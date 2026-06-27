@@ -51,6 +51,7 @@ import type {
 } from "@/types/cms";
 import { pickLocalized, type LocaleCode } from "@/types/cms";
 import { useLocale } from "@/context/LocaleContext";
+import { isFirebaseConfigured } from "@/lib/firebase/client";
 
 const api = FirestoreApi.Api;
 
@@ -118,6 +119,11 @@ export function SiteContentProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<SiteContentState>(defaults);
 
   useEffect(() => {
+    if (!isFirebaseConfigured()) {
+      setState((prev) => ({ ...prev, loading: false }));
+      return;
+    }
+
     const unsubs: (() => void)[] = [];
 
     const subscribeDoc = <T,>(

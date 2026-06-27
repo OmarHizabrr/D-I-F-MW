@@ -12,10 +12,11 @@ import {
   onAuthStateChanged,
   signInWithEmailAndPassword,
   signOut,
+  getAuth,
+  type Auth,
   type User,
 } from "firebase/auth";
-import { getAuth } from "firebase/auth";
-import { firebaseApp } from "@/lib/firebase/client";
+import { getFirebaseApp, isFirebaseConfigured } from "@/lib/firebase/client";
 import FirestoreApi from "@/services/firestoreApi";
 
 type AuthContextValue = {
@@ -27,8 +28,11 @@ type AuthContextValue = {
 };
 
 const AuthContext = createContext<AuthContextValue | null>(null);
-const auth = getAuth(firebaseApp);
 const api = FirestoreApi.Api;
+
+function getFirebaseAuth(): Auth {
+  return getAuth(getFirebaseApp());
+}
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
@@ -36,6 +40,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (!isFirebaseConfigured()) {
+      setLoading(false);
+      return;
+    }
+
+    const auth = getFirebaseAuth();
     const unsub = onAuthStateChanged(auth, async (firebaseUser) => {
       setUser(firebaseUser);
       if (!firebaseUser) {
@@ -56,11 +66,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const signIn = useCallback(async (email: string, password: string) => {
-    await signInWithEmailAndPassword(auth, email, password);
+    if (!isFirebaseConfigured()) {
+      throw new Error("Firebase is not configured.");
+    }
+    await signInWithEmailAndPassword(getFirebaseAuth(), email, password);
   }, []);
 
   const handleSignOut = useCallback(async () => {
-    await signOut(auth);
+    if (!isFirebaseConfigured()) return;
+    await signOut(getFirebaseAuth());
   }, []);
 
   const value = useMemo(

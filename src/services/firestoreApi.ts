@@ -22,10 +22,12 @@ import {
   type DocumentSnapshot,
   type QueryDocumentSnapshot,
 } from "firebase/firestore";
-import { firebaseApp } from "@/lib/firebase/client";
+import { getFirebaseApp } from "@/lib/firebase/client";
 import { COLLECTIONS, SITE_ROOT } from "@/lib/firebase/database-structure";
 
-const db = getFirestore(firebaseApp);
+function getDb() {
+  return getFirestore(getFirebaseApp());
+}
 
 export type UserMeta = {
   uid?: string;
@@ -53,15 +55,15 @@ class FirestoreApi {
   }
 
   getNewId(collectionName: string) {
-    return doc(collection(db, collectionName)).id;
+    return doc(collection(getDb(), collectionName)).id;
   }
 
   getCollection(collectionName: string): CollectionReference {
-    return collection(db, collectionName);
+    return collection(getDb(), collectionName);
   }
 
   getDocument(collectionName: string, documentId: string): DocumentReference {
-    return doc(db, collectionName, documentId);
+    return doc(getDb(), collectionName, documentId);
   }
 
   getSubCollection(
@@ -69,7 +71,7 @@ class FirestoreApi {
     documentId: string,
     subCollectionName: string
   ): CollectionReference {
-    return collection(db, collectionName, documentId, subCollectionName);
+    return collection(getDb(), collectionName, documentId, subCollectionName);
   }
 
   getSubDocument(
@@ -78,7 +80,7 @@ class FirestoreApi {
     subCollectionName: string,
     subDocumentId: string
   ): DocumentReference {
-    return doc(db, collectionName, documentId, subCollectionName, subDocumentId);
+    return doc(getDb(), collectionName, documentId, subCollectionName, subDocumentId);
   }
 
   getSiteConfigDoc() {
@@ -272,7 +274,7 @@ class FirestoreApi {
   }
 
   async getSubCollectionCount(parentCol: string, parentId: string, subCol: string) {
-    const colRef = collection(db, parentCol, parentId, subCol);
+    const colRef = collection(getDb(), parentCol, parentId, subCol);
     const snapshot = await getCountFromServer(colRef);
     return snapshot.data().count;
   }

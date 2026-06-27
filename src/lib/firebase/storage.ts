@@ -5,9 +5,11 @@ import {
   getDownloadURL,
   deleteObject,
 } from "firebase/storage";
-import { firebaseApp } from "./client";
+import { getFirebaseApp } from "./client";
 
-const storage = getStorage(firebaseApp);
+function getFirebaseStorage() {
+  return getStorage(getFirebaseApp());
+}
 
 export async function uploadFile(
   file: File,
@@ -15,14 +17,14 @@ export async function uploadFile(
 ): Promise<string> {
   const safeName = file.name.replace(/[^\w.\-]+/g, "_");
   const path = `${folder}/${Date.now()}_${safeName}`;
-  const storageRef = ref(storage, path);
+  const storageRef = ref(getFirebaseStorage(), path);
   await uploadBytes(storageRef, file);
   return getDownloadURL(storageRef);
 }
 
 export async function deleteFileByUrl(fileUrl: string): Promise<void> {
   if (!fileUrl.includes("firebasestorage.googleapis.com")) return;
-  const storageRef = ref(storage, fileUrl);
+  const storageRef = ref(getFirebaseStorage(), fileUrl);
   await deleteObject(storageRef);
 }
 
