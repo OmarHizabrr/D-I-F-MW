@@ -1,12 +1,13 @@
 import { initializeApp, getApps, type FirebaseApp } from "firebase/app";
 import { getAnalytics, isSupported, type Analytics } from "firebase/analytics";
+import {
+  isFirebaseConfigResolved,
+  resolveFirebaseConfig,
+  type FirebaseWebConfig,
+} from "@/lib/firebase/config";
 
 let firebaseApp: FirebaseApp | null = null;
 let analyticsInstance: Analytics | null = null;
-
-export function isFirebaseConfigured(): boolean {
-  return getFirebaseEnvStatus().configured;
-}
 
 const FIREBASE_ENV_KEYS = [
   "NEXT_PUBLIC_FIREBASE_API_KEY",
@@ -18,42 +19,51 @@ const FIREBASE_ENV_KEYS = [
   "NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID",
 ] as const;
 
+export function getFirebaseConfig(): FirebaseWebConfig {
+  return resolveFirebaseConfig();
+}
+
+export function isFirebaseConfigured(): boolean {
+  return isFirebaseConfigResolved(getFirebaseConfig());
+}
+
 export function getFirebaseEnvStatus() {
   const vars = Object.fromEntries(
     FIREBASE_ENV_KEYS.map((key) => [key, Boolean(process.env[key])])
   ) as Record<(typeof FIREBASE_ENV_KEYS)[number], boolean>;
 
-  const requiredKeys = [
-    "NEXT_PUBLIC_FIREBASE_API_KEY",
-    "NEXT_PUBLIC_FIREBASE_PROJECT_ID",
-    "NEXT_PUBLIC_FIREBASE_APP_ID",
-  ] as const;
-
   const missing = FIREBASE_ENV_KEYS.filter((key) => !vars[key]);
-  const missingRequired = requiredKeys.filter((key) => !vars[key]);
+  const configured = isFirebaseConfigured();
+  const usingFallback = missing.length > 0 && configured;
 
   return {
-    configured: missingRequired.length === 0,
+    configured,
+    usingFallback,
     vars,
     missing,
-    missingRequired,
+    source: missing.length === 0 ? ("env" as const) : usingFallback ? ("fallback" as const) : ("none" as const),
   };
 }
 
 export function logFirebaseEnvStatus(context = "Firebase") {
   const status = getFirebaseEnvStatus();
-  console.warn(`[${context}] حالة متغيرات البيئة`, {
+  console.info(`[${context}] حالة Firebase`, {
     configured: status.configured,
-    missing: status.missing,
-    present: FIREBASE_ENV_KEYS.filter((key) => status.vars[key]),
-    hint: status.configured
-      ? "Firebase جاهز"
-      : "أضف المتغيرات الناقصة في Vercel → Settings → Environment Variables ثم أعد النشر (Redeploy)",
+    source: status.source,
+    missingEnv: status.missing,
+    presentEnv: FIREBASE_ENV_KEYS.filter((key) => status.vars[key]),
+    hint:
+      status.source === "env"
+        ? "Firebase من متغيرات Vercel"
+        : status.source === "fallback"
+          ? "Firebase يعمل من الإعداد المدمج — يُفضّل إضافة متغيرات Vercel أيضاً"
+          : "Firebase غير مهيّأ",
   });
 }
 
 export function getFirebaseApp(): FirebaseApp {
-  if (!isFirebaseConfigured()) {
+  const config = getFirebaseConfig();
+  if (!isFirebaseConfigResolved(config)) {
     throw new Error(
       "Firebase is not configured. Add NEXT_PUBLIC_FIREBASE_* variables in your environment."
     );
@@ -65,16 +75,7 @@ export function getFirebaseApp(): FirebaseApp {
     return firebaseApp;
   }
 
-  firebaseApp = initializeApp({
-    apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
-    authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
-    projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-    storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
-    messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
-    appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
-    measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID,
-  });
-
+  firebaseApp = initializeApp(config);
   return firebaseApp;
 }
 

@@ -48,7 +48,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ar" dir="rtl" suppressHydrationWarning className={`${cairo.variable} h-full overflow-x-hidden`}>
-      <body className="min-h-full flex w-full max-w-[100vw] flex-col overflow-x-hidden antialiased">
+      <body suppressHydrationWarning className="min-h-full flex w-full max-w-[100vw] flex-col overflow-x-hidden antialiased">
         <Providers>{children}</Providers>
       </body>
     </html>
