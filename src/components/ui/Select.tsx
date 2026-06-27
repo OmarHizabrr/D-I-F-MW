@@ -65,7 +65,7 @@ export function Select({
         disabled={disabled}
         onClick={() => setOpen(!open)}
         className={cn(
-          "flex h-11 w-full items-center justify-between rounded-xl border border-border bg-input-bg px-4 text-sm",
+          "flex h-11 w-full items-center justify-between rounded-2xl border border-border bg-input-bg px-4 text-sm",
           "transition-colors hover:border-brand-green/50 focus:border-brand-green focus:outline-none focus:ring-2 focus:ring-brand-green/20",
           disabled && "cursor-not-allowed opacity-50"
         )}
@@ -79,7 +79,7 @@ export function Select({
       </button>
 
       {open && (
-        <div className="absolute z-50 mt-1.5 w-full overflow-hidden rounded-xl border border-border bg-surface shadow-lg">
+        <div className="absolute z-50 mt-1.5 w-full overflow-hidden rounded-2xl border border-border bg-surface shadow-lg">
           {searchable && (
             <div className="border-b border-border-subtle p-2">
               <SearchInput

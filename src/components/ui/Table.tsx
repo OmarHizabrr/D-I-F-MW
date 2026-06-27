@@ -79,7 +79,7 @@ export function Table<T extends Record<string, unknown>>({
         </div>
       )}
 
-      <div ref={printRef} className="dif-print-area overflow-x-auto rounded-xl border border-border-subtle">
+      <div ref={printRef} className="dif-print-area overflow-x-auto rounded-2xl border border-border-subtle">
         {title && (
           <h2 className="no-print mb-4 text-lg font-bold text-brand-green-dark dark:text-brand-green">
             {title}

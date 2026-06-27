@@ -26,7 +26,7 @@ export function HowWeWorkSection() {
             const data = t.howWeWork.steps[step];
             return (
               <Card key={step} className="relative text-center">
-                <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-brand-green/10 text-brand-green-dark dark:text-brand-green">
+                <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-3xl bg-brand-green/10 text-brand-green-dark dark:text-brand-green">
                   <Icon className="h-7 w-7" />
                 </div>
                 <span className="absolute start-4 top-4 text-3xl font-bold text-brand-green/20">

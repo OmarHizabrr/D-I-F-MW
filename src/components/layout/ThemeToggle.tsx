@@ -23,7 +23,7 @@ export function ThemeToggle({ variant = "default" }: { variant?: "default" | "to
   return (
     <div
       className={cn(
-        "flex items-center gap-0.5 rounded-lg p-0.5",
+        "flex items-center gap-0.5 rounded-2xl p-0.5",
         variant === "topbar" ? "bg-white/10" : "bg-border-subtle"
       )}
     >
@@ -35,7 +35,7 @@ export function ThemeToggle({ variant = "default" }: { variant?: "default" | "to
           title={label}
           aria-label={label}
           className={cn(
-            "rounded-md p-1.5 transition-colors",
+            "rounded-xl p-1.5 transition-colors",
             theme === value
               ? variant === "topbar"
                 ? "bg-white text-brand-green-dark"

@@ -159,6 +159,14 @@ const ny = {
     loading: "Tikukweza...",
     viewAll: "Onani Zonse",
   },
+
+  loading: {
+    load: "Tikukweza deta...",
+    save: "Tikuyesa...",
+    delete: "Tikuchotsa...",
+    update: "Tikusintha...",
+    pleaseWait: "Dikirani pang'ono",
+  },
 } as const;
 
 export default ny;

@@ -1,20 +1,20 @@
 export const statsData = [
-  { icon: "🏗️", value: 125, labelKey: "projects" as const },
-  { icon: "💧", value: 40, labelKey: "wells" as const },
-  { icon: "🕌", value: 18, labelKey: "mosques" as const },
-  { icon: "🏫", value: 12, labelKey: "schools" as const },
-  { icon: "👨‍👩‍👧‍👦", value: 85000, labelKey: "beneficiaries" as const },
-  { icon: "🌍", value: 6, labelKey: "countries" as const },
+  { icon: "projects" as const, value: 125, labelKey: "projects" as const },
+  { icon: "wells" as const, value: 40, labelKey: "wells" as const },
+  { icon: "mosques" as const, value: 18, labelKey: "mosques" as const },
+  { icon: "schools" as const, value: 12, labelKey: "schools" as const },
+  { icon: "beneficiaries" as const, value: 85000, labelKey: "beneficiaries" as const },
+  { icon: "countries" as const, value: 6, labelKey: "countries" as const },
 ];
 
 export const programsData = [
-  { id: "mosques", icon: "🕌", color: "from-emerald-600/80 to-emerald-900/80" },
-  { id: "wells", icon: "💧", color: "from-sky-600/80 to-sky-900/80" },
-  { id: "education", icon: "📚", color: "from-amber-600/80 to-amber-900/80" },
-  { id: "health", icon: "🏥", color: "from-rose-600/80 to-rose-900/80" },
-  { id: "orphans", icon: "🤲", color: "from-purple-600/80 to-purple-900/80" },
-  { id: "relief", icon: "🆘", color: "from-orange-600/80 to-orange-900/80" },
-  { id: "community", icon: "🌱", color: "from-lime-600/80 to-lime-900/80" },
+  { id: "mosques", color: "from-emerald-600/70 to-emerald-900/80" },
+  { id: "wells", color: "from-sky-600/70 to-sky-900/80" },
+  { id: "education", color: "from-amber-600/70 to-amber-900/80" },
+  { id: "health", color: "from-rose-600/70 to-rose-900/80" },
+  { id: "orphans", color: "from-purple-600/70 to-purple-900/80" },
+  { id: "relief", color: "from-orange-600/70 to-orange-900/80" },
+  { id: "community", color: "from-lime-600/70 to-lime-900/80" },
 ] as const;
 
 export const ongoingProjectsData = [
@@ -115,14 +115,14 @@ export const mapPointsData = [
 ];
 
 export const mediaItems = [
-  { type: "photos" as const, color: "bg-emerald-500" },
-  { type: "videos" as const, color: "bg-sky-500" },
-  { type: "openings" as const, color: "bg-amber-500" },
-  { type: "visits" as const, color: "bg-rose-500" },
-  { type: "photos" as const, color: "bg-purple-500" },
-  { type: "videos" as const, color: "bg-teal-500" },
-  { type: "openings" as const, color: "bg-orange-500" },
-  { type: "visits" as const, color: "bg-indigo-500" },
+  { type: "mediaPhoto" as const, color: "from-emerald-600/80 to-emerald-800/90" },
+  { type: "mediaVideo" as const, color: "from-sky-600/80 to-sky-800/90" },
+  { type: "mediaOpening" as const, color: "from-amber-600/80 to-amber-800/90" },
+  { type: "mediaVisit" as const, color: "from-rose-600/80 to-rose-800/90" },
+  { type: "mediaPhoto" as const, color: "from-purple-600/80 to-purple-800/90" },
+  { type: "mediaVideo" as const, color: "from-teal-600/80 to-teal-800/90" },
+  { type: "mediaOpening" as const, color: "from-orange-600/80 to-orange-800/90" },
+  { type: "mediaVisit" as const, color: "from-indigo-600/80 to-indigo-800/90" },
 ];
 
 export const whyUsIcons = ["Shield", "Eye", "FileText", "Users", "CheckCircle", "Award"] as const;

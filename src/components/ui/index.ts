@@ -6,3 +6,6 @@ export { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter }
 export { Table } from "./Table";
 export { SectionHeader } from "./SectionHeader";
 export { Badge } from "./Badge";
+export { Spinner } from "./Spinner";
+export { IconBox } from "./IconBox";
+export { MediaPlaceholder } from "./MediaPlaceholder";

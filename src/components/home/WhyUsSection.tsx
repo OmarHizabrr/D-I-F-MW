@@ -20,7 +20,7 @@ export function WhyUsSection() {
             const Icon = whyUsIcons[i];
             return (
               <Card key={key} className="flex items-center gap-4">
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-brand-green text-white">
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-brand-green text-white">
                   <Icon className="h-6 w-6" />
                 </div>
                 <h3 className="font-bold">{t.whyUs.items[key]}</h3>

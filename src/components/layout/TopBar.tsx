@@ -43,7 +43,7 @@ export function TopBar() {
                 key={label}
                 href={href}
                 aria-label={label}
-                className="touch-target rounded-md p-2 transition-colors hover:bg-white/10 active:bg-white/20"
+                className="touch-target rounded-xl p-2 transition-colors hover:bg-white/10 active:bg-white/20"
               >
                 <Icon className="h-4 w-4" />
               </a>
@@ -51,13 +51,13 @@ export function TopBar() {
           </div>
 
           <div className="flex items-center gap-1.5 sm:gap-2">
-            <div className="flex items-center gap-0.5 rounded-lg bg-white/10 p-0.5">
+            <div className="flex items-center gap-0.5 rounded-2xl bg-white/10 p-0.5">
               {localeList.map(({ code, label }) => (
                 <button
                   key={code}
                   type="button"
                   onClick={() => setLocale(code)}
-                  className={`touch-target-sm rounded-md px-1.5 py-1 text-[10px] font-medium transition-colors sm:px-2 sm:text-xs ${
+                  className={`touch-target-sm rounded-xl px-1.5 py-1 text-[10px] font-medium transition-colors sm:px-2 sm:text-xs ${
                     locale === code ? "bg-white text-brand-green-dark" : "hover:bg-white/10"
                   }`}
                 >

@@ -26,7 +26,7 @@ export function LicensesSection() {
             const Icon = licenseIcons[key];
             return (
               <Card key={key} className="text-center">
-                <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-brand-brown/10 text-brand-brown">
+                <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-3xl bg-brand-brown/10 text-brand-brown">
                   <Icon className="h-8 w-8" />
                 </div>
                 <h3 className="mb-3 font-bold">{t.licenses[key]}</h3>

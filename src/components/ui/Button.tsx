@@ -1,8 +1,8 @@
 "use client";
 
-import { forwardRef, type ButtonHTMLAttributes } from "react";
+import { forwardRef, type ButtonHTMLAttributes, type ReactNode } from "react";
 import { cn } from "@/lib/utils";
-import { Loader2 } from "lucide-react";
+import { Spinner } from "./Spinner";
 
 const variants = {
   primary:
@@ -15,13 +15,15 @@ const variants = {
     "text-foreground hover:bg-border-subtle focus-visible:ring-brand-green",
   brown:
     "bg-brand-brown text-white hover:bg-brand-brown-light focus-visible:ring-brand-brown",
+  destructive:
+    "bg-destructive text-white hover:bg-destructive/90 focus-visible:ring-destructive",
 } as const;
 
 const sizes = {
-  sm: "h-9 px-3.5 text-sm gap-1.5 rounded-lg",
-  md: "h-11 px-5 text-sm gap-2 rounded-xl",
-  lg: "h-12 px-7 text-base gap-2.5 rounded-xl",
-  icon: "h-10 w-10 rounded-xl",
+  sm: "h-9 px-3.5 text-sm gap-1.5 rounded-xl",
+  md: "h-11 px-5 text-sm gap-2 rounded-2xl",
+  lg: "h-12 px-7 text-base gap-2.5 rounded-2xl",
+  icon: "h-11 w-11 rounded-2xl",
 } as const;
 
 export type ButtonVariant = keyof typeof variants;
@@ -31,6 +33,7 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: ButtonVariant;
   size?: ButtonSize;
   loading?: boolean;
+  loadingText?: ReactNode;
   fullWidth?: boolean;
 }
 
@@ -41,6 +44,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       variant = "primary",
       size = "md",
       loading = false,
+      loadingText,
       fullWidth = false,
       disabled,
       children,
@@ -51,10 +55,12 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     <button
       ref={ref}
       disabled={disabled || loading}
+      aria-busy={loading}
       className={cn(
-        "inline-flex items-center justify-center font-semibold transition-all",
+        "relative inline-flex items-center justify-center font-semibold transition-all",
         "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-background",
-        "disabled:pointer-events-none disabled:opacity-50",
+        "disabled:pointer-events-none disabled:opacity-60",
+        loading && "cursor-wait",
         variants[variant],
         sizes[size],
         fullWidth && "w-full",
@@ -62,8 +68,20 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       )}
       {...props}
     >
-      {loading && <Loader2 className="h-4 w-4 animate-spin" />}
-      {children}
+      {loading && (
+        <Spinner
+          size={size === "lg" ? "md" : "sm"}
+          className={cn(
+            "shrink-0",
+            variant === "primary" || variant === "brown" || variant === "destructive"
+              ? "text-white"
+              : "text-brand-green"
+          )}
+        />
+      )}
+      <span className={cn("inline-flex items-center gap-1.5", loading && "opacity-90")}>
+        {loading && loadingText ? loadingText : children}
+      </span>
     </button>
   )
 );

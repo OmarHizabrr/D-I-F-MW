@@ -159,6 +159,14 @@ const en = {
     loading: "Loading...",
     viewAll: "View All",
   },
+
+  loading: {
+    load: "Loading data...",
+    save: "Saving...",
+    delete: "Deleting...",
+    update: "Updating...",
+    pleaseWait: "Please wait a moment",
+  },
 } as const;
 
 export default en;

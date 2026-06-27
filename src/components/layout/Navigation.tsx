@@ -56,7 +56,7 @@ export function Navigation() {
             <Link
               key={key}
               href={`#${key}`}
-              className="rounded-lg px-2.5 py-2 text-sm font-medium text-foreground/80 transition-colors hover:bg-brand-green/10 hover:text-brand-green-dark dark:hover:text-brand-green"
+              className="rounded-xl px-2.5 py-2 text-sm font-medium text-foreground/80 transition-colors hover:bg-brand-green/10 hover:text-brand-green-dark dark:hover:text-brand-green"
             >
               {t.nav[key]}
             </Link>
@@ -65,7 +65,7 @@ export function Navigation() {
 
         <button
           type="button"
-          className="touch-target rounded-lg p-2 xl:hidden"
+          className="touch-target rounded-2xl p-2 xl:hidden"
           onClick={() => setMobileOpen(!mobileOpen)}
           aria-label={mobileOpen ? "Close menu" : "Open menu"}
           aria-expanded={mobileOpen}
@@ -96,7 +96,7 @@ export function Navigation() {
               key={key}
               href={`#${key}`}
               onClick={() => setMobileOpen(false)}
-              className="touch-target rounded-xl px-4 py-3.5 text-base font-medium transition-colors active:bg-brand-green/10 hover:bg-brand-green/10"
+              className="touch-target rounded-2xl px-4 py-3.5 text-base font-medium transition-colors active:bg-brand-green/10 hover:bg-brand-green/10"
             >
               {t.nav[key]}
             </Link>

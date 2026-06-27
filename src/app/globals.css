@@ -25,6 +25,12 @@
   --nav-fg: #1a1f12;
   --card-shadow: 0 4px 24px -4px rgb(92 118 34 / 0.12);
   --hero-overlay: rgb(26 31 18 / 0.65);
+  --radius-sm: 0.75rem;
+  --radius-md: 1rem;
+  --radius-lg: 1.25rem;
+  --radius-xl: 1.5rem;
+  --radius-2xl: 1.75rem;
+  --radius-3xl: 2rem;
 }
 
 .dark {
@@ -99,7 +105,7 @@ body {
 .dif-card {
   background: var(--surface);
   border: 1px solid var(--border-subtle);
-  border-radius: 1rem;
+  border-radius: var(--radius-2xl);
   box-shadow: var(--card-shadow);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
@@ -212,6 +218,15 @@ body {
 
 [dir="rtl"] .animate-marquee {
   animation-direction: reverse;
+}
+
+@keyframes loading-bar {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(350%); }
+}
+
+.animate-loading-bar {
+  animation: loading-bar 1.2s ease-in-out infinite;
 }
 
 @media print {

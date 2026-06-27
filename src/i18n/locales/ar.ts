@@ -159,6 +159,14 @@ const ar = {
     loading: "جاري التحميل...",
     viewAll: "عرض الكل",
   },
+
+  loading: {
+    load: "جاري تحميل البيانات...",
+    save: "جاري الحفظ...",
+    delete: "جاري الحذف...",
+    update: "جاري التعديل...",
+    pleaseWait: "يرجى الانتظار قليلاً",
+  },
 } as const;
 
 export default ar;
