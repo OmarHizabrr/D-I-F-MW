@@ -17,6 +17,8 @@ import {
   type User,
 } from "firebase/auth";
 import { getFirebaseApp, isFirebaseConfigured } from "@/lib/firebase/client";
+import { logAuthError } from "@/lib/auth-errors";
+import { registerUser } from "@/services/seedService";
 
 type AuthContextValue = {
   user: User | null;
@@ -35,11 +37,11 @@ function getFirebaseAuth(): Auth {
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(isFirebaseConfigured());
 
   useEffect(() => {
     if (!isFirebaseConfigured()) {
-      setLoading(false);
+      console.warn("[Auth] Firebase غير مهيّأ — تحقق من NEXT_PUBLIC_FIREBASE_*");
       return;
     }
 
@@ -53,10 +55,45 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const signIn = useCallback(async (email: string, password: string) => {
+    console.log("[Auth] محاولة تسجيل الدخول", {
+      email,
+      firebaseConfigured: isFirebaseConfigured(),
+    });
+
     if (!isFirebaseConfigured()) {
-      throw new Error("Firebase is not configured.");
+      const err = new Error("Firebase is not configured.");
+      logAuthError("Auth.signIn", err, { email });
+      throw err;
     }
-    await signInWithEmailAndPassword(getFirebaseAuth(), email, password);
+
+    try {
+      const credential = await signInWithEmailAndPassword(getFirebaseAuth(), email, password);
+      const firebaseUser = credential.user;
+
+      console.log("[Auth] نجح Authentication", {
+        uid: firebaseUser.uid,
+        email: firebaseUser.email,
+      });
+
+      try {
+        await registerUser(
+          firebaseUser.uid,
+          firebaseUser.email || email,
+          getUserMeta(firebaseUser)
+        );
+        console.log("[Auth] تم حفظ المستخدم في Firestore", {
+          path: `users/global/users/${firebaseUser.uid}`,
+        });
+      } catch (firestoreError) {
+        logAuthError("Auth.registerUser", firestoreError, {
+          uid: firebaseUser.uid,
+          hint: "الدخول نجح لكن فشل حفظ المستخدم في Firestore — تحقق من قواعد الأمان",
+        });
+      }
+    } catch (error) {
+      logAuthError("Auth.signIn", error, { email });
+      throw error;
+    }
   }, []);
 
   const handleSignOut = useCallback(async () => {

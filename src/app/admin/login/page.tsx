@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
+import { getAuthErrorMessage, logAuthError } from "@/lib/auth-errors";
+import { isFirebaseConfigured } from "@/lib/firebase/client";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
@@ -27,11 +29,19 @@ export default function AdminLoginPage() {
     e.preventDefault();
     setSubmitting(true);
     setError(null);
+
+    console.log("[Admin Login] بدء المحاولة", {
+      email,
+      firebaseConfigured: isFirebaseConfigured(),
+    });
+
     try {
       await signIn(email, password);
+      console.log("[Admin Login] اكتمل بنجاح — التوجيه إلى /admin");
       router.replace("/admin");
-    } catch {
-      setError("بيانات الدخول غير صحيحة. تأكد من وجود حسابك في Firebase Authentication.");
+    } catch (err) {
+      logAuthError("Admin Login", err, { email, firebaseConfigured: isFirebaseConfigured() });
+      setError(getAuthErrorMessage(err));
     } finally {
       setSubmitting(false);
     }

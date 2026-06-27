@@ -207,6 +207,14 @@ class FirestoreApi {
     return this.getSubDocument(COLLECTIONS.admins, SITE_ROOT, COLLECTIONS.admins, uid);
   }
 
+  getUsersCollection() {
+    return this.getSubCollection(COLLECTIONS.users, SITE_ROOT, COLLECTIONS.users);
+  }
+
+  getUserDoc(uid: string) {
+    return this.getSubDocument(COLLECTIONS.users, SITE_ROOT, COLLECTIONS.users, uid);
+  }
+
   async setData({ docRef, data, merge = true, userData = {} }: SetDataOptions) {
     const payload = {
       ...data,

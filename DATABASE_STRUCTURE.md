@@ -29,6 +29,7 @@
 | لماذا نحن | `why_us/global/why_us/{id}` |
 | التذييل | `footer/global/footer/content` |
 | النشرة | `newsletter/global/newsletter/content` |
+| المستخدمون | `users/global/users/{uid}` |
 | المسؤولون | `admins/global/admins/{uid}` |
 
 ## لوحة التحكم

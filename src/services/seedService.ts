@@ -86,3 +86,24 @@ export async function registerAdmin(uid: string, email: string, userData: UserMe
     userData,
   });
 }
+
+/** حفظ/تحديث المستخدم في users/global/users/{uid} بعد تسجيل الدخول */
+export async function registerUser(
+  uid: string,
+  email: string,
+  userData: UserMeta = {}
+) {
+  await api.setData({
+    docRef: api.getUserDoc(uid),
+    data: {
+      id: uid,
+      uid,
+      email,
+      displayName: userData.displayName || email,
+      photoURL: userData.photoURL || "",
+      role: "admin",
+      active: true,
+    },
+    userData: { ...userData, uid },
+  });
+}

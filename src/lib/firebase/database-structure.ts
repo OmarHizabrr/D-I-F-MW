@@ -8,6 +8,7 @@ export const SITE_ROOT = "global" as const;
 
 export const COLLECTIONS = {
   siteConfig: "site_config",
+  users: "users",
   admins: "admins",
   topbar: "topbar",
   navItems: "nav_items",
