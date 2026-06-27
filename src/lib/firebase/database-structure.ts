@@ -32,6 +32,7 @@ export const COLLECTIONS = {
 } as const;
 
 export const HOME_SECTIONS = [
+  { id: "users", label: "إدارة المستخدمين", href: "/admin/users" },
   { id: "topbar", label: "الشريط العلوي", href: "/admin/topbar" },
   { id: "nav", label: "القائمة الرئيسية", href: "/admin/navigation" },
   { id: "hero", label: "الواجهة الرئيسية", href: "/admin/hero" },

@@ -14,7 +14,6 @@ import { IconPicker } from "@/components/admin/IconPicker";
 import { GradientPicker } from "@/components/admin/GradientPicker";
 import { pickAdminLabel } from "@/lib/admin/pickAdminLabel";
 import {
-  programIconOptions,
   getIconOptionLabel,
 } from "@/lib/admin/icon-options";
 import { getGradientLabel } from "@/lib/admin/gradient-options";
@@ -30,6 +29,7 @@ function newProgram(order: number): ProgramItem {
   return {
     id: "",
     iconKey: "community",
+    iconImageUrl: "",
     title: emptyLocalized(),
     description: emptyLocalized(),
     imageUrl: "",
@@ -103,9 +103,11 @@ export default function AdminProgramsPage() {
             <div className="grid gap-4 sm:grid-cols-2">
               <IconPicker
                 label="الأيقونة"
-                value={editing.iconKey}
-                onChange={(iconKey) => setEditing({ ...editing, iconKey })}
-                options={programIconOptions}
+                iconKey={editing.iconKey}
+                iconImageUrl={editing.iconImageUrl || ""}
+                onIconKeyChange={(iconKey) => setEditing({ ...editing, iconKey })}
+                onIconImageChange={(iconImageUrl) => setEditing({ ...editing, iconImageUrl })}
+                uploadFolder="icons/programs"
               />
               <Input
                 label="الترتيب"
@@ -154,7 +156,7 @@ export default function AdminProgramsPage() {
         onDelete={setDeleteTarget}
         renderTitle={(item) => pickAdminLabel(item.title)}
         renderSubtitle={(item) =>
-          `${getIconOptionLabel(programIconOptions, item.iconKey)} · ${getGradientLabel(item.color)} · ترتيب ${item.order}`
+          `${getIconOptionLabel([], item.iconKey)} · ${getGradientLabel(item.color)} · ترتيب ${item.order}`
         }
       />
     </div>

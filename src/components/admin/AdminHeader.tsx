@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { LogOut, Menu, PanelLeftClose, ExternalLink } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
+import { UserAvatar } from "@/components/ui/UserAvatar";
 import { Button } from "@/components/ui/Button";
 
 type AdminHeaderProps = {
@@ -12,7 +13,7 @@ type AdminHeaderProps = {
 };
 
 export function AdminHeader({ sidebarOpen, onMenuToggle }: AdminHeaderProps) {
-  const { user, signOut } = useAuth();
+  const { user, userProfile, signOut } = useAuth();
   const [loggingOut, setLoggingOut] = useState(false);
 
   async function handleLogout() {
@@ -41,9 +42,17 @@ export function AdminHeader({ sidebarOpen, onMenuToggle }: AdminHeaderProps) {
           )}
         </button>
         <div className="min-w-0">
-          <p className="truncate text-sm font-semibold text-foreground">مرحباً بك</p>
+          <p className="truncate text-sm font-semibold text-foreground">
+            {userProfile?.displayName || "مرحباً بك"}
+          </p>
           <p className="truncate text-xs text-muted-foreground">{user?.email ?? "—"}</p>
         </div>
+        <UserAvatar
+          name={userProfile?.displayName || user?.email || ""}
+          photoURL={userProfile?.photoURL}
+          size="sm"
+          className="hidden sm:inline-flex"
+        />
       </div>
 
       <div className="flex shrink-0 items-center gap-2">

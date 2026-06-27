@@ -11,7 +11,7 @@ import { AdminItemList } from "@/components/admin/AdminItemList";
 import { LocalizedInput } from "@/components/admin/LocalizedInput";
 import { IconPicker } from "@/components/admin/IconPicker";
 import { pickAdminLabel } from "@/lib/admin/pickAdminLabel";
-import { statIconOptions, getIconOptionLabel } from "@/lib/admin/icon-options";
+import { getIconOptionLabel } from "@/lib/admin/icon-options";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import { Spinner } from "@/components/ui/Spinner";
@@ -23,7 +23,8 @@ const api = FirestoreApi.Api;
 function newStat(order: number): StatItem {
   return {
     id: "",
-    iconKey: "users",
+    iconKey: "beneficiaries",
+    iconImageUrl: "",
     value: 0,
     label: emptyLocalized(),
     order,
@@ -84,9 +85,11 @@ export default function AdminStatsPage() {
             <div className="grid gap-4 sm:grid-cols-2">
               <IconPicker
                 label="الأيقونة"
-                value={editing.iconKey}
-                onChange={(iconKey) => setEditing({ ...editing, iconKey })}
-                options={statIconOptions}
+                iconKey={editing.iconKey}
+                iconImageUrl={editing.iconImageUrl || ""}
+                onIconKeyChange={(iconKey) => setEditing({ ...editing, iconKey })}
+                onIconImageChange={(iconImageUrl) => setEditing({ ...editing, iconImageUrl })}
+                uploadFolder="icons/stats"
               />
               <Input
                 label="القيمة"
@@ -135,7 +138,7 @@ export default function AdminStatsPage() {
         onDelete={setDeleteTarget}
         renderTitle={(item) => pickAdminLabel(item.label)}
         renderSubtitle={(item) =>
-          `${item.value} · ${getIconOptionLabel(statIconOptions, item.iconKey)} · ترتيب ${item.order}${!item.enabled ? " · معطّل" : ""}`
+          `${item.value} · ${getIconOptionLabel([], item.iconKey)} · ترتيب ${item.order}${!item.enabled ? " · معطّل" : ""}`
         }
       />
     </div>

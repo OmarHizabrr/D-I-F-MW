@@ -12,7 +12,7 @@ import { LocalizedInput } from "@/components/admin/LocalizedInput";
 import { FileUploadField } from "@/components/admin/FileUploadField";
 import { IconPicker } from "@/components/admin/IconPicker";
 import { pickAdminLabel } from "@/lib/admin/pickAdminLabel";
-import { licenseIconOptions, getIconOptionLabel } from "@/lib/admin/icon-options";
+import { getIconOptionLabel } from "@/lib/admin/icon-options";
 import { Button } from "@/components/ui/Button";
 import { Spinner } from "@/components/ui/Spinner";
 import type { LicenseItem } from "@/types/cms";
@@ -26,6 +26,7 @@ function newItem(order: number): LicenseItem {
     title: emptyLocalized(),
     pdfUrl: "",
     iconKey: "registration",
+    iconImageUrl: "",
     enabled: true,
     order,
   };
@@ -88,9 +89,11 @@ export default function AdminLicensesPage() {
             />
             <IconPicker
               label="الأيقونة"
-              value={editing.iconKey}
-              onChange={(iconKey) => setEditing({ ...editing, iconKey })}
-              options={licenseIconOptions}
+              iconKey={editing.iconKey}
+              iconImageUrl={editing.iconImageUrl || ""}
+              onIconKeyChange={(iconKey) => setEditing({ ...editing, iconKey })}
+              onIconImageChange={(iconImageUrl) => setEditing({ ...editing, iconImageUrl })}
+              uploadFolder="icons/licenses"
             />
             <FileUploadField
               label="ملف PDF"
@@ -118,7 +121,7 @@ export default function AdminLicensesPage() {
         onEdit={setEditing}
         onDelete={setDeleteTarget}
         renderTitle={(item) => pickAdminLabel(item.title)}
-        renderSubtitle={(item) => getIconOptionLabel(licenseIconOptions, item.iconKey)}
+        renderSubtitle={(item) => getIconOptionLabel([], item.iconKey)}
       />
     </div>
   );

@@ -1,16 +1,18 @@
 "use client";
 
-import Image from "next/image";
-import { Quote } from "lucide-react";
+import Link from "next/link";
+import { Quote, MessageSquarePlus } from "lucide-react";
 import { useSiteContent } from "@/context/SiteContentContext";
 import { SectionHeader } from "@/components/ui/SectionHeader";
 import { Card } from "@/components/ui/Card";
-import { IconBox } from "@/components/ui/IconBox";
-import { sectionIcons } from "@/lib/icons";
+import { UserAvatar } from "@/components/ui/UserAvatar";
+import { isTestimonialPublished } from "@/services/testimonialService";
 
 export function TestimonialsSection() {
   const { testimonials, sectionTitles, text } = useSiteContent();
-  const items = testimonials.filter((t) => t.enabled).sort((a, b) => a.order - b.order);
+  const items = testimonials
+    .filter(isTestimonialPublished)
+    .sort((a, b) => a.order - b.order);
 
   return (
     <section className="section-padding bg-surface">
@@ -19,6 +21,17 @@ export function TestimonialsSection() {
           title={text(sectionTitles.testimonials)}
           subtitle={text(sectionTitles.testimonialsSubtitle)}
         />
+
+        <div className="mb-6 flex justify-center sm:justify-end">
+          <Link
+            href="/share-testimonial"
+            className="inline-flex h-9 items-center gap-1.5 rounded-xl border-2 border-brand-green px-3.5 text-sm font-semibold text-brand-green transition-colors hover:bg-brand-green/10"
+          >
+            <MessageSquarePlus className="h-4 w-4" />
+            شارك رأيك عنا
+          </Link>
+        </div>
+
         <div className="grid gap-4 sm:gap-6 md:grid-cols-2">
           {items.map((item) => (
             <Card key={item.id} className="relative">
@@ -27,19 +40,11 @@ export function TestimonialsSection() {
                 &ldquo;{text(item.quote)}&rdquo;
               </p>
               <div className="flex items-center gap-3">
-                {item.imageUrl ? (
-                  <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-full">
-                    <Image
-                      src={item.imageUrl}
-                      alt={text(item.name)}
-                      fill
-                      className="object-cover"
-                      unoptimized
-                    />
-                  </div>
-                ) : (
-                  <IconBox icon={sectionIcons.user} size="md" />
-                )}
+                <UserAvatar
+                  name={text(item.name)}
+                  photoURL={item.imageUrl}
+                  size="md"
+                />
                 <div>
                   <p className="font-bold">{text(item.name)}</p>
                   <p className="text-xs text-muted-foreground sm:text-sm">{text(item.role)}</p>

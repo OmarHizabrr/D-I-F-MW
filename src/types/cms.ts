@@ -39,6 +39,7 @@ export type HeroContent = {
 export type StatItem = {
   id: string;
   iconKey: string;
+  iconImageUrl?: string;
   value: number;
   label: LocalizedString;
   order: number;
@@ -48,6 +49,7 @@ export type StatItem = {
 export type ProgramItem = {
   id: string;
   iconKey: string;
+  iconImageUrl?: string;
   title: LocalizedString;
   description: LocalizedString;
   imageUrl: string;
@@ -97,6 +99,9 @@ export type PartnerItem = {
   order: number;
 };
 
+export type TestimonialSource = "seed" | "admin" | "public";
+export type TestimonialStatus = "approved" | "pending" | "rejected";
+
 export type TestimonialItem = {
   id: string;
   name: LocalizedString;
@@ -106,6 +111,10 @@ export type TestimonialItem = {
   youtubeUrl: string;
   enabled: boolean;
   order: number;
+  userId?: string;
+  source?: TestimonialSource;
+  status?: TestimonialStatus;
+  submittedAt?: string;
 };
 
 export type MediaItem = {
@@ -123,6 +132,7 @@ export type LicenseItem = {
   title: LocalizedString;
   pdfUrl: string;
   iconKey: string;
+  iconImageUrl?: string;
   enabled: boolean;
   order: number;
 };
@@ -145,6 +155,7 @@ export type HowWeWorkStep = {
   title: LocalizedString;
   description: LocalizedString;
   iconKey: string;
+  iconImageUrl?: string;
   order: number;
   enabled: boolean;
 };
@@ -153,6 +164,7 @@ export type WhyUsItem = {
   id: string;
   title: LocalizedString;
   iconKey: string;
+  iconImageUrl?: string;
   order: number;
   enabled: boolean;
 };

@@ -11,7 +11,7 @@ import { AdminItemList } from "@/components/admin/AdminItemList";
 import { LocalizedInput } from "@/components/admin/LocalizedInput";
 import { IconPicker } from "@/components/admin/IconPicker";
 import { pickAdminLabel } from "@/lib/admin/pickAdminLabel";
-import { howWeWorkIconOptions, getIconOptionLabel } from "@/lib/admin/icon-options";
+import { getIconOptionLabel } from "@/lib/admin/icon-options";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import { Spinner } from "@/components/ui/Spinner";
@@ -26,6 +26,7 @@ function newStep(order: number): HowWeWorkStep {
     title: emptyLocalized(),
     description: emptyLocalized(),
     iconKey: "study",
+    iconImageUrl: "",
     order,
     enabled: true,
   };
@@ -95,9 +96,11 @@ export default function AdminHowWeWorkPage() {
             <div className="grid gap-4 sm:grid-cols-2">
               <IconPicker
                 label="الأيقونة"
-                value={editing.iconKey}
-                onChange={(iconKey) => setEditing({ ...editing, iconKey })}
-                options={howWeWorkIconOptions}
+                iconKey={editing.iconKey}
+                iconImageUrl={editing.iconImageUrl || ""}
+                onIconKeyChange={(iconKey) => setEditing({ ...editing, iconKey })}
+                onIconImageChange={(iconImageUrl) => setEditing({ ...editing, iconImageUrl })}
+                uploadFolder="icons/how-we-work"
               />
               <Input
                 label="الترتيب"
@@ -126,7 +129,7 @@ export default function AdminHowWeWorkPage() {
         onDelete={setDeleteTarget}
         renderTitle={(item) => pickAdminLabel(item.title)}
         renderSubtitle={(item) =>
-          `${getIconOptionLabel(howWeWorkIconOptions, item.iconKey)} · ترتيب ${item.order}`
+          `${getIconOptionLabel([], item.iconKey)} · ترتيب ${item.order}`
         }
       />
     </div>

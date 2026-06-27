@@ -9,10 +9,25 @@ const AUTH_MESSAGES: Record<string, string> = {
   "auth/too-many-requests": "محاولات كثيرة. انتظر قليلاً ثم حاول مجدداً.",
   "auth/network-request-failed": "خطأ في الاتصال بالشبكة.",
   "auth/invalid-api-key": "مفتاح Firebase غير صالح — تحقق من متغيرات البيئة.",
-  "auth/operation-not-allowed": "تسجيل الدخول بالبريد غير مفعّل في Firebase Console.",
+  "auth/operation-not-allowed": "تسجيل الدخول غير مفعّل في Firebase Console.",
+  "auth/popup-closed-by-user": "تم إغلاق نافذة Google.",
+  "auth/account-exists-with-different-credential": "البريد مسجّل بطريقة دخول أخرى.",
+  "auth/email-already-in-use": "البريد مستخدم مسبقاً.",
+  "auth/weak-password": "كلمة المرور ضعيفة (6 أحرف على الأقل).",
 };
 
 export function getAuthErrorMessage(error: unknown): string {
+  if (error instanceof Error) {
+    if (error.message === "NOT_ADMIN") {
+      return "ليس لديك صلاحية دخول لوحة الإدارة. اطلب من مدير إنشاء حسابك.";
+    }
+    if (error.message === "BANNED") {
+      return "تم حظر حسابك ولا يمكنك المشاركة.";
+    }
+    if (error.message === "USER_DISABLED") {
+      return "تم تعطيل هذا الحساب.";
+    }
+  }
   if (error instanceof FirebaseError && AUTH_MESSAGES[error.code]) {
     return AUTH_MESSAGES[error.code];
   }

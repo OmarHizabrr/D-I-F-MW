@@ -51,6 +51,7 @@ import type {
 import { pickLocalized, type LocaleCode } from "@/types/cms";
 import { useLocale } from "@/context/LocaleContext";
 import { isFirebaseConfigured } from "@/lib/firebase/client";
+import { isTestimonialPublished } from "@/services/testimonialService";
 
 const api = FirestoreApi.Api;
 
@@ -106,10 +107,11 @@ type SiteContentContextValue = SiteContentState & {
 
 const SiteContentContext = createContext<SiteContentContextValue | null>(null);
 
-function mapCollection<T>(snap: QuerySnapshot): T[] {
+function mapCollection<T>(snap: QuerySnapshot, filter?: (item: T) => boolean): T[] {
   return snap.docs
     .map((d) => ({ id: d.id, ...d.data() }) as T)
     .filter((item) => (item as { enabled?: boolean }).enabled !== false)
+    .filter((item) => (filter ? filter(item) : true))
     .sort((a, b) => ((a as { order?: number }).order ?? 0) - ((b as { order?: number }).order ?? 0));
 }
 
@@ -141,12 +143,13 @@ export function SiteContentProvider({ children }: { children: ReactNode }) {
     const subscribeList = <T,>(
       colRef: ReturnType<typeof api.getStatsCollection>,
       key: keyof SiteContentState,
-      fallback: T[]
+      fallback: T[],
+      filter?: (item: T) => boolean
     ) => {
       const q = query(colRef, orderBy("order", "asc"));
       unsubs.push(
         api.subscribeQuerySnapshot(q, (snap) => {
-          const items = mapCollection<T>(snap);
+          const items = mapCollection<T>(snap, filter);
           setState((prev) => ({
             ...prev,
             [key]: items.length ? items : fallback,
@@ -166,7 +169,12 @@ export function SiteContentProvider({ children }: { children: ReactNode }) {
     subscribeList(api.getProjectsCollection(), "projects", defaults.projects);
     subscribeList(api.getNewsCollection(), "news", defaults.news);
     subscribeList(api.getPartnersCollection(), "partners", defaults.partners);
-    subscribeList(api.getTestimonialsCollection(), "testimonials", defaults.testimonials);
+    subscribeList(
+      api.getTestimonialsCollection(),
+      "testimonials",
+      defaults.testimonials,
+      isTestimonialPublished
+    );
     subscribeList(api.getMediaCollection(), "media", defaults.media);
     subscribeList(api.getLicensesCollection(), "licenses", defaults.licenses);
     subscribeList(api.getMapPointsCollection(), "mapPoints", defaults.mapPoints);

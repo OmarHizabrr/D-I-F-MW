@@ -3,7 +3,7 @@
 import { useSiteContent } from "@/context/SiteContentContext";
 import { SectionHeader } from "@/components/ui/SectionHeader";
 import { Card } from "@/components/ui/Card";
-import { whyUsIcons } from "@/lib/icons";
+import { CmsIconInline } from "@/components/ui/CmsIconBox";
 
 export function WhyUsSection() {
   const { whyUs, sectionTitles, text } = useSiteContent();
@@ -18,11 +18,15 @@ export function WhyUsSection() {
         />
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {items.map((item) => {
-            const Icon = whyUsIcons[item.iconKey] || whyUsIcons.transparency;
             return (
               <Card key={item.id} className="flex items-center gap-4">
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-brand-green text-white">
-                  <Icon className="h-6 w-6" />
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-brand-green text-white">
+                  <CmsIconInline
+                    iconKey={item.iconKey}
+                    iconImageUrl={item.iconImageUrl}
+                    boxClassName="h-12 w-12 rounded-2xl"
+                    className="text-white"
+                  />
                 </div>
                 <h3 className="font-bold">{text(item.title)}</h3>
               </Card>

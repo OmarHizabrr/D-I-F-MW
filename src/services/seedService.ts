@@ -87,25 +87,14 @@ export async function registerAdmin(uid: string, email: string, userData: UserMe
   });
 }
 
-/** حفظ/تحديث المستخدم في users/global/users/{uid} بعد تسجيل الدخول */
+/** @deprecated استخدم registerAdminUser من userService */
 export async function registerUser(
   uid: string,
   email: string,
   userData: UserMeta = {}
 ) {
-  await api.setData({
-    docRef: api.getUserDoc(uid),
-    data: {
-      id: uid,
-      uid,
-      email,
-      displayName: userData.displayName || email,
-      photoURL: userData.photoURL || "",
-      role: "admin",
-      active: true,
-    },
-    userData: { ...userData, uid },
-  });
+  const { registerAdminUser } = await import("@/services/userService");
+  await registerAdminUser(uid, email, userData);
 }
 
 export async function getSiteSeedStatus() {

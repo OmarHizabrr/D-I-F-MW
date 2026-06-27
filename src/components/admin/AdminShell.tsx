@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useState, type ReactNode } from "react";
 import { usePathname } from "next/navigation";
 import { AdminSidebar } from "@/components/admin/AdminSidebar";
 import { AdminHeader } from "@/components/admin/AdminHeader";
@@ -22,10 +22,17 @@ export function AdminShell({ children }: { children: ReactNode }) {
     return () => mq.removeEventListener("change", onChange);
   }, []);
 
+  /** إغلاق القائمة عند التنقل — الموبايل فقط */
   useEffect(() => {
     if (window.matchMedia("(min-width: 1024px)").matches) return;
     setSidebarOpen(false);
   }, [pathname]);
+
+  const closeSidebarIfMobile = useCallback(() => {
+    if (window.matchMedia("(max-width: 1023px)").matches) {
+      setSidebarOpen(false);
+    }
+  }, []);
 
   useEffect(() => {
     if (!sidebarOpen) return;
@@ -55,6 +62,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
       <AdminSidebar
         open={sidebarOpen}
         onClose={() => setSidebarOpen(false)}
+        onLinkClick={closeSidebarIfMobile}
         className={cn(
           "fixed inset-y-0 start-0 z-50 flex w-[min(85vw,16rem)] flex-col border-e border-border-subtle bg-surface shadow-xl transition-all duration-300",
           "lg:static lg:z-auto lg:shadow-none",

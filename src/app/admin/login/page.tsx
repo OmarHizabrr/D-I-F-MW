@@ -12,7 +12,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Spinner } from "@/components/ui/Spinner";
 
 export default function AdminLoginPage() {
-  const { user, loading, signIn } = useAuth();
+  const { user, loading, signIn, isAdmin } = useAuth();
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -26,10 +26,10 @@ export default function AdminLoginPage() {
   }, []);
 
   useEffect(() => {
-    if (!loading && user) {
+    if (!loading && user && isAdmin) {
       router.replace("/admin");
     }
-  }, [loading, user, router]);
+  }, [loading, user, isAdmin, router]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -45,7 +45,6 @@ export default function AdminLoginPage() {
 
     try {
       await signIn(email, password);
-      console.log("[Admin Login] اكتمل بنجاح — التوجيه إلى /admin");
       router.replace("/admin");
     } catch (err) {
       logAuthError("Admin Login", err, {

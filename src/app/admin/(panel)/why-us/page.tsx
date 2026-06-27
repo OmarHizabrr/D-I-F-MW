@@ -11,7 +11,7 @@ import { AdminItemList } from "@/components/admin/AdminItemList";
 import { LocalizedInput } from "@/components/admin/LocalizedInput";
 import { IconPicker } from "@/components/admin/IconPicker";
 import { pickAdminLabel } from "@/lib/admin/pickAdminLabel";
-import { whyUsIconOptions, getIconOptionLabel } from "@/lib/admin/icon-options";
+import { getIconOptionLabel } from "@/lib/admin/icon-options";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import { Spinner } from "@/components/ui/Spinner";
@@ -21,7 +21,7 @@ import { emptyLocalized } from "@/types/cms";
 const api = FirestoreApi.Api;
 
 function newItem(order: number): WhyUsItem {
-  return { id: "", title: emptyLocalized(), iconKey: "transparency", order, enabled: true };
+  return { id: "", title: emptyLocalized(), iconKey: "transparency", iconImageUrl: "", order, enabled: true };
 }
 
 export default function AdminWhyUsPage() {
@@ -81,9 +81,11 @@ export default function AdminWhyUsPage() {
             />
             <IconPicker
               label="الأيقونة"
-              value={editing.iconKey}
-              onChange={(iconKey) => setEditing({ ...editing, iconKey })}
-              options={whyUsIconOptions}
+              iconKey={editing.iconKey}
+              iconImageUrl={editing.iconImageUrl || ""}
+              onIconKeyChange={(iconKey) => setEditing({ ...editing, iconKey })}
+              onIconImageChange={(iconImageUrl) => setEditing({ ...editing, iconImageUrl })}
+              uploadFolder="icons/why-us"
             />
             <Input
               label="الترتيب"
@@ -111,7 +113,7 @@ export default function AdminWhyUsPage() {
         onDelete={setDeleteTarget}
         renderTitle={(item) => pickAdminLabel(item.title)}
         renderSubtitle={(item) =>
-          `${getIconOptionLabel(whyUsIconOptions, item.iconKey)} · ترتيب ${item.order}`
+          `${getIconOptionLabel([], item.iconKey)} · ترتيب ${item.order}`
         }
       />
     </div>

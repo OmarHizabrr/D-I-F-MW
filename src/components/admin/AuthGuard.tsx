@@ -6,14 +6,16 @@ import { useAuth } from "@/context/AuthContext";
 import { Spinner } from "@/components/ui/Spinner";
 
 export function AuthGuard({ children }: { children: ReactNode }) {
-  const { user, loading } = useAuth();
+  const { user, isAdmin, loading } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
     if (!loading && !user) {
       router.replace("/admin/login");
+    } else if (!loading && user && !isAdmin) {
+      router.replace("/");
     }
-  }, [loading, user, router]);
+  }, [loading, user, isAdmin, router]);
 
   if (loading) {
     return (
@@ -23,7 +25,7 @@ export function AuthGuard({ children }: { children: ReactNode }) {
     );
   }
 
-  if (!user) {
+  if (!user || !isAdmin) {
     return null;
   }
 

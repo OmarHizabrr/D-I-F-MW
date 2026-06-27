@@ -4,7 +4,7 @@ import { useSiteContent } from "@/context/SiteContentContext";
 import { SectionHeader } from "@/components/ui/SectionHeader";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
-import { licenseIcons } from "@/lib/icons";
+import { CmsIconInline } from "@/components/ui/CmsIconBox";
 
 export function LicensesSection() {
   const { licenses, sectionTitles, text } = useSiteContent();
@@ -19,11 +19,14 @@ export function LicensesSection() {
         />
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {items.map((item) => {
-            const Icon = licenseIcons[item.iconKey] || licenseIcons.registration;
             return (
               <Card key={item.id} className="text-center">
-                <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-3xl bg-brand-brown/10 text-brand-brown">
-                  <Icon className="h-8 w-8" />
+                <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center overflow-hidden rounded-3xl bg-brand-brown/10 text-brand-brown">
+                  <CmsIconInline
+                    iconKey={item.iconKey}
+                    iconImageUrl={item.iconImageUrl}
+                    boxClassName="h-16 w-16 rounded-3xl"
+                  />
                 </div>
                 <h3 className="mb-3 font-bold">{text(item.title)}</h3>
                 {item.pdfUrl ? (

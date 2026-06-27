@@ -4,8 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useSiteContent } from "@/context/SiteContentContext";
 import { SectionHeader } from "@/components/ui/SectionHeader";
 import { Card } from "@/components/ui/Card";
-import { IconBox } from "@/components/ui/IconBox";
-import { statIcons, type StatIconKey } from "@/lib/icons";
+import { CmsIconBox } from "@/components/ui/CmsIconBox";
 
 function AnimatedNumber({ value }: { value: number }) {
   const [display, setDisplay] = useState(0);
@@ -46,14 +45,17 @@ export function StatsSection() {
         <SectionHeader title={text(sectionTitles.stats)} />
         <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 lg:grid-cols-6">
           {stats.map((stat, i) => {
-            const Icon = statIcons[stat.iconKey as StatIconKey] || statIcons.projects;
             return (
               <Card
                 key={stat.id}
                 className="animate-count-up flex flex-col items-center text-center"
                 style={{ animationDelay: `${i * 100}ms` }}
               >
-                <IconBox icon={Icon} size="md" />
+                <CmsIconBox
+                  iconKey={stat.iconKey}
+                  iconImageUrl={stat.iconImageUrl}
+                  size="md"
+                />
                 <p className="mt-3 text-xl font-bold text-brand-green-dark dark:text-brand-green sm:text-2xl md:text-3xl">
                   <AnimatedNumber value={stat.value} />
                 </p>

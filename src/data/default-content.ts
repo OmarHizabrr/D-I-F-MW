@@ -153,6 +153,8 @@ export function getDefaultTestimonials(): TestimonialItem[] {
     youtubeUrl: "",
     enabled: true,
     order: i + 1,
+    status: "approved" as const,
+    source: "seed" as const,
   }));
 }
 

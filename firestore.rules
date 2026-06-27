@@ -2,12 +2,83 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-    function isAdmin() {
+    function isSignedIn() {
       return request.auth != null;
     }
 
+    function userDoc() {
+      return get(/databases/$(database)/documents/users/global/users/$(request.auth.uid));
+    }
+
+    function userExists() {
+      return isSignedIn() && userDoc().exists();
+    }
+
+    function isAdmin() {
+      return isSignedIn() &&
+        userExists() &&
+        userDoc().data.role in ['admin', 'superadmin'] &&
+        userDoc().data.get('active', true) == true &&
+        userDoc().data.get('banned', false) != true;
+    }
+
+    function isNotBanned() {
+      return isSignedIn() &&
+        userExists() &&
+        userDoc().data.get('banned', false) != true &&
+        userDoc().data.get('active', true) == true;
+    }
+
+    function isValidMemberSelfCreate() {
+      return request.resource.data.role == 'member' &&
+        request.resource.data.get('banned', false) == false &&
+        request.resource.data.get('active', true) == true &&
+        request.resource.data.uid == request.auth.uid;
+    }
+
+    function isPublishedTestimonial() {
+      return resource.data.enabled == true && (
+        (resource.data.get('source', 'seed') == 'public' &&
+          resource.data.get('status', '') == 'approved') ||
+        (resource.data.get('source', 'seed') != 'public' &&
+          resource.data.get('status', 'approved') != 'pending' &&
+          resource.data.get('status', 'approved') != 'rejected')
+      );
+    }
+
+    function isValidPublicTestimonialCreate() {
+      return request.resource.data.userId == request.auth.uid &&
+        request.resource.data.status == 'pending' &&
+        request.resource.data.source == 'public' &&
+        request.resource.data.enabled == false;
+    }
+
+    // — المستخدمون —
+    match /users/global/users/{uid} {
+      allow read: if isSignedIn() && (request.auth.uid == uid || isAdmin());
+      allow create: if isSignedIn() && (
+        isAdmin() ||
+        (request.auth.uid == uid && isValidMemberSelfCreate())
+      );
+      allow update: if isSignedIn() && (
+        isAdmin() ||
+        (request.auth.uid == uid &&
+          !request.resource.data.diff(resource.data).affectedKeys()
+            .hasAny(['role', 'banned', 'active']))
+      );
+      allow delete: if isAdmin();
+    }
+
+    // — آراء الزوار —
+    match /testimonials/global/testimonials/{docId} {
+      allow read: if isPublishedTestimonial() || isAdmin();
+      allow create: if isSignedIn() && isNotBanned() && isValidPublicTestimonialCreate();
+      allow update, delete: if isAdmin();
+    }
+
+    // — محتوى الموقع (قراءة عامة، كتابة للمدراء فقط) —
     match /{collection}/{parentId}/{subCollection}/{documentId} {
-      allow read: if true;
+      allow read: if !(collection in ['users', 'testimonials']);
       allow write: if isAdmin();
     }
   }
