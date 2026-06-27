@@ -3,16 +3,14 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { getAuth } from "firebase/auth";
-import { useAuth, getUserMeta } from "@/context/AuthContext";
-import { registerAdmin } from "@/services/seedService";
+import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Spinner } from "@/components/ui/Spinner";
 
 export default function AdminLoginPage() {
-  const { user, isAdmin, loading, signIn } = useAuth();
+  const { user, loading, signIn } = useAuth();
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -20,10 +18,10 @@ export default function AdminLoginPage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!loading && user && isAdmin) {
+    if (!loading && user) {
       router.replace("/admin");
     }
-  }, [loading, user, isAdmin, router]);
+  }, [loading, user, router]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -31,13 +29,9 @@ export default function AdminLoginPage() {
     setError(null);
     try {
       await signIn(email, password);
-      const currentUser = getAuth().currentUser;
-      if (currentUser) {
-        await registerAdmin(currentUser.uid, email, getUserMeta(currentUser));
-      }
       router.replace("/admin");
     } catch {
-      setError("بيانات الدخول غير صحيحة أو ليس لديك صلاحية المسؤول.");
+      setError("بيانات الدخول غير صحيحة. تأكد من وجود حسابك في Firebase Authentication.");
     } finally {
       setSubmitting(false);
     }

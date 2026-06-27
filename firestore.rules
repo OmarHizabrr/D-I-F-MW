@@ -3,9 +3,7 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     function isAdmin() {
-      return request.auth != null
-        && exists(/databases/$(database)/documents/admins/global/admins/$(request.auth.uid))
-        && get(/databases/$(database)/documents/admins/global/admins/$(request.auth.uid)).data.active == true;
+      return request.auth != null;
     }
 
     match /{collection}/{parentId}/{subCollection}/{documentId} {

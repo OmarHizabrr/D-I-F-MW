@@ -1,9 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useSiteContent } from "@/context/SiteContentContext";
 import { useAuth, getUserMeta } from "@/context/AuthContext";
-import { seedSiteContent, registerAdmin } from "@/services/seedService";
+import { seedSiteContent } from "@/services/seedService";
 import {
   FolderKanban,
   Layers,
@@ -92,7 +91,6 @@ export default function AdminDashboardPage() {
     setSeeding(true);
     try {
       const meta = getUserMeta(user);
-      await registerAdmin(user.uid, user.email || "", meta);
       await seedSiteContent(meta);
       window.location.reload();
     } finally {

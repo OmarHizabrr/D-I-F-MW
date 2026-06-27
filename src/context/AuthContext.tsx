@@ -17,7 +17,6 @@ import {
   type User,
 } from "firebase/auth";
 import { getFirebaseApp, isFirebaseConfigured } from "@/lib/firebase/client";
-import FirestoreApi from "@/services/firestoreApi";
 
 type AuthContextValue = {
   user: User | null;
@@ -28,7 +27,6 @@ type AuthContextValue = {
 };
 
 const AuthContext = createContext<AuthContextValue | null>(null);
-const api = FirestoreApi.Api;
 
 function getFirebaseAuth(): Auth {
   return getAuth(getFirebaseApp());
@@ -46,21 +44,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
 
     const auth = getFirebaseAuth();
-    const unsub = onAuthStateChanged(auth, async (firebaseUser) => {
+    const unsub = onAuthStateChanged(auth, (firebaseUser) => {
       setUser(firebaseUser);
-      if (!firebaseUser) {
-        setIsAdmin(false);
-        setLoading(false);
-        return;
-      }
-      try {
-        const adminDoc = await api.getData(api.getAdminDoc(firebaseUser.uid));
-        setIsAdmin(Boolean(adminDoc?.active ?? adminDoc));
-      } catch {
-        setIsAdmin(false);
-      } finally {
-        setLoading(false);
-      }
+      setIsAdmin(Boolean(firebaseUser));
+      setLoading(false);
     });
     return () => unsub();
   }, []);
