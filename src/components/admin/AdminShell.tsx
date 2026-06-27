@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState, type ReactNode } from "react";
 import { usePathname } from "next/navigation";
 import { AdminSidebar } from "@/components/admin/AdminSidebar";
 import { AdminHeader } from "@/components/admin/AdminHeader";
+import { AdminNavIndicator } from "@/components/admin/AdminNavIndicator";
 import { cn } from "@/lib/utils";
 
 export function AdminShell({ children }: { children: ReactNode }) {
@@ -77,6 +78,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
           sidebarOpen={sidebarOpen}
           onMenuToggle={() => setSidebarOpen((v) => !v)}
         />
+        <AdminNavIndicator />
         <main className="admin-scroll min-h-0 flex-1 overflow-y-auto overflow-x-hidden p-4 sm:p-6">
           {children}
         </main>

@@ -1,15 +1,16 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { Ban, CheckCircle2, MessageSquarePlus } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { submitPublicTestimonial } from "@/services/testimonialService";
 import { UserAvatar } from "@/components/ui/UserAvatar";
 import { Button } from "@/components/ui/Button";
-import { Card, CardContent, CardTitle } from "@/components/ui/Card";
-import { Spinner } from "@/components/ui/Spinner";
-import { MessageSquarePlus } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/Card";
+import { StatusMessageCard, StatusLinkButton } from "@/components/ui/StatusMessageCard";
+import { SitePageSkeleton } from "@/components/admin/AdminPageSkeleton";
 
 export default function ShareTestimonialPage() {
   const { user, userProfile, loading, profileLoading, signInWithGoogle } = useAuth();
@@ -19,20 +20,22 @@ export default function ShareTestimonialPage() {
   const [googleLoading, setGoogleLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const [bannedNotice, setBannedNotice] = useState(false);
 
   const displayName =
     userProfile?.displayName || user?.displayName || user?.email?.split("@")[0] || "";
   const photoURL = userProfile?.photoURL || user?.photoURL || "";
-  const isBanned = userProfile?.banned;
+  const isBanned = userProfile?.banned || bannedNotice;
 
   async function handleGoogleSignIn() {
     setGoogleLoading(true);
     setError(null);
+    setBannedNotice(false);
     try {
       await signInWithGoogle();
     } catch (err) {
       if (err instanceof Error && err.message === "BANNED") {
-        setError("تم حظر حسابك من مشاركة الآراء. تواصل مع الإدارة.");
+        setBannedNotice(true);
       } else {
         setError("فشل تسجيل الدخول عبر Google");
       }
@@ -64,11 +67,7 @@ export default function ShareTestimonialPage() {
   }
 
   if (loading || profileLoading) {
-    return (
-      <div className="flex min-h-[50vh] items-center justify-center">
-        <Spinner size="lg" />
-      </div>
-    );
+    return <SitePageSkeleton />;
   }
 
   return (
@@ -113,37 +112,47 @@ export default function ShareTestimonialPage() {
                 </svg>
                 التسجيل عبر Google
               </Button>
-              {error && (
+              {bannedNotice && (
+                <StatusMessageCard
+                  tone="error"
+                  icon={<Ban className="h-8 w-8" />}
+                  title="تم حظر حسابك"
+                  message="لا يمكنك مشاركة آراء على الموقع. إذا كان ذلك خطأً، تواصل مع إدارة المؤسسة."
+                  className="w-full border-0 bg-transparent p-0 shadow-none"
+                />
+              )}
+              {error && !bannedNotice && (
                 <p className="text-sm text-destructive">{error}</p>
               )}
             </CardContent>
           </Card>
         ) : isBanned ? (
-          <Card padding="lg">
-            <CardContent className="text-center">
-              <p className="text-destructive font-medium">تم حظر حسابك من مشاركة الآراء</p>
-              <p className="mt-2 text-sm text-muted-foreground">تواصل مع إدارة المؤسسة للاستفسار</p>
-            </CardContent>
-          </Card>
+          <StatusMessageCard
+            tone="error"
+            icon={<Ban className="h-8 w-8" />}
+            title="تم حظر حسابك من المشاركة"
+            message="لا يمكنك إرسال آراء جديدة على الموقع. للاستفسار أو طلب رفع الحظر، تواصل مع إدارة مؤسسة D.I.F."
+            actions={
+              <StatusLinkButton onClick={() => router.push("/")}>العودة للموقع</StatusLinkButton>
+            }
+          />
         ) : success ? (
-          <Card padding="lg" className="border-brand-green/30 bg-brand-green/5">
-            <CardContent className="text-center">
-              <CardTitle className="mb-2 text-brand-green-dark dark:text-brand-green">
-                شكراً لمشاركتك!
-              </CardTitle>
-              <p className="text-sm text-muted-foreground">
-                تم استلام رأيك وسيُراجع قبل النشر على الموقع
-              </p>
-              <div className="mt-4 flex flex-wrap justify-center gap-2">
-                <Button variant="secondary" onClick={() => setSuccess(false)}>
+          <StatusMessageCard
+            tone="success"
+            icon={<CheckCircle2 className="h-8 w-8" />}
+            title="شكراً لمشاركتك!"
+            message="تم استلام رأيك بنجاح وسيُراجع من قبل الإدارة قبل نشره على الموقع."
+            actions={
+              <>
+                <StatusLinkButton variant="secondary" onClick={() => setSuccess(false)}>
                   مشاركة رأي آخر
-                </Button>
-                <Button variant="outline" onClick={() => router.push("/#about")}>
+                </StatusLinkButton>
+                <StatusLinkButton onClick={() => router.push("/#about")}>
                   العودة للموقع
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+                </StatusLinkButton>
+              </>
+            }
+          />
         ) : (
           <Card padding="lg">
             <CardContent>

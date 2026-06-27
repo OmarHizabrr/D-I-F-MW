@@ -24,8 +24,9 @@ export const metadata: Metadata = {
     email: true,
   },
   icons: {
-    icon: "/Image/login.png",
-    apple: "/Image/login.png",
+    icon: [{ url: "/Image/login.png", type: "image/png" }],
+    apple: [{ url: "/Image/login.png", type: "image/png" }],
+    shortcut: "/Image/login.png",
   },
 };
 

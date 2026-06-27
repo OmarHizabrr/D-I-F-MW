@@ -11,34 +11,38 @@ import {
 } from "@/services/userService";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { AdminFormDialog } from "@/components/admin/AdminFormDialog";
+import { ConfirmDialog, ConfirmIcons } from "@/components/admin/ConfirmDialog";
+import { AdminPageSkeleton } from "@/components/admin/AdminPageSkeleton";
 import { UserAvatar } from "@/components/ui/UserAvatar";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
-import { Spinner } from "@/components/ui/Spinner";
 import type { AppUser } from "@/types/user";
 import { isAdminRole } from "@/types/user";
 
 function sortUsers(list: AppUser[]) {
-  return list.sort((a, b) => (b.createdAt || "").localeCompare(a.createdAt || ""));
+  return [...list].sort((a, b) => (b.createdAt || "").localeCompare(a.createdAt || ""));
 }
+
+type BanConfirm = { user: AppUser; action: "ban" | "unban" };
 
 export default function AdminUsersPage() {
   const { user } = useAuth();
   const [users, setUsers] = useState<AppUser[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [ready, setReady] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [saving, setSaving] = useState(false);
   const [actionId, setActionId] = useState<string | null>(null);
+  const [banConfirm, setBanConfirm] = useState<BanConfirm | null>(null);
+  const [banLoading, setBanLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
 
-  const refreshUsers = useCallback(async () => {
-    const list = await listAllUsers();
-    setUsers(sortUsers(list));
+  const patchUser = useCallback((uid: string, patch: Partial<AppUser>) => {
+    setUsers((prev) => prev.map((u) => (u.uid === uid ? { ...u, ...patch } : u)));
   }, []);
 
   useEffect(() => {
@@ -52,7 +56,7 @@ export default function AdminUsersPage() {
         }
       } finally {
         if (!cancelled) {
-          setLoading(false);
+          setReady(true);
         }
       }
     })();
@@ -75,7 +79,8 @@ export default function AdminUsersPage() {
       setDialogOpen(false);
       setEmail("");
       setPassword("");
-      await refreshUsers();
+      const list = await listAllUsers();
+      setUsers(sortUsers(list));
     } catch (err) {
       setError(err instanceof Error ? err.message : "فشل إنشاء الحساب");
     } finally {
@@ -83,35 +88,64 @@ export default function AdminUsersPage() {
     }
   }
 
-  async function toggleBan(target: AppUser) {
-    if (!user) return;
-    setActionId(target.uid);
+  async function handleBanConfirm() {
+    if (!banConfirm || !user) return;
+    const { user: target, action } = banConfirm;
+    const nextBanned = action === "ban";
+
+    setBanLoading(true);
+    patchUser(target.uid, { banned: nextBanned });
+
     try {
-      await setUserBanned(target.uid, !target.banned, getUserMeta(user));
-      await refreshUsers();
+      await setUserBanned(target.uid, nextBanned, getUserMeta(user));
+      setBanConfirm(null);
+      setMessage(nextBanned ? "تم حظر المستخدم بنجاح" : "تم رفع الحظر عن المستخدم");
+    } catch {
+      patchUser(target.uid, { banned: target.banned });
     } finally {
-      setActionId(null);
+      setBanLoading(false);
     }
   }
 
   async function toggleActive(target: AppUser) {
     if (!user) return;
     setActionId(target.uid);
+    const nextActive = !target.active;
+    patchUser(target.uid, { active: nextActive });
+
     try {
-      await setUserActive(target.uid, !target.active, getUserMeta(user));
-      await refreshUsers();
+      await setUserActive(target.uid, nextActive, getUserMeta(user));
+    } catch {
+      patchUser(target.uid, { active: target.active });
     } finally {
       setActionId(null);
     }
   }
 
-  if (loading) {
-    return (
-      <div className="flex justify-center py-16">
-        <Spinner size="lg" />
-      </div>
-    );
+  if (!ready) {
+    return <AdminPageSkeleton />;
   }
+
+  const banDialog = banConfirm
+    ? banConfirm.action === "ban"
+      ? {
+          title: "حظر المستخدم",
+          message: `هل تريد حظر «${banConfirm.user.displayName || banConfirm.user.email}» من مشاركة الآراء على الموقع؟`,
+          description: "لن يتمكن من إرسال آراء جديدة، ويمكنك رفع الحظر لاحقاً.",
+          confirmLabel: "تأكيد الحظر",
+          loadingText: "جاري الحظر...",
+          variant: "warning" as const,
+          icon: ConfirmIcons.ban,
+        }
+      : {
+          title: "رفع الحظر",
+          message: `هل تريد رفع الحظر عن «${banConfirm.user.displayName || banConfirm.user.email}» والسماح له بالمشاركة مجدداً؟`,
+          confirmLabel: "رفع الحظر",
+          loadingText: "جاري رفع الحظر...",
+          variant: "success" as const,
+          icon: ConfirmIcons.unban,
+        }
+    : null;
 
   return (
     <div>
@@ -127,7 +161,7 @@ export default function AdminUsersPage() {
       />
 
       {message && (
-        <p className="mb-4 rounded-xl bg-brand-green/10 px-4 py-3 text-sm text-brand-green-dark dark:text-brand-green">
+        <p className="mb-4 animate-in fade-in rounded-xl bg-brand-green/10 px-4 py-3 text-sm text-brand-green-dark dark:text-brand-green">
           {message}
         </p>
       )}
@@ -166,6 +200,22 @@ export default function AdminUsersPage() {
           <p className="rounded-xl bg-destructive/10 px-3 py-2 text-sm text-destructive">{error}</p>
         )}
       </AdminFormDialog>
+
+      {banDialog && (
+        <ConfirmDialog
+          open={!!banConfirm}
+          onClose={() => !banLoading && setBanConfirm(null)}
+          onConfirm={handleBanConfirm}
+          loading={banLoading}
+          title={banDialog.title}
+          message={banDialog.message}
+          description={banDialog.description}
+          confirmLabel={banDialog.confirmLabel}
+          loadingText={banDialog.loadingText}
+          variant={banDialog.variant}
+          icon={banDialog.icon}
+        />
+      )}
 
       <div className="space-y-3">
         {users.length === 0 ? (
@@ -212,13 +262,32 @@ export default function AdminUsersPage() {
                     <Button
                       variant={u.banned ? "secondary" : "destructive"}
                       size="sm"
-                      loading={actionId === u.uid}
-                      onClick={() => toggleBan(u)}
+                      onClick={() =>
+                        setBanConfirm({
+                          user: u,
+                          action: u.banned ? "unban" : "ban",
+                        })
+                      }
                     >
-                      <Ban className="h-4 w-4" />
-                      {u.banned ? "إلغاء الحظر" : "حظر"}
+                      {u.banned ? (
+                        <>
+                          <UserCheck className="h-4 w-4" />
+                          رفع الحظر
+                        </>
+                      ) : (
+                        <>
+                          <Ban className="h-4 w-4" />
+                          حظر
+                        </>
+                      )}
                     </Button>
-                    <Button variant="outline" size="sm" onClick={() => toggleActive(u)}>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      loading={actionId === u.uid}
+                      loadingText="..."
+                      onClick={() => toggleActive(u)}
+                    >
                       <UserCheck className="h-4 w-4" />
                       {u.active ? "تعطيل" : "تفعيل"}
                     </Button>

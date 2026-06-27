@@ -1,7 +1,6 @@
 import FirestoreApi, { type UserMeta } from "@/services/firestoreApi";
 import { setUserBanned } from "@/services/userService";
 import type { TestimonialItem } from "@/types/cms";
-import { emptyLocalized } from "@/types/cms";
 
 const api = FirestoreApi.Api;
 
@@ -57,8 +56,28 @@ export async function rejectTestimonial(id: string, actor: UserMeta = {}) {
   await api.deleteData(api.getTestimonialDoc(id));
 }
 
+export async function hideTestimonialFromSite(id: string, actor: UserMeta = {}) {
+  await api.updateData({
+    docRef: api.getTestimonialDoc(id),
+    data: { enabled: false },
+    userData: actor,
+  });
+}
+
+export async function showTestimonialOnSite(id: string, actor: UserMeta = {}) {
+  await api.updateData({
+    docRef: api.getTestimonialDoc(id),
+    data: { enabled: true, status: "approved" },
+    userData: actor,
+  });
+}
+
 export async function banTestimonialUser(userId: string, actor: UserMeta = {}) {
   await setUserBanned(userId, true, actor);
+}
+
+export async function unbanTestimonialUser(userId: string, actor: UserMeta = {}) {
+  await setUserBanned(userId, false, actor);
 }
 
 export function isTestimonialPublished(item: TestimonialItem): boolean {
@@ -67,9 +86,14 @@ export function isTestimonialPublished(item: TestimonialItem): boolean {
   return item.status !== "pending" && item.status !== "rejected";
 }
 
+export function isTestimonialHidden(item: TestimonialItem): boolean {
+  return item.status === "approved" && !item.enabled;
+}
+
 export function testimonialStatusLabel(item: TestimonialItem): string {
   if (item.status === "pending") return "بانتظار الموافقة";
   if (item.status === "rejected") return "مرفوض";
+  if (isTestimonialHidden(item)) return "مخفي من الموقع";
   if (item.enabled) return "منشور";
   return "مسودة";
 }
