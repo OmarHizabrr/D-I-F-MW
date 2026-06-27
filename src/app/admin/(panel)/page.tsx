@@ -1,8 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useAuth, getUserMeta } from "@/context/AuthContext";
-import { seedSiteContent } from "@/services/seedService";
 import {
   FolderKanban,
   Layers,
@@ -15,8 +13,8 @@ import {
 import FirestoreApi from "@/services/firestoreApi";
 import { COLLECTIONS, SITE_ROOT } from "@/lib/firebase/database-structure";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
+import { AdminSeedPanel } from "@/components/admin/AdminSeedPanel";
 import { Card, CardContent, CardTitle } from "@/components/ui/Card";
-import { Button } from "@/components/ui/Button";
 import { Spinner } from "@/components/ui/Spinner";
 import type { DashboardStats } from "@/types/cms";
 
@@ -38,10 +36,8 @@ const statCards: {
 ];
 
 export default function AdminDashboardPage() {
-  const { user } = useAuth();
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [loading, setLoading] = useState(true);
-  const [seeding, setSeeding] = useState(false);
 
   useEffect(() => {
     async function loadStats() {
@@ -86,47 +82,32 @@ export default function AdminDashboardPage() {
     void loadStats();
   }, []);
 
-  async function handleSeed() {
-    if (!user) return;
-    setSeeding(true);
-    try {
-      const meta = getUserMeta(user);
-      await seedSiteContent(meta);
-      window.location.reload();
-    } finally {
-      setSeeding(false);
-    }
-  }
-
   return (
     <div>
       <AdminPageHeader
         title="لوحة التحكم"
-        description="نظرة عامة على محتوى الموقع وإحصائياته"
-        actions={
-          <Button loading={seeding} loadingText="جاري التهيئة..." onClick={handleSeed}>
-            تهيئة البيانات الافتراضية
-          </Button>
-        }
+        description="إدارة محتوى الموقع — تهيئة، تعديل، إضافة، وحذف"
       />
+
+      <AdminSeedPanel />
 
       {loading ? (
         <div className="flex justify-center py-16">
           <Spinner size="lg" />
         </div>
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-3 sm:grid-cols-2 sm:gap-4 xl:grid-cols-4">
           {statCards.map(({ key, label, icon: Icon }) => (
             <Card key={key} hover={false} padding="md">
-              <CardContent className="flex items-center gap-4">
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-brand-green/10 text-brand-green-dark dark:text-brand-green">
-                  <Icon className="h-6 w-6" />
+              <CardContent className="flex items-center gap-3 sm:gap-4">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-brand-green/10 text-brand-green-dark dark:text-brand-green sm:h-12 sm:w-12">
+                  <Icon className="h-5 w-5 sm:h-6 sm:w-6" />
                 </div>
-                <div>
-                  <CardTitle className="text-sm font-medium text-muted-foreground">
+                <div className="min-w-0">
+                  <CardTitle className="truncate text-xs font-medium text-muted-foreground sm:text-sm">
                     {label}
                   </CardTitle>
-                  <p className="text-2xl font-bold text-foreground">
+                  <p className="text-xl font-bold text-foreground sm:text-2xl">
                     {stats?.[key] ?? 0}
                   </p>
                 </div>

@@ -107,3 +107,38 @@ export async function registerUser(
     userData: { ...userData, uid },
   });
 }
+
+export async function getSiteSeedStatus() {
+  const config = await api.getData(api.getSiteConfigDoc());
+
+  const collections = [
+    api.getNavItemsCollection(),
+    api.getStatsCollection(),
+    api.getProgramsCollection(),
+    api.getProjectsCollection(),
+    api.getNewsCollection(),
+    api.getPartnersCollection(),
+    api.getTestimonialsCollection(),
+    api.getMediaCollection(),
+    api.getLicensesCollection(),
+    api.getMapPointsCollection(),
+    api.getHowWeWorkCollection(),
+    api.getWhyUsCollection(),
+  ] as const;
+
+  const counts = await Promise.all(
+    collections.map(async (col) => {
+      const docs = await api.getOrderedDocuments(col);
+      return docs.length;
+    })
+  );
+
+  const docCount = counts.reduce((a, b) => a + b, 0);
+  const hasDocs = docCount > 0;
+
+  return {
+    seeded: Boolean(config?.seeded) || hasDocs,
+    totalItems: docCount + 4,
+    docCount,
+  };
+}
