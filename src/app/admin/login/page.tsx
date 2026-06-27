@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
+import { isAdminBootstrapAvailable } from "@/services/userService";
 import { getAuthErrorMessage, logAuthError } from "@/lib/auth-errors";
 import { getFirebaseEnvStatus, isFirebaseConfigured, logFirebaseEnvStatus } from "@/lib/firebase/client";
 import { Button } from "@/components/ui/Button";
@@ -19,10 +20,12 @@ export default function AdminLoginPage() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [mounted, setMounted] = useState(false);
+  const [setupAvailable, setSetupAvailable] = useState(false);
 
   useEffect(() => {
     setMounted(true);
     logFirebaseEnvStatus("Admin Login");
+    isAdminBootstrapAvailable().then(setSetupAvailable);
   }, []);
 
   useEffect(() => {
@@ -82,6 +85,23 @@ export default function AdminLoginPage() {
         </CardHeader>
 
         <CardContent>
+          {mounted && setupAvailable && (
+            <div className="mb-4 rounded-xl border border-brand-green/30 bg-brand-green/10 px-4 py-3 text-sm">
+              <p className="font-semibold text-brand-green-dark dark:text-brand-green">
+                أول استخدام للنظام؟
+              </p>
+              <p className="mt-1 text-xs text-muted-foreground">
+                أنشئ حساب المدير الأول للدخول إلى لوحة التحكم
+              </p>
+              <Link
+                href="/admin/setup"
+                className="mt-2 inline-block text-sm font-semibold text-brand-green hover:underline"
+              >
+                إعداد المدير الأول ←
+              </Link>
+            </div>
+          )}
+
           {mounted && envStatus?.usingFallback && (
             <div className="mb-4 rounded-xl border border-sky-500/30 bg-sky-500/10 px-4 py-3 text-sm text-sky-900 dark:text-sky-100">
               <p className="font-semibold">تنبيه: متغيرات Vercel غير مدمجة في البناء</p>

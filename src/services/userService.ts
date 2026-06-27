@@ -1,5 +1,7 @@
 import { initializeApp, deleteApp } from "firebase/app";
 import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
+import { getFirestore, runTransaction } from "firebase/firestore";
+import { getFirebaseApp } from "@/lib/firebase/client";
 import FirestoreApi, { type UserMeta } from "@/services/firestoreApi";
 import { resolveFirebaseConfig, isFirebaseConfigResolved } from "@/lib/firebase/config";
 import type { AppUser, UserRole } from "@/types/user";
@@ -47,14 +49,69 @@ export async function saveUserProfile(
   });
 }
 
-/** تسجيل مدير بعد الدخول بالبريد — يُسمح فقط لحسابات مُسجّلة مسبقاً كمدير */
+/** هل لا يزال بإمكان إنشاء المدير الأول؟ */
+export async function isAdminBootstrapAvailable(): Promise<boolean> {
+  const data = await api.getData(api.getBootstrapDoc());
+  return !data || data.bootstrapped !== true;
+}
+
+/** إنشاء المدير الأول (superadmin) — مرة واحدة فقط */
+async function bootstrapFirstAdmin(
+  uid: string,
+  email: string,
+  userData: UserMeta = {}
+) {
+  const db = getFirestore(getFirebaseApp());
+  const bootRef = api.getBootstrapDoc();
+  const userRef = api.getUserDoc(uid);
+  const now = new Date().toISOString();
+
+  await runTransaction(db, async (tx) => {
+    const bootSnap = await tx.get(bootRef);
+    if (bootSnap.exists() && bootSnap.data()?.bootstrapped === true) {
+      throw new Error("NOT_ADMIN");
+    }
+
+    tx.set(userRef, {
+      id: uid,
+      uid,
+      email,
+      displayName: userData.displayName || email.split("@")[0],
+      photoURL: userData.photoURL || "",
+      phone: "",
+      role: "superadmin",
+      active: true,
+      profileComplete: false,
+      banned: false,
+      createdAt: now,
+      updatedAt: now,
+    });
+
+    tx.set(bootRef, {
+      bootstrapped: true,
+      bootstrappedAt: now,
+      bootstrappedBy: uid,
+    });
+  });
+}
+
+/** تسجيل مدير بعد الدخول بالبريد — أو إنشاء المدير الأول تلقائياً */
 export async function registerAdminUser(
   uid: string,
   email: string,
   userData: UserMeta = {}
 ) {
   const existing = await getUserProfile(uid);
-  if (!existing || !isAdminRole(existing.role)) {
+
+  if (!existing) {
+    if (await isAdminBootstrapAvailable()) {
+      await bootstrapFirstAdmin(uid, email, userData);
+      return;
+    }
+    throw new Error("NOT_ADMIN");
+  }
+
+  if (!isAdminRole(existing.role)) {
     throw new Error("NOT_ADMIN");
   }
   if (existing.banned) {
@@ -79,6 +136,33 @@ export async function registerAdminUser(
     },
     userData
   );
+}
+
+/** إنشاء حساب المدير الأول في Firebase Auth + Firestore */
+export async function createFirstAdminAccount(email: string, password: string) {
+  const config = resolveFirebaseConfig();
+  if (!isFirebaseConfigResolved(config)) {
+    throw new Error("Firebase is not configured.");
+  }
+
+  if (!(await isAdminBootstrapAvailable())) {
+    throw new Error("BOOTSTRAP_DONE");
+  }
+
+  const credential = await createUserWithEmailAndPassword(getAuth(getFirebaseApp()), email, password);
+  const firebaseUser = credential.user;
+
+  try {
+    await bootstrapFirstAdmin(firebaseUser.uid, email, {
+      uid: firebaseUser.uid,
+      displayName: email.split("@")[0],
+    });
+  } catch (error) {
+    await firebaseUser.delete().catch(() => undefined);
+    throw error;
+  }
+
+  return firebaseUser.uid;
 }
 
 /** تسجيل مستخدم عام (Google) لمشاركة الرأي */

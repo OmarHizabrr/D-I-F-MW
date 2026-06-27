@@ -14,6 +14,14 @@ service cloud.firestore {
       return isSignedIn() && userDoc().exists();
     }
 
+    function bootstrapDoc() {
+      return get(/databases/$(database)/documents/users/global/meta/bootstrap);
+    }
+
+    function canBootstrapFirstAdmin() {
+      return !bootstrapDoc().exists() || bootstrapDoc().data.get('bootstrapped', false) != true;
+    }
+
     function isAdmin() {
       return isSignedIn() &&
         userExists() &&
@@ -36,6 +44,15 @@ service cloud.firestore {
         request.resource.data.uid == request.auth.uid;
     }
 
+    function isValidFirstAdminSelfCreate() {
+      return request.auth.uid == uid &&
+        request.resource.data.role == 'superadmin' &&
+        request.resource.data.get('banned', false) == false &&
+        request.resource.data.get('active', true) == true &&
+        request.resource.data.uid == request.auth.uid &&
+        canBootstrapFirstAdmin();
+    }
+
     function isPublishedTestimonial() {
       return resource.data.enabled == true && (
         (resource.data.get('source', 'seed') == 'public' &&
@@ -53,11 +70,23 @@ service cloud.firestore {
         request.resource.data.enabled == false;
     }
 
+    // — تهيئة المدير الأول —
+    match /users/global/meta/bootstrap {
+      allow read: if true;
+      allow create: if isSignedIn() &&
+        request.resource.data.bootstrapped == true &&
+        canBootstrapFirstAdmin();
+      allow update: if isSignedIn() &&
+        resource.data.get('bootstrapped', false) != true &&
+        request.resource.data.bootstrapped == true;
+    }
+
     // — المستخدمون —
     match /users/global/users/{uid} {
       allow read: if isSignedIn() && (request.auth.uid == uid || isAdmin());
       allow create: if isSignedIn() && (
         isAdmin() ||
+        isValidFirstAdminSelfCreate() ||
         (request.auth.uid == uid && isValidMemberSelfCreate())
       );
       allow update: if isSignedIn() && (

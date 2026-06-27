@@ -27,6 +27,9 @@ export function getAuthErrorMessage(error: unknown): string {
     if (error.message === "USER_DISABLED") {
       return "تم تعطيل هذا الحساب.";
     }
+    if (error.message === "BOOTSTRAP_DONE") {
+      return "تم إعداد المدير الأول مسبقاً. سجّل الدخول أو اطلب من مدير إضافة حسابك.";
+    }
   }
   if (error instanceof FirebaseError && AUTH_MESSAGES[error.code]) {
     return AUTH_MESSAGES[error.code];

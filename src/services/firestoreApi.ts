@@ -215,6 +215,10 @@ class FirestoreApi {
     return this.getSubDocument(COLLECTIONS.users, SITE_ROOT, COLLECTIONS.users, uid);
   }
 
+  getBootstrapDoc() {
+    return this.getSubDocument(COLLECTIONS.users, SITE_ROOT, "meta", "bootstrap");
+  }
+
   async setData({ docRef, data, merge = true, userData = {} }: SetDataOptions) {
     const payload = {
       ...data,
