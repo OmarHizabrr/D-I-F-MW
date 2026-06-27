@@ -9,7 +9,9 @@ import { AdminFormDialog } from "@/components/admin/AdminFormDialog";
 import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
 import { AdminItemList } from "@/components/admin/AdminItemList";
 import { LocalizedInput } from "@/components/admin/LocalizedInput";
+import { IconPicker } from "@/components/admin/IconPicker";
 import { pickAdminLabel } from "@/lib/admin/pickAdminLabel";
+import { statIconOptions, getIconOptionLabel } from "@/lib/admin/icon-options";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import { Spinner } from "@/components/ui/Spinner";
@@ -79,12 +81,12 @@ export default function AdminStatsPage() {
       >
         {editing && (
           <>
-            <div className="grid gap-4 sm:grid-cols-3">
-              <Input
-                label="مفتاح الأيقونة"
+            <div className="grid gap-4 sm:grid-cols-2">
+              <IconPicker
+                label="الأيقونة"
                 value={editing.iconKey}
-                onChange={(e) => setEditing({ ...editing, iconKey: e.target.value })}
-                hint="مثال: users, projects"
+                onChange={(iconKey) => setEditing({ ...editing, iconKey })}
+                options={statIconOptions}
               />
               <Input
                 label="القيمة"
@@ -92,13 +94,13 @@ export default function AdminStatsPage() {
                 value={editing.value}
                 onChange={(e) => setEditing({ ...editing, value: Number(e.target.value) })}
               />
-              <Input
-                label="الترتيب"
-                type="number"
-                value={editing.order}
-                onChange={(e) => setEditing({ ...editing, order: Number(e.target.value) })}
-              />
             </div>
+            <Input
+              label="الترتيب"
+              type="number"
+              value={editing.order}
+              onChange={(e) => setEditing({ ...editing, order: Number(e.target.value) })}
+            />
             <LocalizedInput
               label="التسمية"
               value={editing.label}
@@ -133,7 +135,7 @@ export default function AdminStatsPage() {
         onDelete={setDeleteTarget}
         renderTitle={(item) => pickAdminLabel(item.label)}
         renderSubtitle={(item) =>
-          `${item.value} · ${item.iconKey} · ترتيب ${item.order}${!item.enabled ? " · معطّل" : ""}`
+          `${item.value} · ${getIconOptionLabel(statIconOptions, item.iconKey)} · ترتيب ${item.order}${!item.enabled ? " · معطّل" : ""}`
         }
       />
     </div>

@@ -9,7 +9,9 @@ import { AdminFormDialog } from "@/components/admin/AdminFormDialog";
 import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
 import { AdminItemList } from "@/components/admin/AdminItemList";
 import { LocalizedInput } from "@/components/admin/LocalizedInput";
+import { IconPicker } from "@/components/admin/IconPicker";
 import { pickAdminLabel } from "@/lib/admin/pickAdminLabel";
+import { howWeWorkIconOptions, getIconOptionLabel } from "@/lib/admin/icon-options";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import { Spinner } from "@/components/ui/Spinner";
@@ -91,11 +93,11 @@ export default function AdminHowWeWorkPage() {
               multiline
             />
             <div className="grid gap-4 sm:grid-cols-2">
-              <Input
-                label="مفتاح الأيقونة"
+              <IconPicker
+                label="الأيقونة"
                 value={editing.iconKey}
-                onChange={(e) => setEditing({ ...editing, iconKey: e.target.value })}
-                hint="study, approve, execute, report"
+                onChange={(iconKey) => setEditing({ ...editing, iconKey })}
+                options={howWeWorkIconOptions}
               />
               <Input
                 label="الترتيب"
@@ -123,7 +125,9 @@ export default function AdminHowWeWorkPage() {
         onEdit={setEditing}
         onDelete={setDeleteTarget}
         renderTitle={(item) => pickAdminLabel(item.title)}
-        renderSubtitle={(item) => `${item.iconKey} · ترتيب ${item.order}`}
+        renderSubtitle={(item) =>
+          `${getIconOptionLabel(howWeWorkIconOptions, item.iconKey)} · ترتيب ${item.order}`
+        }
       />
     </div>
   );

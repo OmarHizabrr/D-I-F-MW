@@ -10,7 +10,14 @@ import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
 import { AdminItemList } from "@/components/admin/AdminItemList";
 import { LocalizedInput } from "@/components/admin/LocalizedInput";
 import { FileUploadField } from "@/components/admin/FileUploadField";
+import { IconPicker } from "@/components/admin/IconPicker";
+import { GradientPicker } from "@/components/admin/GradientPicker";
 import { pickAdminLabel } from "@/lib/admin/pickAdminLabel";
+import {
+  programIconOptions,
+  getIconOptionLabel,
+} from "@/lib/admin/icon-options";
+import { getGradientLabel } from "@/lib/admin/gradient-options";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import { Spinner } from "@/components/ui/Spinner";
@@ -94,10 +101,11 @@ export default function AdminProgramsPage() {
               multiline
             />
             <div className="grid gap-4 sm:grid-cols-2">
-              <Input
-                label="مفتاح الأيقونة"
+              <IconPicker
+                label="الأيقونة"
                 value={editing.iconKey}
-                onChange={(e) => setEditing({ ...editing, iconKey: e.target.value })}
+                onChange={(iconKey) => setEditing({ ...editing, iconKey })}
+                options={programIconOptions}
               />
               <Input
                 label="الترتيب"
@@ -106,11 +114,10 @@ export default function AdminProgramsPage() {
                 onChange={(e) => setEditing({ ...editing, order: Number(e.target.value) })}
               />
             </div>
-            <Input
-              label="لون التدرج (Tailwind classes)"
-              dir="ltr"
+            <GradientPicker
+              label="لون خلفية البطاقة"
               value={editing.color}
-              onChange={(e) => setEditing({ ...editing, color: e.target.value })}
+              onChange={(color) => setEditing({ ...editing, color })}
             />
             <FileUploadField
               label="صورة البرنامج"
@@ -146,7 +153,9 @@ export default function AdminProgramsPage() {
         onEdit={setEditing}
         onDelete={setDeleteTarget}
         renderTitle={(item) => pickAdminLabel(item.title)}
-        renderSubtitle={(item) => `${item.iconKey} · ترتيب ${item.order}`}
+        renderSubtitle={(item) =>
+          `${getIconOptionLabel(programIconOptions, item.iconKey)} · ${getGradientLabel(item.color)} · ترتيب ${item.order}`
+        }
       />
     </div>
   );

@@ -10,8 +10,9 @@ import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
 import { AdminItemList } from "@/components/admin/AdminItemList";
 import { LocalizedInput } from "@/components/admin/LocalizedInput";
 import { FileUploadField } from "@/components/admin/FileUploadField";
+import { IconPicker } from "@/components/admin/IconPicker";
 import { pickAdminLabel } from "@/lib/admin/pickAdminLabel";
-import { Input } from "@/components/ui/Input";
+import { licenseIconOptions, getIconOptionLabel } from "@/lib/admin/icon-options";
 import { Button } from "@/components/ui/Button";
 import { Spinner } from "@/components/ui/Spinner";
 import type { LicenseItem } from "@/types/cms";
@@ -85,10 +86,11 @@ export default function AdminLicensesPage() {
               value={editing.title}
               onChange={(title) => setEditing({ ...editing, title })}
             />
-            <Input
-              label="مفتاح الأيقونة"
+            <IconPicker
+              label="الأيقونة"
               value={editing.iconKey}
-              onChange={(e) => setEditing({ ...editing, iconKey: e.target.value })}
+              onChange={(iconKey) => setEditing({ ...editing, iconKey })}
+              options={licenseIconOptions}
             />
             <FileUploadField
               label="ملف PDF"
@@ -116,7 +118,7 @@ export default function AdminLicensesPage() {
         onEdit={setEditing}
         onDelete={setDeleteTarget}
         renderTitle={(item) => pickAdminLabel(item.title)}
-        renderSubtitle={(item) => item.iconKey}
+        renderSubtitle={(item) => getIconOptionLabel(licenseIconOptions, item.iconKey)}
       />
     </div>
   );

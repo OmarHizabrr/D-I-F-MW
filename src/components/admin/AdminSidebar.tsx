@@ -54,12 +54,12 @@ const dashboardLink = {
 };
 
 type AdminSidebarProps = {
-  mobileOpen?: boolean;
+  open?: boolean;
   onClose?: () => void;
   className?: string;
 };
 
-export function AdminSidebar({ mobileOpen, onClose, className }: AdminSidebarProps) {
+export function AdminSidebar({ open, onClose, className }: AdminSidebarProps) {
   const pathname = usePathname();
   const DashIcon = dashboardLink.icon;
 
@@ -74,7 +74,7 @@ export function AdminSidebar({ mobileOpen, onClose, className }: AdminSidebarPro
         "flex flex-col border-s border-border-subtle bg-surface lg:border-e lg:border-s-0",
         className
       )}
-      aria-hidden={mobileOpen === false ? undefined : !mobileOpen}
+      aria-hidden={open === false ? true : undefined}
     >
       <div className="flex shrink-0 items-center justify-between border-b border-border-subtle px-4 py-5 sm:px-5">
         <Link href="/admin" className="block min-w-0" onClick={onClose}>
@@ -87,7 +87,7 @@ export function AdminSidebar({ mobileOpen, onClose, className }: AdminSidebarPro
           <button
             type="button"
             onClick={onClose}
-            className="rounded-xl p-2 text-muted-foreground hover:bg-border-subtle lg:hidden"
+            className="rounded-xl p-2 text-muted-foreground hover:bg-border-subtle"
             aria-label="إغلاق القائمة"
           >
             <X className="h-5 w-5" />

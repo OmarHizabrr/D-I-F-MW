@@ -9,7 +9,9 @@ import { AdminFormDialog } from "@/components/admin/AdminFormDialog";
 import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
 import { AdminItemList } from "@/components/admin/AdminItemList";
 import { LocalizedInput } from "@/components/admin/LocalizedInput";
+import { IconPicker } from "@/components/admin/IconPicker";
 import { pickAdminLabel } from "@/lib/admin/pickAdminLabel";
+import { whyUsIconOptions, getIconOptionLabel } from "@/lib/admin/icon-options";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import { Spinner } from "@/components/ui/Spinner";
@@ -77,19 +79,18 @@ export default function AdminWhyUsPage() {
               value={editing.title}
               onChange={(title) => setEditing({ ...editing, title })}
             />
-            <div className="grid gap-4 sm:grid-cols-2">
-              <Input
-                label="مفتاح الأيقونة"
-                value={editing.iconKey}
-                onChange={(e) => setEditing({ ...editing, iconKey: e.target.value })}
-              />
-              <Input
-                label="الترتيب"
-                type="number"
-                value={editing.order}
-                onChange={(e) => setEditing({ ...editing, order: Number(e.target.value) })}
-              />
-            </div>
+            <IconPicker
+              label="الأيقونة"
+              value={editing.iconKey}
+              onChange={(iconKey) => setEditing({ ...editing, iconKey })}
+              options={whyUsIconOptions}
+            />
+            <Input
+              label="الترتيب"
+              type="number"
+              value={editing.order}
+              onChange={(e) => setEditing({ ...editing, order: Number(e.target.value) })}
+            />
           </>
         )}
       </AdminFormDialog>
@@ -109,7 +110,9 @@ export default function AdminWhyUsPage() {
         onEdit={setEditing}
         onDelete={setDeleteTarget}
         renderTitle={(item) => pickAdminLabel(item.title)}
-        renderSubtitle={(item) => `${item.iconKey} · ترتيب ${item.order}`}
+        renderSubtitle={(item) =>
+          `${getIconOptionLabel(whyUsIconOptions, item.iconKey)} · ترتيب ${item.order}`
+        }
       />
     </div>
   );

@@ -2,15 +2,16 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { LogOut, Menu, ExternalLink } from "lucide-react";
+import { LogOut, Menu, PanelLeftClose, ExternalLink } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/Button";
 
 type AdminHeaderProps = {
-  onMenuOpen?: () => void;
+  sidebarOpen?: boolean;
+  onMenuToggle?: () => void;
 };
 
-export function AdminHeader({ onMenuOpen }: AdminHeaderProps) {
+export function AdminHeader({ sidebarOpen, onMenuToggle }: AdminHeaderProps) {
   const { user, signOut } = useAuth();
   const [loggingOut, setLoggingOut] = useState(false);
 
@@ -28,11 +29,16 @@ export function AdminHeader({ onMenuOpen }: AdminHeaderProps) {
       <div className="flex min-w-0 items-center gap-3">
         <button
           type="button"
-          onClick={onMenuOpen}
-          className="rounded-xl p-2 text-foreground hover:bg-border-subtle lg:hidden"
-          aria-label="فتح القائمة"
+          onClick={onMenuToggle}
+          className="rounded-xl p-2 text-foreground hover:bg-border-subtle"
+          aria-label={sidebarOpen ? "إغلاق القائمة" : "فتح القائمة"}
+          aria-expanded={sidebarOpen}
         >
-          <Menu className="h-5 w-5" />
+          {sidebarOpen ? (
+            <PanelLeftClose className="h-5 w-5" />
+          ) : (
+            <Menu className="h-5 w-5" />
+          )}
         </button>
         <div className="min-w-0">
           <p className="truncate text-sm font-semibold text-foreground">مرحباً بك</p>
