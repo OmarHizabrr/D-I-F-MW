@@ -1,9 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Cairo } from "next/font/google";
 import { Providers } from "@/components/providers/Providers";
-import { TopBar } from "@/components/layout/TopBar";
-import { Navigation } from "@/components/layout/Navigation";
-import { Footer } from "@/components/layout/Footer";
 import "./globals.css";
 
 const cairo = Cairo({
@@ -52,12 +49,7 @@ export default function RootLayout({
   return (
     <html lang="ar" dir="rtl" suppressHydrationWarning className={`${cairo.variable} h-full overflow-x-hidden`}>
       <body className="min-h-full flex w-full max-w-[100vw] flex-col overflow-x-hidden antialiased">
-        <Providers>
-          <TopBar />
-          <Navigation />
-          <main className="w-full min-w-0 flex-1 overflow-x-hidden">{children}</main>
-          <Footer />
-        </Providers>
+        <Providers>{children}</Providers>
       </body>
     </html>
   );

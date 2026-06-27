@@ -2,56 +2,63 @@
 
 import { Phone, Mail, Share2, MessageCircle, Play, Camera } from "lucide-react";
 import { useLocale } from "@/context/LocaleContext";
+import { useSiteContent } from "@/context/SiteContentContext";
 import { localeList } from "@/i18n";
 import { Button } from "@/components/ui/Button";
 import { ThemeToggle } from "./ThemeToggle";
 
-const socialLinks = [
-  { icon: Share2, href: "#", label: "Facebook" },
-  { icon: MessageCircle, href: "#", label: "Twitter" },
-  { icon: Play, href: "#", label: "YouTube" },
-  { icon: Camera, href: "#", label: "Instagram" },
-];
+const iconMap: Record<string, typeof Share2> = {
+  facebook: Share2,
+  twitter: MessageCircle,
+  youtube: Play,
+  instagram: Camera,
+};
 
 export function TopBar() {
-  const { locale, setLocale, t } = useLocale();
+  const { locale, setLocale } = useLocale();
+  const { topbar, text } = useSiteContent();
+
+  const socialLinks = topbar.socialLinks
+    .filter((s) => s.enabled)
+    .sort((a, b) => a.order - b.order);
 
   return (
     <div className="safe-top w-full overflow-hidden bg-topbar-bg text-topbar-fg">
       <div className="container-dif min-w-0 py-2 text-xs sm:text-sm">
-        {/* Row 1: contact */}
         <div className="flex min-w-0 items-center gap-3 overflow-hidden sm:gap-4">
           <a
-            href={`tel:${t.topBar.phone}`}
+            href={`tel:${topbar.phone}`}
             className="flex shrink-0 items-center gap-1.5 hover:opacity-80 active:opacity-70"
           >
             <Phone className="h-3.5 w-3.5 shrink-0 sm:h-4 sm:w-4" />
             <span dir="ltr" className="whitespace-nowrap text-[11px] sm:text-sm">
-              {t.topBar.phone}
+              {topbar.phone}
             </span>
           </a>
           <a
-            href={`mailto:${t.topBar.email}`}
+            href={`mailto:${topbar.email}`}
             className="flex min-w-0 items-center gap-1.5 truncate hover:opacity-80 active:opacity-70"
           >
             <Mail className="h-3.5 w-3.5 shrink-0 sm:h-4 sm:w-4" />
-            <span className="hidden truncate min-[380px]:inline">{t.topBar.email}</span>
+            <span className="hidden truncate min-[380px]:inline">{topbar.email}</span>
           </a>
         </div>
 
-        {/* Row 2: controls — stays within viewport */}
         <div className="mt-2 flex min-w-0 items-center justify-between gap-2">
           <div className="hidden items-center gap-0.5 sm:flex">
-            {socialLinks.map(({ icon: Icon, href, label }) => (
-              <a
-                key={label}
-                href={href}
-                aria-label={label}
-                className="rounded-xl p-2 transition-colors hover:bg-white/10 active:bg-white/20"
-              >
-                <Icon className="h-4 w-4" />
-              </a>
-            ))}
+            {socialLinks.map((link) => {
+              const Icon = iconMap[link.platform] || Share2;
+              return (
+                <a
+                  key={link.id}
+                  href={link.url}
+                  aria-label={link.platform}
+                  className="rounded-xl p-2 transition-colors hover:bg-white/10 active:bg-white/20"
+                >
+                  <Icon className="h-4 w-4" />
+                </a>
+              );
+            })}
           </div>
 
           <div className="flex min-w-0 flex-1 items-center justify-end gap-1.5 sm:gap-2 sm:flex-none">
@@ -77,8 +84,8 @@ export function TopBar() {
               size="sm"
               className="!h-8 shrink-0 !border-white/30 !bg-white/10 !px-2 !text-[10px] !text-white hover:!bg-white/20 sm:!h-9 sm:!px-3 sm:!text-xs"
             >
-              <span className="hidden sm:inline">{t.topBar.donorPortal}</span>
-              <span className="sm:hidden">{t.topBar.login}</span>
+              <span className="hidden sm:inline">{text(topbar.donorPortalLabel)}</span>
+              <span className="sm:hidden">{text(topbar.loginLabel)}</span>
             </Button>
           </div>
         </div>

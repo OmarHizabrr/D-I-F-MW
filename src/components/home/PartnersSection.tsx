@@ -1,29 +1,48 @@
 "use client";
 
+import Image from "next/image";
 import { Handshake } from "lucide-react";
-import { useLocale } from "@/context/LocaleContext";
+import { useSiteContent } from "@/context/SiteContentContext";
 import { SectionHeader } from "@/components/ui/SectionHeader";
 import { IconBox } from "@/components/ui/IconBox";
-import { partnersData } from "@/data/mock";
 
 export function PartnersSection() {
-  const { t } = useLocale();
+  const { partners, sectionTitles, text } = useSiteContent();
+  const items = partners.filter((p) => p.enabled).sort((a, b) => a.order - b.order);
 
   return (
     <section className="section-padding">
       <div className="container-dif">
-        <SectionHeader title={t.partners.title} subtitle={t.partners.subtitle} />
+        <SectionHeader
+          title={text(sectionTitles.partners)}
+          subtitle={text(sectionTitles.partnersSubtitle)}
+        />
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-6">
-          {partnersData.map((partner) => (
-            <div
-              key={partner}
+          {items.map((partner) => (
+            <a
+              key={partner.id}
+              href={partner.websiteUrl || "#"}
+              target={partner.websiteUrl ? "_blank" : undefined}
+              rel={partner.websiteUrl ? "noopener noreferrer" : undefined}
               className="dif-card flex flex-col items-center justify-center gap-3 p-4 text-center sm:p-5"
             >
-              <IconBox icon={Handshake} size="sm" variant="surface" />
+              {partner.logoUrl ? (
+                <div className="relative h-12 w-full">
+                  <Image
+                    src={partner.logoUrl}
+                    alt={partner.name}
+                    fill
+                    className="object-contain"
+                    unoptimized
+                  />
+                </div>
+              ) : (
+                <IconBox icon={Handshake} size="sm" variant="surface" />
+              )}
               <span className="text-xs font-semibold leading-snug text-muted-foreground sm:text-sm">
-                {partner}
+                {partner.name}
               </span>
-            </div>
+            </a>
           ))}
         </div>
       </div>

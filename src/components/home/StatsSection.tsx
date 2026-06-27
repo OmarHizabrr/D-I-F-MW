@@ -1,11 +1,10 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { useLocale } from "@/context/LocaleContext";
+import { useSiteContent } from "@/context/SiteContentContext";
 import { SectionHeader } from "@/components/ui/SectionHeader";
 import { Card } from "@/components/ui/Card";
 import { IconBox } from "@/components/ui/IconBox";
-import { statsData } from "@/data/mock";
 import { statIcons, type StatIconKey } from "@/lib/icons";
 
 function AnimatedNumber({ value }: { value: number }) {
@@ -39,18 +38,18 @@ function AnimatedNumber({ value }: { value: number }) {
 }
 
 export function StatsSection() {
-  const { t } = useLocale();
+  const { stats, sectionTitles, text } = useSiteContent();
 
   return (
     <section className="section-padding bg-surface">
       <div className="container-dif">
-        <SectionHeader title={t.stats.title} />
+        <SectionHeader title={text(sectionTitles.stats)} />
         <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 lg:grid-cols-6">
-          {statsData.map((stat, i) => {
-            const Icon = statIcons[stat.icon as StatIconKey];
+          {stats.map((stat, i) => {
+            const Icon = statIcons[stat.iconKey as StatIconKey] || statIcons.projects;
             return (
               <Card
-                key={stat.labelKey}
+                key={stat.id}
                 className="animate-count-up flex flex-col items-center text-center"
                 style={{ animationDelay: `${i * 100}ms` }}
               >
@@ -59,7 +58,7 @@ export function StatsSection() {
                   <AnimatedNumber value={stat.value} />
                 </p>
                 <p className="mt-1 text-[11px] leading-snug text-muted-foreground sm:text-xs md:text-sm">
-                  {t.stats[stat.labelKey]}
+                  {text(stat.label)}
                 </p>
               </Card>
             );

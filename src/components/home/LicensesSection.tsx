@@ -1,38 +1,45 @@
 "use client";
 
-import { FileText, Award, Stamp, BookOpen } from "lucide-react";
-import { useLocale } from "@/context/LocaleContext";
+import { useSiteContent } from "@/context/SiteContentContext";
 import { SectionHeader } from "@/components/ui/SectionHeader";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
-import { licenseItems } from "@/data/mock";
-
-const licenseIcons = {
-  registration: FileText,
-  licenses: Stamp,
-  endorsements: Award,
-  annualReports: BookOpen,
-};
+import { licenseIcons } from "@/lib/icons";
 
 export function LicensesSection() {
-  const { t } = useLocale();
+  const { licenses, sectionTitles, text } = useSiteContent();
+  const items = licenses.filter((l) => l.enabled).sort((a, b) => a.order - b.order);
 
   return (
     <section id="reports" className="section-padding">
       <div className="container-dif">
-        <SectionHeader title={t.licenses.title} subtitle={t.licenses.subtitle} />
+        <SectionHeader
+          title={text(sectionTitles.licenses)}
+          subtitle={text(sectionTitles.licensesSubtitle)}
+        />
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {licenseItems.map((key) => {
-            const Icon = licenseIcons[key];
+          {items.map((item) => {
+            const Icon = licenseIcons[item.iconKey] || licenseIcons.registration;
             return (
-              <Card key={key} className="text-center">
+              <Card key={item.id} className="text-center">
                 <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-3xl bg-brand-brown/10 text-brand-brown">
                   <Icon className="h-8 w-8" />
                 </div>
-                <h3 className="mb-3 font-bold">{t.licenses[key]}</h3>
-                <Button variant="outline" size="sm">
-                  PDF
-                </Button>
+                <h3 className="mb-3 font-bold">{text(item.title)}</h3>
+                {item.pdfUrl ? (
+                  <a
+                    href={item.pdfUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex h-9 items-center justify-center rounded-xl border-2 border-brand-green px-3.5 text-sm font-semibold text-brand-green transition-colors hover:bg-brand-green/10"
+                  >
+                    {text(sectionTitles.licensesPdf)}
+                  </a>
+                ) : (
+                  <Button variant="outline" size="sm" disabled>
+                    {text(sectionTitles.licensesPdf)}
+                  </Button>
+                )}
               </Card>
             );
           })}

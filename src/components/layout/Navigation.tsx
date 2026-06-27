@@ -4,24 +4,16 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Menu, X } from "lucide-react";
+import { useSiteContent } from "@/context/SiteContentContext";
 import { useLocale } from "@/context/LocaleContext";
 import { cn } from "@/lib/utils";
 
-const navKeys = [
-  "home",
-  "about",
-  "projects",
-  "programs",
-  "achievements",
-  "news",
-  "reports",
-  "media",
-  "contact",
-] as const;
-
 export function Navigation() {
-  const { t } = useLocale();
+  const { locale } = useLocale();
+  const { navItems, text } = useSiteContent();
   const [mobileOpen, setMobileOpen] = useState(false);
+
+  const items = navItems.filter((i) => i.enabled).sort((a, b) => a.order - b.order);
 
   useEffect(() => {
     document.body.style.overflow = mobileOpen ? "hidden" : "";
@@ -46,7 +38,7 @@ export function Navigation() {
           />
           <div className="min-w-0 overflow-hidden">
             <p className="truncate text-xs font-bold leading-tight text-brand-green-dark dark:text-brand-green sm:text-sm">
-              {t.locale === "ar" ? "مؤسسة التطوير والتنمية" : "D.I.F"}
+              {locale === "ar" ? "مؤسسة التطوير والتنمية" : "D.I.F"}
             </p>
             <p className="hidden truncate text-[10px] text-muted-foreground min-[480px]:block">
               Development & Investment Foundation
@@ -55,13 +47,13 @@ export function Navigation() {
         </Link>
 
         <nav className="hidden shrink-0 items-center gap-0.5 xl:flex">
-          {navKeys.map((key) => (
+          {items.map((item) => (
             <Link
-              key={key}
-              href={`#${key}`}
+              key={item.id}
+              href={item.href}
               className="rounded-xl px-2.5 py-2 text-sm font-medium text-foreground/80 transition-colors hover:bg-brand-green/10 hover:text-brand-green-dark dark:hover:text-brand-green"
             >
-              {t.nav[key]}
+              {text(item.label)}
             </Link>
           ))}
         </nav>
@@ -91,14 +83,14 @@ export function Navigation() {
             )}
           >
             <div className="container-dif flex flex-col gap-0.5 py-3 pb-safe">
-              {navKeys.map((key) => (
+              {items.map((item) => (
                 <Link
-                  key={key}
-                  href={`#${key}`}
+                  key={item.id}
+                  href={item.href}
                   onClick={() => setMobileOpen(false)}
                   className="rounded-2xl px-4 py-3.5 text-base font-medium transition-colors active:bg-brand-green/10 hover:bg-brand-green/10"
                 >
-                  {t.nav[key]}
+                  {text(item.label)}
                 </Link>
               ))}
             </div>

@@ -1,18 +1,22 @@
 "use client";
 
 import { useState } from "react";
-import { useLocale } from "@/context/LocaleContext";
+import Image from "next/image";
+import { useSiteContent } from "@/context/SiteContentContext";
 import { SectionHeader } from "@/components/ui/SectionHeader";
 import { Card, CardContent, CardFooter, CardTitle } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import { MediaPlaceholder } from "@/components/ui/MediaPlaceholder";
-import { ongoingProjectsData, getLocalized } from "@/data/mock";
 import { sectionIcons } from "@/lib/icons";
 
 export function OngoingProjectsSection() {
-  const { t, locale } = useLocale();
+  const { projects, sectionTitles, text } = useSiteContent();
   const [loadingId, setLoadingId] = useState<string | null>(null);
+
+  const ongoing = projects
+    .filter((p) => p.enabled && p.status === "ongoing")
+    .sort((a, b) => a.order - b.order);
 
   async function handleViewDetails(id: string) {
     setLoadingId(id);
@@ -23,24 +27,37 @@ export function OngoingProjectsSection() {
   return (
     <section id="projects" className="section-padding bg-surface">
       <div className="container-dif">
-        <SectionHeader title={t.ongoingProjects.title} subtitle={t.ongoingProjects.subtitle} />
+        <SectionHeader
+          title={text(sectionTitles.projects)}
+          subtitle={text(sectionTitles.projectsSubtitle)}
+        />
         <div className="grid gap-4 sm:gap-6 md:grid-cols-2">
-          {ongoingProjectsData.map((project) => (
+          {ongoing.map((project) => (
             <Card key={project.id} padding="none" className="overflow-hidden">
-              <MediaPlaceholder icon={sectionIcons.project} className="h-40 sm:h-48" />
+              {project.imageUrl ? (
+                <div className="relative h-40 sm:h-48">
+                  <Image
+                    src={project.imageUrl}
+                    alt={text(project.name)}
+                    fill
+                    className="object-cover"
+                    unoptimized
+                  />
+                </div>
+              ) : (
+                <MediaPlaceholder icon={sectionIcons.project} className="h-40 sm:h-48" />
+              )}
               <CardContent className="p-4 sm:p-5">
                 <div className="mb-2 flex items-start justify-between gap-2">
-                  <CardTitle className="text-base sm:text-lg">
-                    {getLocalized(project.name, locale)}
-                  </CardTitle>
-                  <Badge variant="outline">{project.id}</Badge>
+                  <CardTitle className="text-base sm:text-lg">{text(project.name)}</CardTitle>
+                  <Badge variant="outline">{project.code || project.id}</Badge>
                 </div>
                 <p className="text-sm text-muted-foreground">
-                  {t.ongoingProjects.country}: {getLocalized(project.country, locale)}
+                  {text(sectionTitles.projectsCountry)}: {text(project.country)}
                 </p>
                 <div className="mt-4">
                   <div className="mb-1.5 flex justify-between text-sm">
-                    <span>{t.ongoingProjects.progress}</span>
+                    <span>{text(sectionTitles.projectsProgress)}</span>
                     <span className="font-bold text-brand-green">{project.progress}%</span>
                   </div>
                   <div className="h-2.5 overflow-hidden rounded-full bg-border-subtle">
@@ -51,17 +68,17 @@ export function OngoingProjectsSection() {
                   </div>
                 </div>
                 <p className="mt-3 text-xs text-muted-foreground">
-                  {t.ongoingProjects.lastUpdate}: {project.lastUpdate}
+                  {text(sectionTitles.projectsLastUpdate)}: {project.lastUpdate}
                 </p>
                 <CardFooter className="mt-4 !p-0">
                   <Button
                     size="sm"
                     className="w-full sm:w-auto"
                     loading={loadingId === project.id}
-                    loadingText={t.common.loading}
+                    loadingText="..."
                     onClick={() => handleViewDetails(project.id)}
                   >
-                    {t.ongoingProjects.viewDetails}
+                    {text(sectionTitles.projectsViewDetails)}
                   </Button>
                 </CardFooter>
               </CardContent>
