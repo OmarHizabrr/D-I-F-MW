@@ -16,7 +16,7 @@ import {
   type Auth,
   type User,
 } from "firebase/auth";
-import { getFirebaseApp, isFirebaseConfigured } from "@/lib/firebase/client";
+import { getFirebaseApp, isFirebaseConfigured, logFirebaseEnvStatus } from "@/lib/firebase/client";
 import { logAuthError } from "@/lib/auth-errors";
 import { registerUser } from "@/services/seedService";
 
@@ -41,7 +41,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (!isFirebaseConfigured()) {
-      console.warn("[Auth] Firebase غير مهيّأ — تحقق من NEXT_PUBLIC_FIREBASE_*");
+      logFirebaseEnvStatus("Auth");
       return;
     }
 

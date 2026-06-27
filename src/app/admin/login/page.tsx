@@ -5,7 +5,11 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
 import { getAuthErrorMessage, logAuthError } from "@/lib/auth-errors";
-import { isFirebaseConfigured } from "@/lib/firebase/client";
+import {
+  getFirebaseEnvStatus,
+  isFirebaseConfigured,
+  logFirebaseEnvStatus,
+} from "@/lib/firebase/client";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
@@ -18,6 +22,12 @@ export default function AdminLoginPage() {
   const [password, setPassword] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const firebaseReady = isFirebaseConfigured();
+  const envStatus = getFirebaseEnvStatus();
+
+  useEffect(() => {
+    logFirebaseEnvStatus("Admin Login");
+  }, []);
 
   useEffect(() => {
     if (!loading && user) {
@@ -33,6 +43,7 @@ export default function AdminLoginPage() {
     console.log("[Admin Login] بدء المحاولة", {
       email,
       firebaseConfigured: isFirebaseConfigured(),
+      missing: envStatus.missing,
     });
 
     try {
@@ -40,7 +51,11 @@ export default function AdminLoginPage() {
       console.log("[Admin Login] اكتمل بنجاح — التوجيه إلى /admin");
       router.replace("/admin");
     } catch (err) {
-      logAuthError("Admin Login", err, { email, firebaseConfigured: isFirebaseConfigured() });
+      logAuthError("Admin Login", err, {
+        email,
+        firebaseConfigured: isFirebaseConfigured(),
+        missing: envStatus.missing,
+      });
       setError(getAuthErrorMessage(err));
     } finally {
       setSubmitting(false);
@@ -68,6 +83,23 @@ export default function AdminLoginPage() {
         </CardHeader>
 
         <CardContent>
+          {!firebaseReady && (
+            <div className="mb-4 rounded-xl border border-amber-500/40 bg-amber-500/10 px-4 py-3 text-sm text-amber-900 dark:text-amber-200">
+              <p className="font-semibold">Firebase غير مهيّأ على هذا السيرفر</p>
+              <p className="mt-1 text-xs leading-relaxed opacity-90">
+                أضف متغيرات <code className="font-mono">NEXT_PUBLIC_FIREBASE_*</code> في Vercel
+                → Settings → Environment Variables (Production)، ثم اضغط Redeploy.
+              </p>
+              {envStatus.missing.length > 0 && (
+                <ul className="mt-2 list-inside list-disc text-xs opacity-90">
+                  {envStatus.missing.map((key) => (
+                    <li key={key}>{key}</li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          )}
+
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
             <Input
               label="البريد الإلكتروني"
@@ -78,6 +110,7 @@ export default function AdminLoginPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="admin@example.com"
+              disabled={!firebaseReady}
             />
 
             <Input
@@ -88,6 +121,7 @@ export default function AdminLoginPage() {
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              disabled={!firebaseReady}
             />
 
             {error && (
@@ -96,7 +130,13 @@ export default function AdminLoginPage() {
               </p>
             )}
 
-            <Button type="submit" fullWidth loading={submitting} loadingText="جاري الدخول...">
+            <Button
+              type="submit"
+              fullWidth
+              loading={submitting}
+              loadingText="جاري الدخول..."
+              disabled={!firebaseReady}
+            >
               تسجيل الدخول
             </Button>
           </form>
