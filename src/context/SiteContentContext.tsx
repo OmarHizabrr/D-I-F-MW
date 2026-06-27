@@ -8,7 +8,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { query, orderBy, type QuerySnapshot, type DocumentSnapshot } from "firebase/firestore";
+import { query, orderBy, type QuerySnapshot } from "firebase/firestore";
 import FirestoreApi from "@/services/firestoreApi";
 import {
   getDefaultFooter,
@@ -23,7 +23,6 @@ import {
   getDefaultPartners,
   getDefaultPrograms,
   getDefaultProjects,
-  getDefaultSiteConfig,
   getDefaultStats,
   getDefaultTestimonials,
   getDefaultTopbar,
@@ -80,7 +79,7 @@ type SiteContentState = {
 };
 
 const defaults: SiteContentState = {
-  loading: true,
+  loading: isFirebaseConfigured(),
   seeded: false,
   topbar: getDefaultTopbar(),
   navItems: getDefaultNavItems(),
@@ -119,10 +118,7 @@ export function SiteContentProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<SiteContentState>(defaults);
 
   useEffect(() => {
-    if (!isFirebaseConfigured()) {
-      setState((prev) => ({ ...prev, loading: false }));
-      return;
-    }
+    if (!isFirebaseConfigured()) return;
 
     const unsubs: (() => void)[] = [];
 
