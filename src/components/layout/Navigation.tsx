@@ -31,9 +31,12 @@ export function Navigation() {
   }, [mobileOpen]);
 
   return (
-    <header className="sticky top-0 z-40 border-b border-border-subtle bg-nav-bg/95 text-nav-fg backdrop-blur-md">
-      <div className="container-dif flex h-14 items-center justify-between gap-3 sm:h-16 md:h-[4.5rem]">
-        <Link href="/" className="flex min-w-0 shrink items-center gap-2 sm:gap-3">
+    <header className="relative sticky top-0 z-40 w-full max-w-[100vw] overflow-hidden border-b border-border-subtle bg-nav-bg/95 text-nav-fg backdrop-blur-md">
+      <div className="container-dif flex h-14 min-w-0 items-center gap-2 sm:h-16 md:h-[4.5rem]">
+        <Link
+          href="/"
+          className="flex min-w-0 flex-1 items-center gap-2 overflow-hidden sm:gap-3"
+        >
           <Image
             src="/Image/login.png"
             alt="D.I.F Logo"
@@ -41,7 +44,7 @@ export function Navigation() {
             height={48}
             className="h-9 w-9 shrink-0 rounded-full sm:h-10 sm:w-10 md:h-12 md:w-12"
           />
-          <div className="min-w-0 truncate">
+          <div className="min-w-0 overflow-hidden">
             <p className="truncate text-xs font-bold leading-tight text-brand-green-dark dark:text-brand-green sm:text-sm">
               {t.locale === "ar" ? "مؤسسة التطوير والتنمية" : "D.I.F"}
             </p>
@@ -51,7 +54,7 @@ export function Navigation() {
           </div>
         </Link>
 
-        <nav className="hidden items-center gap-0.5 xl:flex">
+        <nav className="hidden shrink-0 items-center gap-0.5 xl:flex">
           {navKeys.map((key) => (
             <Link
               key={key}
@@ -65,7 +68,7 @@ export function Navigation() {
 
         <button
           type="button"
-          className="touch-target rounded-2xl p-2 xl:hidden"
+          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl transition-colors hover:bg-brand-green/10 active:bg-brand-green/15 xl:hidden"
           onClick={() => setMobileOpen(!mobileOpen)}
           aria-label={mobileOpen ? "Close menu" : "Open menu"}
           aria-expanded={mobileOpen}
@@ -74,35 +77,34 @@ export function Navigation() {
         </button>
       </div>
 
-      {/* Mobile overlay menu */}
-      <div
-        className={cn(
-          "fixed inset-0 top-14 z-30 bg-black/40 transition-opacity xl:hidden sm:top-16",
-          mobileOpen ? "opacity-100" : "pointer-events-none opacity-0"
-        )}
-        onClick={() => setMobileOpen(false)}
-        aria-hidden={!mobileOpen}
-      />
-
-      <div
-        className={cn(
-          "fixed inset-x-0 top-14 z-40 max-h-[calc(100dvh-3.5rem)] overflow-y-auto border-b border-border-subtle bg-nav-bg shadow-lg transition-transform duration-300 xl:hidden sm:top-16",
-          mobileOpen ? "translate-y-0" : "-translate-y-full pointer-events-none"
-        )}
-      >
-        <nav className="container-dif flex flex-col gap-0.5 py-3 pb-safe">
-          {navKeys.map((key) => (
-            <Link
-              key={key}
-              href={`#${key}`}
-              onClick={() => setMobileOpen(false)}
-              className="touch-target rounded-2xl px-4 py-3.5 text-base font-medium transition-colors active:bg-brand-green/10 hover:bg-brand-green/10"
-            >
-              {t.nav[key]}
-            </Link>
-          ))}
-        </nav>
-      </div>
+      {mobileOpen && (
+        <>
+          <div
+            className="fixed inset-0 z-30 bg-black/40 xl:hidden"
+            onClick={() => setMobileOpen(false)}
+            aria-hidden="true"
+          />
+          <nav
+            className={cn(
+              "absolute inset-x-0 top-full z-40 max-h-[calc(100dvh-3.5rem)] overflow-y-auto",
+              "border-b border-border-subtle bg-nav-bg shadow-lg xl:hidden sm:max-h-[calc(100dvh-4rem)]"
+            )}
+          >
+            <div className="container-dif flex flex-col gap-0.5 py-3 pb-safe">
+              {navKeys.map((key) => (
+                <Link
+                  key={key}
+                  href={`#${key}`}
+                  onClick={() => setMobileOpen(false)}
+                  className="rounded-2xl px-4 py-3.5 text-base font-medium transition-colors active:bg-brand-green/10 hover:bg-brand-green/10"
+                >
+                  {t.nav[key]}
+                </Link>
+              ))}
+            </div>
+          </nav>
+        </>
+      )}
     </header>
   );
 }

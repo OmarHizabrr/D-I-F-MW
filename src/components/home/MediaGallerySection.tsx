@@ -23,8 +23,8 @@ export function MediaGallerySection() {
         <SectionHeader title={t.mediaGallery.title} subtitle={t.mediaGallery.subtitle} />
       </div>
 
-      <div className="relative mt-4">
-        <div className="flex w-max animate-marquee gap-3 px-3 sm:gap-4 sm:px-4">
+      <div className="relative mt-4 w-full overflow-hidden">
+        <div className="flex w-max max-w-none animate-marquee gap-3 pe-3 ps-3 sm:gap-4 sm:pe-4 sm:ps-4">
           {[...mediaItems, ...mediaItems].map((item, i) => {
             const Icon = sectionIcons[item.type];
             const labelKey = mediaLabels[item.type];

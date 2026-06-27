@@ -50,12 +50,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ar" dir="rtl" suppressHydrationWarning className={`${cairo.variable} h-full`}>
-      <body className="min-h-full flex flex-col overflow-x-hidden antialiased">
+    <html lang="ar" dir="rtl" suppressHydrationWarning className={`${cairo.variable} h-full overflow-x-hidden`}>
+      <body className="min-h-full flex w-full max-w-[100vw] flex-col overflow-x-hidden antialiased">
         <Providers>
           <TopBar />
           <Navigation />
-          <main className="flex-1">{children}</main>
+          <main className="w-full min-w-0 flex-1 overflow-x-hidden">{children}</main>
           <Footer />
         </Providers>
       </body>

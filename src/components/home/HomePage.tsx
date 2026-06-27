@@ -17,7 +17,7 @@ import { ProjectsTableSection } from "./ProjectsTableSection";
 
 export function HomePage() {
   return (
-    <>
+    <div className="w-full min-w-0 overflow-x-hidden">
       <HeroSection />
       <StatsSection />
       <ProgramsSection />
@@ -32,6 +32,6 @@ export function HomePage() {
       <ProjectMapSection />
       <ProjectsTableSection />
       <NewsletterSection />
-    </>
+    </div>
   );
 }
