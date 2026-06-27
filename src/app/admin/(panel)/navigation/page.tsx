@@ -1,14 +1,17 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
-import { Pencil, Plus, Trash2 } from "lucide-react";
+import { Plus } from "lucide-react";
 import FirestoreApi from "@/services/firestoreApi";
 import { useAuth } from "@/context/AuthContext";
+import { useAdminCrud } from "@/hooks/useAdminCrud";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
+import { AdminFormDialog } from "@/components/admin/AdminFormDialog";
+import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
+import { AdminItemList } from "@/components/admin/AdminItemList";
 import { LocalizedInput } from "@/components/admin/LocalizedInput";
+import { pickAdminLabel } from "@/lib/admin/pickAdminLabel";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
-import { Card, CardContent, CardTitle } from "@/components/ui/Card";
 import { Spinner } from "@/components/ui/Spinner";
 import type { NavItem } from "@/types/cms";
 import { emptyLocalized } from "@/types/cms";
@@ -21,49 +24,23 @@ function newItem(order: number): NavItem {
 
 export default function AdminNavigationPage() {
   const { user } = useAuth();
-  const [items, setItems] = useState<NavItem[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [editing, setEditing] = useState<NavItem | null>(null);
-  const [saving, setSaving] = useState(false);
-  const [deletingId, setDeletingId] = useState<string | null>(null);
-
-  const loadItems = useCallback(async () => {
-    const docs = await api.getOrderedDocuments(api.getNavItemsCollection());
-    setItems(docs.map((d) => api.docToData<NavItem>(d)));
-    setLoading(false);
-  }, []);
-
-  useEffect(() => {
-    void loadItems();
-  }, [loadItems]);
-
-  async function handleSave() {
-    if (!editing) return;
-    setSaving(true);
-    try {
-      const id = editing.id || api.getNewId("nav");
-      await api.setData({
-        docRef: api.getNavItemDoc(id),
-        data: { ...editing, id },
-        userData: { uid: user?.uid, displayName: user?.email ?? undefined },
-      });
-      setEditing(null);
-      await loadItems();
-    } finally {
-      setSaving(false);
-    }
-  }
-
-  async function handleDelete(id: string) {
-    if (!confirm("هل أنت متأكد من الحذف؟")) return;
-    setDeletingId(id);
-    try {
-      await api.deleteData(api.getNavItemDoc(id));
-      await loadItems();
-    } finally {
-      setDeletingId(null);
-    }
-  }
+  const {
+    items,
+    loading,
+    editing,
+    setEditing,
+    saving,
+    deletingId,
+    deleteTarget,
+    setDeleteTarget,
+    handleSave,
+    handleDeleteConfirm,
+  } = useAdminCrud<NavItem>({
+    getCollection: () => api.getNavItemsCollection(),
+    getDocRef: (id) => api.getNavItemDoc(id),
+    newIdPrefix: "nav",
+    user: user ? { uid: user.uid, displayName: user.email ?? undefined } : null,
+  });
 
   if (loading) {
     return (
@@ -86,10 +63,15 @@ export default function AdminNavigationPage() {
         }
       />
 
-      {editing && (
-        <Card className="mb-6" padding="lg">
-          <CardTitle className="mb-4">{editing.id ? "تعديل رابط" : "رابط جديد"}</CardTitle>
-          <CardContent className="flex flex-col gap-4">
+      <AdminFormDialog
+        open={!!editing}
+        onClose={() => setEditing(null)}
+        title={editing?.id ? "تعديل رابط" : "رابط جديد"}
+        onSave={handleSave}
+        saving={saving}
+      >
+        {editing && (
+          <>
             <LocalizedInput
               label="التسمية"
               value={editing.label}
@@ -117,45 +99,27 @@ export default function AdminNavigationPage() {
               />
               مفعّل
             </label>
-            <div className="flex gap-2">
-              <Button loading={saving} onClick={handleSave}>
-                حفظ
-              </Button>
-              <Button variant="secondary" onClick={() => setEditing(null)}>
-                إلغاء
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      )}
+          </>
+        )}
+      </AdminFormDialog>
 
-      <div className="space-y-3">
-        {items.map((item) => (
-          <Card key={item.id} hover={false} padding="md">
-            <div className="flex items-center justify-between gap-4">
-              <div>
-                <p className="font-semibold">{item.label.ar || item.label.en}</p>
-                <p className="text-sm text-muted-foreground">
-                  {item.href} · ترتيب {item.order}
-                </p>
-              </div>
-              <div className="flex gap-2">
-                <Button variant="secondary" size="icon" onClick={() => setEditing(item)}>
-                  <Pencil className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant="destructive"
-                  size="icon"
-                  loading={deletingId === item.id}
-                  onClick={() => handleDelete(item.id)}
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-          </Card>
-        ))}
-      </div>
+      <ConfirmDialog
+        open={!!deleteTarget}
+        onClose={() => setDeleteTarget(null)}
+        onConfirm={handleDeleteConfirm}
+        loading={!!deletingId}
+        message={`هل أنت متأكد من حذف «${pickAdminLabel(deleteTarget?.label)}»؟`}
+      />
+
+      <AdminItemList
+        items={items}
+        emptyMessage="لا توجد روابط بعد"
+        deletingId={deletingId}
+        onEdit={setEditing}
+        onDelete={setDeleteTarget}
+        renderTitle={(item) => pickAdminLabel(item.label)}
+        renderSubtitle={(item) => `${item.href} · ترتيب ${item.order}`}
+      />
     </div>
   );
 }

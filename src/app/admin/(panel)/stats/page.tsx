@@ -1,14 +1,17 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
-import { Pencil, Plus, Trash2 } from "lucide-react";
+import { Plus } from "lucide-react";
 import FirestoreApi from "@/services/firestoreApi";
 import { useAuth } from "@/context/AuthContext";
+import { useAdminCrud } from "@/hooks/useAdminCrud";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
+import { AdminFormDialog } from "@/components/admin/AdminFormDialog";
+import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
+import { AdminItemList } from "@/components/admin/AdminItemList";
 import { LocalizedInput } from "@/components/admin/LocalizedInput";
+import { pickAdminLabel } from "@/lib/admin/pickAdminLabel";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
-import { Card, CardContent, CardTitle } from "@/components/ui/Card";
 import { Spinner } from "@/components/ui/Spinner";
 import type { StatItem } from "@/types/cms";
 import { emptyLocalized } from "@/types/cms";
@@ -28,50 +31,23 @@ function newStat(order: number): StatItem {
 
 export default function AdminStatsPage() {
   const { user } = useAuth();
-  const [items, setItems] = useState<StatItem[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [editing, setEditing] = useState<StatItem | null>(null);
-  const [saving, setSaving] = useState(false);
-  const [deletingId, setDeletingId] = useState<string | null>(null);
-
-  const loadItems = useCallback(async () => {
-    const docs = await api.getOrderedDocuments(api.getStatsCollection());
-    setItems(docs.map((d) => api.docToData<StatItem>(d)));
-    setLoading(false);
-  }, []);
-
-  useEffect(() => {
-    void loadItems();
-  }, [loadItems]);
-
-  async function handleSave() {
-    if (!editing) return;
-    setSaving(true);
-    try {
-      const id = editing.id || api.getNewId("stats");
-      const payload = { ...editing, id };
-      await api.setData({
-        docRef: api.getStatDoc(id),
-        data: payload,
-        userData: { uid: user?.uid, displayName: user?.email ?? undefined },
-      });
-      setEditing(null);
-      await loadItems();
-    } finally {
-      setSaving(false);
-    }
-  }
-
-  async function handleDelete(id: string) {
-    if (!confirm("هل أنت متأكد من حذف هذا العنصر؟")) return;
-    setDeletingId(id);
-    try {
-      await api.deleteData(api.getStatDoc(id));
-      await loadItems();
-    } finally {
-      setDeletingId(null);
-    }
-  }
+  const {
+    items,
+    loading,
+    editing,
+    setEditing,
+    saving,
+    deletingId,
+    deleteTarget,
+    setDeleteTarget,
+    handleSave,
+    handleDeleteConfirm,
+  } = useAdminCrud<StatItem>({
+    getCollection: () => api.getStatsCollection(),
+    getDocRef: (id) => api.getStatDoc(id),
+    newIdPrefix: "stats",
+    user: user ? { uid: user.uid, displayName: user.email ?? undefined } : null,
+  });
 
   if (loading) {
     return (
@@ -94,12 +70,15 @@ export default function AdminStatsPage() {
         }
       />
 
-      {editing && (
-        <Card className="mb-6" padding="lg">
-          <CardTitle className="mb-4">
-            {editing.id ? "تعديل إحصائية" : "إحصائية جديدة"}
-          </CardTitle>
-          <CardContent className="flex flex-col gap-4">
+      <AdminFormDialog
+        open={!!editing}
+        onClose={() => setEditing(null)}
+        title={editing?.id ? "تعديل إحصائية" : "إحصائية جديدة"}
+        onSave={handleSave}
+        saving={saving}
+      >
+        {editing && (
+          <>
             <div className="grid gap-4 sm:grid-cols-3">
               <Input
                 label="مفتاح الأيقونة"
@@ -120,13 +99,11 @@ export default function AdminStatsPage() {
                 onChange={(e) => setEditing({ ...editing, order: Number(e.target.value) })}
               />
             </div>
-
             <LocalizedInput
               label="التسمية"
               value={editing.label}
               onChange={(label) => setEditing({ ...editing, label })}
             />
-
             <label className="flex items-center gap-2 text-sm">
               <input
                 type="checkbox"
@@ -136,61 +113,29 @@ export default function AdminStatsPage() {
               />
               مفعّل
             </label>
-
-            <div className="flex gap-2">
-              <Button loading={saving} loadingText="جاري الحفظ..." onClick={handleSave}>
-                حفظ
-              </Button>
-              <Button variant="secondary" onClick={() => setEditing(null)}>
-                إلغاء
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      <div className="space-y-3">
-        {items.length === 0 ? (
-          <Card padding="lg">
-            <p className="text-center text-muted-foreground">لا توجد إحصائيات بعد</p>
-          </Card>
-        ) : (
-          items.map((item) => (
-            <Card key={item.id} hover={false} padding="md">
-              <div className="flex items-center justify-between gap-4">
-                <div className="min-w-0 flex-1">
-                  <p className="font-semibold text-foreground">
-                    {item.label.ar || item.label.en || "—"}
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    {item.value} · {item.iconKey} · ترتيب {item.order}
-                    {!item.enabled && " · معطّل"}
-                  </p>
-                </div>
-                <div className="flex shrink-0 gap-2">
-                  <Button
-                    variant="secondary"
-                    size="icon"
-                    onClick={() => setEditing(item)}
-                    aria-label="تعديل"
-                  >
-                    <Pencil className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="destructive"
-                    size="icon"
-                    loading={deletingId === item.id}
-                    onClick={() => handleDelete(item.id)}
-                    aria-label="حذف"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-            </Card>
-          ))
+          </>
         )}
-      </div>
+      </AdminFormDialog>
+
+      <ConfirmDialog
+        open={!!deleteTarget}
+        onClose={() => setDeleteTarget(null)}
+        onConfirm={handleDeleteConfirm}
+        loading={!!deletingId}
+        message={`هل أنت متأكد من حذف «${pickAdminLabel(deleteTarget?.label)}»؟`}
+      />
+
+      <AdminItemList
+        items={items}
+        emptyMessage="لا توجد إحصائيات بعد"
+        deletingId={deletingId}
+        onEdit={setEditing}
+        onDelete={setDeleteTarget}
+        renderTitle={(item) => pickAdminLabel(item.label)}
+        renderSubtitle={(item) =>
+          `${item.value} · ${item.iconKey} · ترتيب ${item.order}${!item.enabled ? " · معطّل" : ""}`
+        }
+      />
     </div>
   );
 }

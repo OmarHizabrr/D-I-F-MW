@@ -1,14 +1,18 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
-import { Pencil, Plus, Trash2 } from "lucide-react";
+import { Plus } from "lucide-react";
 import FirestoreApi from "@/services/firestoreApi";
 import { useAuth } from "@/context/AuthContext";
+import { useAdminCrud } from "@/hooks/useAdminCrud";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
+import { AdminFormDialog } from "@/components/admin/AdminFormDialog";
+import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
+import { AdminItemList } from "@/components/admin/AdminItemList";
 import { LocalizedInput } from "@/components/admin/LocalizedInput";
+import { pickAdminLabel } from "@/lib/admin/pickAdminLabel";
 import { Input } from "@/components/ui/Input";
+import { RangeSlider } from "@/components/ui/RangeSlider";
 import { Button } from "@/components/ui/Button";
-import { Card, CardContent, CardTitle } from "@/components/ui/Card";
 import { Spinner } from "@/components/ui/Spinner";
 import type { MapPointItem } from "@/types/cms";
 import { emptyLocalized } from "@/types/cms";
@@ -32,49 +36,23 @@ function newPoint(order: number): MapPointItem {
 
 export default function AdminMapPage() {
   const { user } = useAuth();
-  const [items, setItems] = useState<MapPointItem[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [editing, setEditing] = useState<MapPointItem | null>(null);
-  const [saving, setSaving] = useState(false);
-  const [deletingId, setDeletingId] = useState<string | null>(null);
-
-  const loadItems = useCallback(async () => {
-    const docs = await api.getOrderedDocuments(api.getMapPointsCollection());
-    setItems(docs.map((d) => api.docToData<MapPointItem>(d)));
-    setLoading(false);
-  }, []);
-
-  useEffect(() => {
-    void loadItems();
-  }, [loadItems]);
-
-  async function handleSave() {
-    if (!editing) return;
-    setSaving(true);
-    try {
-      const id = editing.id || api.getNewId("map_points");
-      await api.setData({
-        docRef: api.getMapPointDoc(id),
-        data: { ...editing, id },
-        userData: { uid: user?.uid, displayName: user?.email ?? undefined },
-      });
-      setEditing(null);
-      await loadItems();
-    } finally {
-      setSaving(false);
-    }
-  }
-
-  async function handleDelete(id: string) {
-    if (!confirm("هل أنت متأكد من الحذف؟")) return;
-    setDeletingId(id);
-    try {
-      await api.deleteData(api.getMapPointDoc(id));
-      await loadItems();
-    } finally {
-      setDeletingId(null);
-    }
-  }
+  const {
+    items,
+    loading,
+    editing,
+    setEditing,
+    saving,
+    deletingId,
+    deleteTarget,
+    setDeleteTarget,
+    handleSave,
+    handleDeleteConfirm,
+  } = useAdminCrud<MapPointItem>({
+    getCollection: () => api.getMapPointsCollection(),
+    getDocRef: (id) => api.getMapPointDoc(id),
+    newIdPrefix: "map_points",
+    user: user ? { uid: user.uid, displayName: user.email ?? undefined } : null,
+  });
 
   if (loading) {
     return (
@@ -97,10 +75,15 @@ export default function AdminMapPage() {
         }
       />
 
-      {editing && (
-        <Card className="mb-6" padding="lg">
-          <CardTitle className="mb-4">{editing.id ? "تعديل نقطة" : "نقطة جديدة"}</CardTitle>
-          <CardContent className="flex flex-col gap-4">
+      <AdminFormDialog
+        open={!!editing}
+        onClose={() => setEditing(null)}
+        title={editing?.id ? "تعديل نقطة" : "نقطة جديدة"}
+        onSave={handleSave}
+        saving={saving}
+      >
+        {editing && (
+          <>
             <LocalizedInput
               label="اسم المشروع"
               value={editing.name}
@@ -111,7 +94,7 @@ export default function AdminMapPage() {
               value={editing.country}
               onChange={(country) => setEditing({ ...editing, country })}
             />
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="grid gap-4 sm:grid-cols-2">
               <Input
                 label="Latitude"
                 type="number"
@@ -126,65 +109,46 @@ export default function AdminMapPage() {
                 value={editing.lng}
                 onChange={(e) => setEditing({ ...editing, lng: Number(e.target.value) })}
               />
-              <Input
-                label="موقع X %"
-                type="number"
-                min={0}
-                max={100}
-                value={editing.mapX}
-                onChange={(e) => setEditing({ ...editing, mapX: Number(e.target.value) })}
-              />
-              <Input
-                label="موقع Y %"
-                type="number"
-                min={0}
-                max={100}
-                value={editing.mapY}
-                onChange={(e) => setEditing({ ...editing, mapY: Number(e.target.value) })}
-              />
             </div>
+            <RangeSlider
+              label="موقع X على الخريطة"
+              value={editing.mapX}
+              onChange={(mapX) => setEditing({ ...editing, mapX })}
+            />
+            <RangeSlider
+              label="موقع Y على الخريطة"
+              value={editing.mapY}
+              onChange={(mapY) => setEditing({ ...editing, mapY })}
+            />
             <Input
               label="معرّف المشروع (اختياري)"
               dir="ltr"
               value={editing.projectId}
               onChange={(e) => setEditing({ ...editing, projectId: e.target.value })}
             />
-            <div className="flex gap-2">
-              <Button loading={saving} onClick={handleSave}>
-                حفظ
-              </Button>
-              <Button variant="secondary" onClick={() => setEditing(null)}>
-                إلغاء
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      )}
+          </>
+        )}
+      </AdminFormDialog>
 
-      <div className="space-y-3">
-        {items.map((item) => (
-          <Card key={item.id} hover={false} padding="md">
-            <div className="flex items-center justify-between gap-4">
-              <p className="font-semibold">
-                {item.name.ar || item.name.en} · ({item.mapX}%, {item.mapY}%)
-              </p>
-              <div className="flex gap-2">
-                <Button variant="secondary" size="icon" onClick={() => setEditing(item)}>
-                  <Pencil className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant="destructive"
-                  size="icon"
-                  loading={deletingId === item.id}
-                  onClick={() => handleDelete(item.id)}
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-          </Card>
-        ))}
-      </div>
+      <ConfirmDialog
+        open={!!deleteTarget}
+        onClose={() => setDeleteTarget(null)}
+        onConfirm={handleDeleteConfirm}
+        loading={!!deletingId}
+        message={`هل أنت متأكد من حذف «${pickAdminLabel(deleteTarget?.name)}»؟`}
+      />
+
+      <AdminItemList
+        items={items}
+        emptyMessage="لا توجد نقاط على الخريطة بعد"
+        deletingId={deletingId}
+        onEdit={setEditing}
+        onDelete={setDeleteTarget}
+        renderTitle={(item) => pickAdminLabel(item.name)}
+        renderSubtitle={(item) =>
+          `${pickAdminLabel(item.country)} · (${item.mapX}%, ${item.mapY}%)`
+        }
+      />
     </div>
   );
 }

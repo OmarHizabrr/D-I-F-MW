@@ -1,16 +1,20 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
-import { Pencil, Plus, Trash2 } from "lucide-react";
+import { Plus } from "lucide-react";
 import FirestoreApi from "@/services/firestoreApi";
 import { useAuth } from "@/context/AuthContext";
+import { useAdminCrud } from "@/hooks/useAdminCrud";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
+import { AdminFormDialog } from "@/components/admin/AdminFormDialog";
+import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
+import { AdminItemList } from "@/components/admin/AdminItemList";
 import { LocalizedInput } from "@/components/admin/LocalizedInput";
 import { FileUploadField } from "@/components/admin/FileUploadField";
+import { pickAdminLabel } from "@/lib/admin/pickAdminLabel";
 import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
+import { RangeSlider } from "@/components/ui/RangeSlider";
 import { Button } from "@/components/ui/Button";
-import { Card, CardContent, CardTitle } from "@/components/ui/Card";
 import { Spinner } from "@/components/ui/Spinner";
 import type { ProjectItem, ProjectStatus } from "@/types/cms";
 import { emptyLocalized } from "@/types/cms";
@@ -45,50 +49,23 @@ function newProject(order: number): ProjectItem {
 
 export default function AdminProjectsPage() {
   const { user } = useAuth();
-  const [items, setItems] = useState<ProjectItem[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [editing, setEditing] = useState<ProjectItem | null>(null);
-  const [saving, setSaving] = useState(false);
-  const [deletingId, setDeletingId] = useState<string | null>(null);
-
-  const loadItems = useCallback(async () => {
-    const docs = await api.getOrderedDocuments(api.getProjectsCollection());
-    setItems(docs.map((d) => api.docToData<ProjectItem>(d)));
-    setLoading(false);
-  }, []);
-
-  useEffect(() => {
-    void loadItems();
-  }, [loadItems]);
-
-  async function handleSave() {
-    if (!editing) return;
-    setSaving(true);
-    try {
-      const id = editing.id || api.getNewId("projects");
-      const payload = { ...editing, id };
-      await api.setData({
-        docRef: api.getProjectDoc(id),
-        data: payload,
-        userData: { uid: user?.uid, displayName: user?.email ?? undefined },
-      });
-      setEditing(null);
-      await loadItems();
-    } finally {
-      setSaving(false);
-    }
-  }
-
-  async function handleDelete(id: string) {
-    if (!confirm("هل أنت متأكد من حذف هذا المشروع؟")) return;
-    setDeletingId(id);
-    try {
-      await api.deleteData(api.getProjectDoc(id));
-      await loadItems();
-    } finally {
-      setDeletingId(null);
-    }
-  }
+  const {
+    items,
+    loading,
+    editing,
+    setEditing,
+    saving,
+    deletingId,
+    deleteTarget,
+    setDeleteTarget,
+    handleSave,
+    handleDeleteConfirm,
+  } = useAdminCrud<ProjectItem>({
+    getCollection: () => api.getProjectsCollection(),
+    getDocRef: (id) => api.getProjectDoc(id),
+    newIdPrefix: "projects",
+    user: user ? { uid: user.uid, displayName: user.email ?? undefined } : null,
+  });
 
   if (loading) {
     return (
@@ -111,12 +88,16 @@ export default function AdminProjectsPage() {
         }
       />
 
-      {editing && (
-        <Card className="mb-6" padding="lg">
-          <CardTitle className="mb-4">
-            {editing.id ? "تعديل مشروع" : "مشروع جديد"}
-          </CardTitle>
-          <CardContent className="flex flex-col gap-4">
+      <AdminFormDialog
+        open={!!editing}
+        onClose={() => setEditing(null)}
+        title={editing?.id ? "تعديل مشروع" : "مشروع جديد"}
+        onSave={handleSave}
+        saving={saving}
+        size="full"
+      >
+        {editing && (
+          <>
             <div className="grid gap-4 sm:grid-cols-2">
               <Input
                 label="رمز المشروع"
@@ -143,20 +124,12 @@ export default function AdminProjectsPage() {
               onChange={(country) => setEditing({ ...editing, country })}
             />
 
-            <div className="grid gap-4 sm:grid-cols-3">
+            <div className="grid gap-4 sm:grid-cols-2">
               <Input
                 label="معرّف البرنامج"
                 dir="ltr"
                 value={editing.programId}
                 onChange={(e) => setEditing({ ...editing, programId: e.target.value })}
-              />
-              <Input
-                label="نسبة الإنجاز %"
-                type="number"
-                min={0}
-                max={100}
-                value={editing.progress}
-                onChange={(e) => setEditing({ ...editing, progress: Number(e.target.value) })}
               />
               <Select
                 label="الحالة"
@@ -165,6 +138,13 @@ export default function AdminProjectsPage() {
                 options={statusOptions}
               />
             </div>
+
+            <RangeSlider
+              label="نسبة الإنجاز"
+              value={editing.progress}
+              onChange={(progress) => setEditing({ ...editing, progress })}
+              hint="اسحب الشريط لتعديل نسبة الإنجاز"
+            />
 
             <div className="grid gap-4 sm:grid-cols-2">
               <Input
@@ -215,67 +195,40 @@ export default function AdminProjectsPage() {
                 مفعّل
               </label>
             </div>
-
-            <div className="flex gap-2">
-              <Button loading={saving} loadingText="جاري الحفظ..." onClick={handleSave}>
-                حفظ
-              </Button>
-              <Button variant="secondary" onClick={() => setEditing(null)}>
-                إلغاء
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      <div className="space-y-3">
-        {items.length === 0 ? (
-          <Card padding="lg">
-            <p className="text-center text-muted-foreground">لا توجد مشاريع بعد</p>
-          </Card>
-        ) : (
-          items.map((item) => (
-            <Card key={item.id} hover={false} padding="md">
-              <div className="flex items-center justify-between gap-4">
-                <div className="min-w-0 flex-1">
-                  <p className="font-semibold text-foreground">
-                    {item.name.ar || item.name.en || "—"}
-                    {item.code && (
-                      <span className="ms-2 text-xs font-normal text-muted-foreground">
-                        ({item.code})
-                      </span>
-                    )}
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    {item.country.ar} · {item.city} · {item.progress}% ·{" "}
-                    {statusOptions.find((s) => s.value === item.status)?.label}
-                    {!item.enabled && " · معطّل"}
-                  </p>
-                </div>
-                <div className="flex shrink-0 gap-2">
-                  <Button
-                    variant="secondary"
-                    size="icon"
-                    onClick={() => setEditing(item)}
-                    aria-label="تعديل"
-                  >
-                    <Pencil className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="destructive"
-                    size="icon"
-                    loading={deletingId === item.id}
-                    onClick={() => handleDelete(item.id)}
-                    aria-label="حذف"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-            </Card>
-          ))
+          </>
         )}
-      </div>
+      </AdminFormDialog>
+
+      <ConfirmDialog
+        open={!!deleteTarget}
+        onClose={() => setDeleteTarget(null)}
+        onConfirm={handleDeleteConfirm}
+        loading={!!deletingId}
+        message={`هل أنت متأكد من حذف «${pickAdminLabel(deleteTarget?.name)}»؟ لا يمكن التراجع.`}
+      />
+
+      <AdminItemList
+        items={items}
+        emptyMessage="لا توجد مشاريع بعد"
+        deletingId={deletingId}
+        onEdit={setEditing}
+        onDelete={setDeleteTarget}
+        renderTitle={(item) => (
+          <>
+            {pickAdminLabel(item.name)}
+            {item.code && (
+              <span className="ms-2 text-xs font-normal text-muted-foreground">({item.code})</span>
+            )}
+          </>
+        )}
+        renderSubtitle={(item) => (
+          <>
+            {pickAdminLabel(item.country)} · {item.city} · {item.progress}% ·{" "}
+            {statusOptions.find((s) => s.value === item.status)?.label}
+            {!item.enabled && " · معطّل"}
+          </>
+        )}
+      />
     </div>
   );
 }

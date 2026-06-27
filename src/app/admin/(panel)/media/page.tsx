@@ -1,17 +1,20 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
-import { Pencil, Plus, Trash2 } from "lucide-react";
+import { Plus } from "lucide-react";
 import FirestoreApi from "@/services/firestoreApi";
 import { useAuth } from "@/context/AuthContext";
+import { useAdminCrud } from "@/hooks/useAdminCrud";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
+import { AdminFormDialog } from "@/components/admin/AdminFormDialog";
+import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
+import { AdminItemList } from "@/components/admin/AdminItemList";
 import { LocalizedInput } from "@/components/admin/LocalizedInput";
 import { FileUploadField } from "@/components/admin/FileUploadField";
 import { YouTubeField } from "@/components/admin/YouTubeField";
+import { pickAdminLabel } from "@/lib/admin/pickAdminLabel";
 import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
 import { Button } from "@/components/ui/Button";
-import { Card, CardContent, CardTitle } from "@/components/ui/Card";
 import { Spinner } from "@/components/ui/Spinner";
 import type { MediaItem } from "@/types/cms";
 import { emptyLocalized } from "@/types/cms";
@@ -39,49 +42,23 @@ function newItem(order: number): MediaItem {
 
 export default function AdminMediaPage() {
   const { user } = useAuth();
-  const [items, setItems] = useState<MediaItem[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [editing, setEditing] = useState<MediaItem | null>(null);
-  const [saving, setSaving] = useState(false);
-  const [deletingId, setDeletingId] = useState<string | null>(null);
-
-  const loadItems = useCallback(async () => {
-    const docs = await api.getOrderedDocuments(api.getMediaCollection());
-    setItems(docs.map((d) => api.docToData<MediaItem>(d)));
-    setLoading(false);
-  }, []);
-
-  useEffect(() => {
-    void loadItems();
-  }, [loadItems]);
-
-  async function handleSave() {
-    if (!editing) return;
-    setSaving(true);
-    try {
-      const id = editing.id || api.getNewId("media");
-      await api.setData({
-        docRef: api.getMediaDoc(id),
-        data: { ...editing, id },
-        userData: { uid: user?.uid, displayName: user?.email ?? undefined },
-      });
-      setEditing(null);
-      await loadItems();
-    } finally {
-      setSaving(false);
-    }
-  }
-
-  async function handleDelete(id: string) {
-    if (!confirm("هل أنت متأكد من الحذف؟")) return;
-    setDeletingId(id);
-    try {
-      await api.deleteData(api.getMediaDoc(id));
-      await loadItems();
-    } finally {
-      setDeletingId(null);
-    }
-  }
+  const {
+    items,
+    loading,
+    editing,
+    setEditing,
+    saving,
+    deletingId,
+    deleteTarget,
+    setDeleteTarget,
+    handleSave,
+    handleDeleteConfirm,
+  } = useAdminCrud<MediaItem>({
+    getCollection: () => api.getMediaCollection(),
+    getDocRef: (id) => api.getMediaDoc(id),
+    newIdPrefix: "media",
+    user: user ? { uid: user.uid, displayName: user.email ?? undefined } : null,
+  });
 
   if (loading) {
     return (
@@ -104,10 +81,15 @@ export default function AdminMediaPage() {
         }
       />
 
-      {editing && (
-        <Card className="mb-6" padding="lg">
-          <CardTitle className="mb-4">{editing.id ? "تعديل" : "جديد"}</CardTitle>
-          <CardContent className="flex flex-col gap-4">
+      <AdminFormDialog
+        open={!!editing}
+        onClose={() => setEditing(null)}
+        title={editing?.id ? "تعديل وسائط" : "وسائط جديدة"}
+        onSave={handleSave}
+        saving={saving}
+      >
+        {editing && (
+          <>
             <Select
               label="النوع"
               value={editing.type}
@@ -135,42 +117,27 @@ export default function AdminMediaPage() {
               value={editing.order}
               onChange={(e) => setEditing({ ...editing, order: Number(e.target.value) })}
             />
-            <div className="flex gap-2">
-              <Button loading={saving} onClick={handleSave}>
-                حفظ
-              </Button>
-              <Button variant="secondary" onClick={() => setEditing(null)}>
-                إلغاء
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      )}
+          </>
+        )}
+      </AdminFormDialog>
 
-      <div className="space-y-3">
-        {items.map((item) => (
-          <Card key={item.id} hover={false} padding="md">
-            <div className="flex items-center justify-between gap-4">
-              <p className="font-semibold">
-                {item.title.ar || item.title.en || item.type} · ترتيب {item.order}
-              </p>
-              <div className="flex gap-2">
-                <Button variant="secondary" size="icon" onClick={() => setEditing(item)}>
-                  <Pencil className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant="destructive"
-                  size="icon"
-                  loading={deletingId === item.id}
-                  onClick={() => handleDelete(item.id)}
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-          </Card>
-        ))}
-      </div>
+      <ConfirmDialog
+        open={!!deleteTarget}
+        onClose={() => setDeleteTarget(null)}
+        onConfirm={handleDeleteConfirm}
+        loading={!!deletingId}
+        message={`هل أنت متأكد من حذف «${pickAdminLabel(deleteTarget?.title) || deleteTarget?.type}»؟`}
+      />
+
+      <AdminItemList
+        items={items}
+        emptyMessage="لا توجد وسائط بعد"
+        deletingId={deletingId}
+        onEdit={setEditing}
+        onDelete={setDeleteTarget}
+        renderTitle={(item) => pickAdminLabel(item.title) || item.type}
+        renderSubtitle={(item) => `${typeOptions.find((t) => t.value === item.type)?.label} · ترتيب ${item.order}`}
+      />
     </div>
   );
 }
