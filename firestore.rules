@@ -145,9 +145,23 @@ service cloud.firestore {
       allow update, delete: if isAdmin();
     }
 
+    // — طلبات التطوع —
+    match /volunteer_applications/global/volunteer_applications/{docId} {
+      allow read: if isAdmin();
+      allow create: if
+        request.resource.data.name is string &&
+        request.resource.data.name.size() >= 2 &&
+        request.resource.data.email is string &&
+        request.resource.data.email.matches('.*@.*\\..*') &&
+        request.resource.data.message is string &&
+        request.resource.data.message.size() >= 5 &&
+        request.resource.data.read == false;
+      allow update, delete: if isAdmin();
+    }
+
     // — محتوى الموقع (قراءة عامة، كتابة للمدراء فقط) —
     match /{collection}/{parentId}/{subCollection}/{documentId} {
-      allow read: if !(collection in ['users', 'testimonials', 'donation_intents', 'contact_messages', 'newsletter_subscribers']);
+      allow read: if !(collection in ['users', 'testimonials', 'donation_intents', 'contact_messages', 'newsletter_subscribers', 'volunteer_applications']);
       allow write: if isAdmin();
     }
   }

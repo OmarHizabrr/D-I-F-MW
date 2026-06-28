@@ -92,6 +92,7 @@ export type ProjectItem = {
   showDonor: boolean;
   description?: LocalizedString;
   youtubeUrl?: string;
+  featured?: boolean;
   enabled: boolean;
   order: number;
 };
@@ -265,6 +266,85 @@ export type NewsletterSubscriber = {
   subscribedAt: string;
 };
 
+export type SuccessStoryItem = {
+  id: string;
+  title: LocalizedString;
+  excerpt: LocalizedString;
+  body: LocalizedString;
+  imageUrl: string;
+  youtubeUrl: string;
+  country: LocalizedString;
+  programId: string;
+  projectId: string;
+  beneficiaries: LocalizedString;
+  impactHighlight: LocalizedString;
+  publishedAt: string;
+  featured: boolean;
+  enabled: boolean;
+  order: number;
+};
+
+export type FaqItem = {
+  id: string;
+  question: LocalizedString;
+  answer: LocalizedString;
+  category: LocalizedString;
+  order: number;
+  enabled: boolean;
+};
+
+export type DownloadFileType = "report" | "brochure" | "form" | "other";
+
+export type DownloadItem = {
+  id: string;
+  title: LocalizedString;
+  description: LocalizedString;
+  fileUrl: string;
+  fileType: DownloadFileType;
+  year: string;
+  iconKey: string;
+  iconImageUrl?: string;
+  order: number;
+  enabled: boolean;
+};
+
+export type EventItem = {
+  id: string;
+  title: LocalizedString;
+  excerpt: LocalizedString;
+  body: LocalizedString;
+  location: LocalizedString;
+  startDate: string;
+  endDate: string;
+  imageUrl: string;
+  registrationUrl: string;
+  enabled: boolean;
+  order: number;
+};
+
+export type VolunteerOpportunity = {
+  id: string;
+  title: LocalizedString;
+  description: LocalizedString;
+  location: LocalizedString;
+  commitment: LocalizedString;
+  requirements: LocalizedString;
+  enabled: boolean;
+  order: number;
+};
+
+export type VolunteerApplication = {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  opportunityId: string;
+  opportunityTitle: string;
+  message: string;
+  read: boolean;
+  submittedAt: string;
+};
+
 export type SiteConfig = {
   siteName: LocalizedString;
   seeded: boolean;
@@ -287,6 +367,13 @@ export type DashboardStats = {
   unreadContactMessages: number;
   newsletterSubscribers: number;
   teamMembers: number;
+  successStories: number;
+  events: number;
+  faqItems: number;
+  downloads: number;
+  volunteerOpportunities: number;
+  volunteerApplications: number;
+  unreadVolunteerApplications: number;
 };
 
 export function emptyLocalized(): LocalizedString {

@@ -15,6 +15,11 @@ import {
   Mail,
   Users,
   ArrowLeft,
+  Trophy,
+  CalendarDays,
+  HelpCircle,
+  Download,
+  HandHeart,
 } from "lucide-react";
 import FirestoreApi from "@/services/firestoreApi";
 import { COLLECTIONS, SITE_ROOT } from "@/lib/firebase/database-structure";
@@ -37,6 +42,11 @@ const contentStatCards: {
   { key: "media", label: "الوسائط", icon: ImageIcon },
   { key: "partners", label: "الشركاء", icon: Handshake },
   { key: "testimonials", label: "آراء المستفيدين", icon: MessageSquare },
+  { key: "successStories", label: "قصص النجاح", icon: Trophy },
+  { key: "events", label: "الفعاليات", icon: CalendarDays },
+  { key: "faqItems", label: "الأسئلة الشائعة", icon: HelpCircle },
+  { key: "downloads", label: "الموارد", icon: Download },
+  { key: "volunteerOpportunities", label: "فرص التطوع", icon: HandHeart },
   { key: "activeProjects", label: "مشاريع جارية", icon: Activity },
   { key: "completedProjects", label: "مشاريع مكتملة", icon: FolderKanban },
 ];
@@ -69,6 +79,13 @@ const inboxLinks = [
     key: "teamMembers" as const,
     icon: Users,
   },
+  {
+    href: "/admin/volunteer-applications",
+    label: "طلبات التطوع",
+    key: "volunteerApplications" as const,
+    unreadKey: "unreadVolunteerApplications" as const,
+    icon: HandHeart,
+  },
 ];
 
 export default function AdminDashboardPage() {
@@ -88,6 +105,11 @@ export default function AdminDashboardPage() {
           donationIntents,
           newsletterSubscribers,
           teamMembers,
+          successStories,
+          events,
+          faqItems,
+          downloads,
+          volunteerOpportunities,
         ] = await Promise.all([
           api.getSubCollectionCount(COLLECTIONS.projects, SITE_ROOT, COLLECTIONS.projects),
           api.getSubCollectionCount(COLLECTIONS.programs, SITE_ROOT, COLLECTIONS.programs),
@@ -102,11 +124,21 @@ export default function AdminDashboardPage() {
             COLLECTIONS.newsletterSubscribers
           ),
           api.getSubCollectionCount(COLLECTIONS.team, SITE_ROOT, COLLECTIONS.team),
+          api.getSubCollectionCount(COLLECTIONS.successStories, SITE_ROOT, COLLECTIONS.successStories),
+          api.getSubCollectionCount(COLLECTIONS.events, SITE_ROOT, COLLECTIONS.events),
+          api.getSubCollectionCount(COLLECTIONS.faq, SITE_ROOT, COLLECTIONS.faq),
+          api.getSubCollectionCount(COLLECTIONS.downloads, SITE_ROOT, COLLECTIONS.downloads),
+          api.getSubCollectionCount(
+            COLLECTIONS.volunteerOpportunities,
+            SITE_ROOT,
+            COLLECTIONS.volunteerOpportunities
+          ),
         ]);
 
-        const [projectDocs, contactDocs] = await Promise.all([
+        const [projectDocs, contactDocs, volunteerDocs] = await Promise.all([
           api.getOrderedDocuments(api.getProjectsCollection()),
           api.getOrderedDocuments(api.getContactMessagesCollection()),
+          api.getOrderedDocuments(api.getVolunteerApplicationsCollection()),
         ]);
 
         let activeProjects = 0;
@@ -122,6 +154,8 @@ export default function AdminDashboardPage() {
 
         const unreadContactMessages = contactDocs.filter((d) => !d.data().read).length;
         const totalContactMessages = contactDocs.length;
+        const unreadVolunteerApplications = volunteerDocs.filter((d) => !d.data().read).length;
+        const volunteerApplications = volunteerDocs.length;
 
         setStats({
           projects,
@@ -138,6 +172,13 @@ export default function AdminDashboardPage() {
           unreadContactMessages,
           newsletterSubscribers,
           teamMembers,
+          successStories,
+          events,
+          faqItems,
+          downloads,
+          volunteerOpportunities,
+          volunteerApplications,
+          unreadVolunteerApplications,
         });
       } finally {
         setLoading(false);

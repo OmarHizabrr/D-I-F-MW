@@ -24,6 +24,12 @@ const ny = {
     team: "Gulu Lathu",
     allProjects: "Mapulojekiti Onse",
     aboutOverview: "Za Fundo",
+    ourWork: "Ntchito Zathu",
+    successStories: "Nkhani Zopambana",
+    events: "Zochitika",
+    faq: "Mafunso Ofunsidwa Kawiri",
+    volunteer: "Kuthandiza",
+    resources: "Zothandizira",
   },
 
   hero: {
@@ -205,6 +211,58 @@ const ny = {
     contactFormSuccess: "Zikomo! Tidzakuyankhani posachedwa.",
     contactMapsLink: "Onani pa Mapu",
     shareStory: "Gawani Nkhani Yanu",
+    successStoriesTitle: "Nkhani Zopambana",
+    successStoriesSubtitle: "Zotsatira zenizeni kuchokera ku mapulojekiti athu",
+    faqTitle: "Mafunso Ofunsidwa Kawiri",
+    faqSubtitle: "Mayankho a mafunso omwe amafunsidwa kwambiri",
+    eventsTitle: "Zochitika",
+    eventsSubtitle: "Lowani nawo pa zochitika zathu zotsatira",
+    volunteerTitle: "Kuthandiza Nafe",
+    volunteerSubtitle: "Gawani nthawi ndi luso lanu kupanga zotsatira",
+    ourWorkTitle: "Ntchito Zathu",
+    ourWorkSubtitle: "Mapulojekiti omaliza omwe tikunyadira",
+    resourcesTitle: "Zothandizira ndi Malipoti",
+    resourcesSubtitle: "Tsitsani malipoti, mabuku, ndi mafomu",
+  },
+
+  successStories: {
+    title: "Nkhani Zopambana",
+    subtitle: "Kumene zothandizo zimakhala moyo wabwino",
+    readMore: "Werengani nkhani",
+    impact: "Zotsatira",
+  },
+
+  ourWork: {
+    title: "Ntchito Zathu",
+    subtitle: "Zochitika zomwe zalembedwa m'dera",
+  },
+
+  events: {
+    title: "Zochitika",
+    subtitle: "Misonkhano, maphunziro, ndi ntchito za mdera",
+    register: "Lembetsani tsopano",
+    location: "Malo",
+    readMore: "Tsatanetsu",
+  },
+
+  faq: {
+    title: "Mafunso Ofunsidwa Kawiri",
+    subtitle: "Zonse mukufuna kudziwa za ife",
+  },
+
+  volunteer: {
+    title: "Mwayi Wokuthandiza",
+    subtitle: "Lowani nawo pa gulu lathu la opanga zotsatira",
+    apply: "Perekani application",
+    commitment: "Kuchita",
+    requirements: "Zofunika",
+    formSuccess: "Zikomo! Talandira application yanu ndipo tikukuyimbirani posachedwa.",
+  },
+
+  downloads: {
+    title: "Malipoti ndi Zothandizira",
+    subtitle: "Zolemba ndi kuwonekera kumene mungatsitsire",
+    download: "Tsitsani",
   },
 
   loading: {

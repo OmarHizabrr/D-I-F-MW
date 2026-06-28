@@ -24,6 +24,12 @@ const en = {
     team: "Our Team",
     allProjects: "All Projects",
     aboutOverview: "About the Foundation",
+    ourWork: "Our Work",
+    successStories: "Success Stories",
+    events: "Events",
+    faq: "FAQ",
+    volunteer: "Volunteer",
+    resources: "Resources",
   },
 
   hero: {
@@ -205,6 +211,58 @@ const en = {
     contactFormSuccess: "Thank you for reaching out! We will respond as soon as possible.",
     contactMapsLink: "View on Map",
     shareStory: "Share Your Story",
+    successStoriesTitle: "Success Stories",
+    successStoriesSubtitle: "Real impact from our field projects",
+    faqTitle: "Frequently Asked Questions",
+    faqSubtitle: "Answers to common questions",
+    eventsTitle: "Events",
+    eventsSubtitle: "Join our upcoming activities",
+    volunteerTitle: "Volunteer With Us",
+    volunteerSubtitle: "Share your time and skills to create impact",
+    ourWorkTitle: "Our Work",
+    ourWorkSubtitle: "Featured completed projects we are proud of",
+    resourcesTitle: "Resources & Reports",
+    resourcesSubtitle: "Download reports, brochures, and forms",
+  },
+
+  successStories: {
+    title: "Success Stories",
+    subtitle: "Where donations become better lives",
+    readMore: "Read story",
+    impact: "Impact",
+  },
+
+  ourWork: {
+    title: "Our Work",
+    subtitle: "Documented field achievements",
+  },
+
+  events: {
+    title: "Events",
+    subtitle: "Meetings, workshops, and community activities",
+    register: "Register now",
+    location: "Location",
+    readMore: "Details",
+  },
+
+  faq: {
+    title: "FAQ",
+    subtitle: "Everything you need to know about us",
+  },
+
+  volunteer: {
+    title: "Volunteer Opportunities",
+    subtitle: "Join our impact makers team",
+    apply: "Apply now",
+    commitment: "Commitment",
+    requirements: "Requirements",
+    formSuccess: "Thank you! We received your application and will contact you soon.",
+  },
+
+  downloads: {
+    title: "Reports & Resources",
+    subtitle: "Documents and transparency you can download",
+    download: "Download",
   },
 
   loading: {

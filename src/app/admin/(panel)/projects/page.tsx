@@ -204,6 +204,15 @@ export default function AdminProjectsPage() {
               <label className="flex items-center gap-2 text-sm">
                 <input
                   type="checkbox"
+                  checked={Boolean(editing.featured)}
+                  onChange={(e) => setEditing({ ...editing, featured: e.target.checked })}
+                  className="h-4 w-4 rounded border-border text-brand-green focus:ring-brand-green"
+                />
+                مميز في «أعمالنا»
+              </label>
+              <label className="flex items-center gap-2 text-sm">
+                <input
+                  type="checkbox"
                   checked={editing.enabled}
                   onChange={(e) => setEditing({ ...editing, enabled: e.target.checked })}
                   className="h-4 w-4 rounded border-border text-brand-green focus:ring-brand-green"

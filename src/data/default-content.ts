@@ -24,6 +24,21 @@ import type {
   WhyUsItem,
 } from "@/types/cms";
 import { statsData, programsData, ongoingProjectsData, newsData, partnersData, testimonialsData, mapPointsData, mediaItems, licenseItems, howWeWorkSteps } from "@/data/mock";
+import {
+  getDefaultSuccessStories,
+  getDefaultFaq,
+  getDefaultDownloads,
+  getDefaultEvents,
+  getDefaultVolunteerOpportunities,
+} from "@/data/extended-defaults";
+
+export {
+  getDefaultSuccessStories,
+  getDefaultFaq,
+  getDefaultDownloads,
+  getDefaultEvents,
+  getDefaultVolunteerOpportunities,
+} from "@/data/extended-defaults";
 
 const whyUsKeys = ["transparency", "followUp", "reports", "team", "documented", "quality"] as const;
 
@@ -34,9 +49,15 @@ function L(arText: string, enText: string, nyText: string): LocalizedString {
 const navKeys = [
   { id: "home", href: "/" },
   { id: "about", href: "/about" },
+  { id: "ourWork", href: "/our-work" },
   { id: "projects", href: "/projects" },
+  { id: "successStories", href: "/success-stories" },
   { id: "news", href: "/news" },
+  { id: "events", href: "/events" },
   { id: "stories", href: "/stories" },
+  { id: "volunteer", href: "/volunteer" },
+  { id: "faq", href: "/faq" },
+  { id: "resources", href: "/resources" },
   { id: "media", href: "/media" },
   { id: "contact", href: "/contact" },
 ] as const;
@@ -168,6 +189,7 @@ export function getDefaultProjects(): ProjectItem[] {
     lastUpdate: p.lastUpdate,
     donorName: "",
     showDonor: false,
+    featured: i < 2,
     enabled: true,
     order: i + 1,
   }));
@@ -426,5 +448,39 @@ export function getDefaultSectionTitles() {
     contactFormSuccess: L(ar.pages.contactFormSuccess, en.pages.contactFormSuccess, ny.pages.contactFormSuccess),
     contactMapsLink: L(ar.pages.contactMapsLink, en.pages.contactMapsLink, ny.pages.contactMapsLink),
     shareStory: L(ar.pages.shareStory, en.pages.shareStory, ny.pages.shareStory),
+    successStories: L(ar.successStories.title, en.successStories.title, ny.successStories.title),
+    successStoriesSubtitle: L(ar.successStories.subtitle, en.successStories.subtitle, ny.successStories.subtitle),
+    successStoriesReadMore: L(ar.successStories.readMore, en.successStories.readMore, ny.successStories.readMore),
+    successStoriesImpact: L(ar.successStories.impact, en.successStories.impact, ny.successStories.impact),
+    ourWork: L(ar.ourWork.title, en.ourWork.title, ny.ourWork.title),
+    ourWorkSubtitle: L(ar.ourWork.subtitle, en.ourWork.subtitle, ny.ourWork.subtitle),
+    events: L(ar.events.title, en.events.title, ny.events.title),
+    eventsSubtitle: L(ar.events.subtitle, en.events.subtitle, ny.events.subtitle),
+    eventsRegister: L(ar.events.register, en.events.register, ny.events.register),
+    eventsLocation: L(ar.events.location, en.events.location, ny.events.location),
+    eventsReadMore: L(ar.events.readMore, en.events.readMore, ny.events.readMore),
+    faq: L(ar.faq.title, en.faq.title, ny.faq.title),
+    faqSubtitle: L(ar.faq.subtitle, en.faq.subtitle, ny.faq.subtitle),
+    volunteer: L(ar.volunteer.title, en.volunteer.title, ny.volunteer.title),
+    volunteerSubtitle: L(ar.volunteer.subtitle, en.volunteer.subtitle, ny.volunteer.subtitle),
+    volunteerApply: L(ar.volunteer.apply, en.volunteer.apply, ny.volunteer.apply),
+    volunteerCommitment: L(ar.volunteer.commitment, en.volunteer.commitment, ny.volunteer.commitment),
+    volunteerRequirements: L(ar.volunteer.requirements, en.volunteer.requirements, ny.volunteer.requirements),
+    volunteerFormSuccess: L(ar.volunteer.formSuccess, en.volunteer.formSuccess, ny.volunteer.formSuccess),
+    downloads: L(ar.downloads.title, en.downloads.title, ny.downloads.title),
+    downloadsSubtitle: L(ar.downloads.subtitle, en.downloads.subtitle, ny.downloads.subtitle),
+    downloadsButton: L(ar.downloads.download, en.downloads.download, ny.downloads.download),
+    successStoriesPageTitle: L(ar.pages.successStoriesTitle, en.pages.successStoriesTitle, ny.pages.successStoriesTitle),
+    successStoriesPageSubtitle: L(ar.pages.successStoriesSubtitle, en.pages.successStoriesSubtitle, ny.pages.successStoriesSubtitle),
+    faqPageTitle: L(ar.pages.faqTitle, en.pages.faqTitle, ny.pages.faqTitle),
+    faqPageSubtitle: L(ar.pages.faqSubtitle, en.pages.faqSubtitle, ny.pages.faqSubtitle),
+    eventsPageTitle: L(ar.pages.eventsTitle, en.pages.eventsTitle, ny.pages.eventsTitle),
+    eventsPageSubtitle: L(ar.pages.eventsSubtitle, en.pages.eventsSubtitle, ny.pages.eventsSubtitle),
+    volunteerPageTitle: L(ar.pages.volunteerTitle, en.pages.volunteerTitle, ny.pages.volunteerTitle),
+    volunteerPageSubtitle: L(ar.pages.volunteerSubtitle, en.pages.volunteerSubtitle, ny.pages.volunteerSubtitle),
+    ourWorkPageTitle: L(ar.pages.ourWorkTitle, en.pages.ourWorkTitle, ny.pages.ourWorkTitle),
+    ourWorkPageSubtitle: L(ar.pages.ourWorkSubtitle, en.pages.ourWorkSubtitle, ny.pages.ourWorkSubtitle),
+    resourcesPageTitle: L(ar.pages.resourcesTitle, en.pages.resourcesTitle, ny.pages.resourcesTitle),
+    resourcesPageSubtitle: L(ar.pages.resourcesSubtitle, en.pages.resourcesSubtitle, ny.pages.resourcesSubtitle),
   };
 }

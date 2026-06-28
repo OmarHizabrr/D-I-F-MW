@@ -31,6 +31,13 @@ import {
   getDefaultWhyUs,
   getDefaultSectionTitles,
 } from "@/data/default-content";
+import {
+  getDefaultSuccessStories,
+  getDefaultFaq,
+  getDefaultDownloads,
+  getDefaultEvents,
+  getDefaultVolunteerOpportunities,
+} from "@/data/extended-defaults";
 import type {
   FooterContent,
   HeroContent,
@@ -51,6 +58,11 @@ import type {
   TopbarContent,
   WhyUsItem,
   LocalizedString,
+  SuccessStoryItem,
+  FaqItem,
+  DownloadItem,
+  EventItem,
+  VolunteerOpportunity,
 } from "@/types/cms";
 import { pickLocalized, type LocaleCode } from "@/types/cms";
 import { useLocale } from "@/context/LocaleContext";
@@ -79,6 +91,11 @@ type SiteContentState = {
   howWeWork: HowWeWorkStep[];
   whyUs: WhyUsItem[];
   team: TeamMember[];
+  successStories: SuccessStoryItem[];
+  faq: FaqItem[];
+  downloads: DownloadItem[];
+  events: EventItem[];
+  volunteerOpportunities: VolunteerOpportunity[];
   footer: FooterContent;
   newsletter: NewsletterContent;
   donation: DonationContent;
@@ -103,6 +120,11 @@ const defaults: SiteContentState = {
   howWeWork: getDefaultHowWeWork(),
   whyUs: getDefaultWhyUs(),
   team: getDefaultTeam(),
+  successStories: getDefaultSuccessStories(),
+  faq: getDefaultFaq(),
+  downloads: getDefaultDownloads(),
+  events: getDefaultEvents(),
+  volunteerOpportunities: getDefaultVolunteerOpportunities(),
   footer: getDefaultFooter(),
   newsletter: getDefaultNewsletter(),
   donation: getDefaultDonation(),
@@ -190,6 +212,15 @@ export function SiteContentProvider({ children }: { children: ReactNode }) {
     subscribeList(api.getHowWeWorkCollection(), "howWeWork", defaults.howWeWork);
     subscribeList(api.getWhyUsCollection(), "whyUs", defaults.whyUs);
     subscribeList(api.getTeamCollection(), "team", defaults.team);
+    subscribeList(api.getSuccessStoriesCollection(), "successStories", defaults.successStories);
+    subscribeList(api.getFaqCollection(), "faq", defaults.faq);
+    subscribeList(api.getDownloadsCollection(), "downloads", defaults.downloads);
+    subscribeList(api.getEventsCollection(), "events", defaults.events);
+    subscribeList(
+      api.getVolunteerOpportunitiesCollection(),
+      "volunteerOpportunities",
+      defaults.volunteerOpportunities
+    );
 
     unsubs.push(
       api.subscribeDocSnapshot(api.getSiteConfigDoc(), (docSnap) => {

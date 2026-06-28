@@ -24,6 +24,12 @@ const ar = {
     team: "فريق العمل",
     allProjects: "جميع المشاريع",
     aboutOverview: "نبذة عن المؤسسة",
+    ourWork: "أعمالنا",
+    successStories: "قصص النجاح",
+    events: "الفعاليات",
+    faq: "الأسئلة الشائعة",
+    volunteer: "التطوع",
+    resources: "الموارد والتقارير",
   },
 
   hero: {
@@ -204,6 +210,58 @@ const ar = {
     contactFormSuccess: "شكراً لتواصلك! سنرد عليك في أقرب وقت.",
     contactMapsLink: "عرض على الخريطة",
     shareStory: "شارك قصتك",
+    successStoriesTitle: "قصص النجاح",
+    successStoriesSubtitle: "تأثير حقيقي من مشاريعنا الميدانية",
+    faqTitle: "الأسئلة الشائعة",
+    faqSubtitle: "إجابات على أكثر الأسئلة تكراراً",
+    eventsTitle: "الفعاليات",
+    eventsSubtitle: "انضم إلينا في أنشطتنا القادمة",
+    volunteerTitle: "التطوع معنا",
+    volunteerSubtitle: "ساهم بوقتك ومهاراتك في صنع الأثر",
+    ourWorkTitle: "أعمالنا",
+    ourWorkSubtitle: "مشاريع مكتملة ومميزة نفخر بها",
+    resourcesTitle: "الموارد والتقارير",
+    resourcesSubtitle: "تحميل التقارير والكتيبات والنماذج",
+  },
+
+  successStories: {
+    title: "قصص النجاح",
+    subtitle: "حيث يتحول التبرع إلى حياة أفضل",
+    readMore: "اقرأ القصة",
+    impact: "الأثر",
+  },
+
+  ourWork: {
+    title: "أعمالنا",
+    subtitle: "إنجازات ميدانية موثقة",
+  },
+
+  events: {
+    title: "الفعاليات",
+    subtitle: "لقاءات وورش وأنشطة مجتمعية",
+    register: "سجّل الآن",
+    location: "الموقع",
+    readMore: "التفاصيل",
+  },
+
+  faq: {
+    title: "الأسئلة الشائعة",
+    subtitle: "كل ما تحتاج معرفته عن المؤسسة",
+  },
+
+  volunteer: {
+    title: "فرص التطوع",
+    subtitle: "انضم لفريق صناع الأثر",
+    apply: "قدّم طلباً",
+    commitment: "الالتزام",
+    requirements: "المتطلبات",
+    formSuccess: "شكراً! استلمنا طلبك وسنتواصل معك قريباً.",
+  },
+
+  downloads: {
+    title: "التقارير والموارد",
+    subtitle: "وثائق وشفافية يمكنك تحميلها",
+    download: "تحميل",
   },
 
   loading: {

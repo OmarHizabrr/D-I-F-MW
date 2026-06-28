@@ -21,6 +21,13 @@ import {
   getDefaultWhyUs,
   getDefaultSectionTitles,
 } from "@/data/default-content";
+import {
+  getDefaultSuccessStories,
+  getDefaultFaq,
+  getDefaultDownloads,
+  getDefaultEvents,
+  getDefaultVolunteerOpportunities,
+} from "@/data/extended-defaults";
 import type { UserMeta } from "@/services/firestoreApi";
 
 const api = FirestoreApi.Api;
@@ -82,6 +89,25 @@ export async function seedSiteContent(userData: UserMeta = {}) {
   }
   for (const item of getDefaultTeam()) {
     await api.setData({ docRef: api.getTeamDoc(item.id), data: item, userData });
+  }
+  for (const item of getDefaultSuccessStories()) {
+    await api.setData({ docRef: api.getSuccessStoryDoc(item.id), data: item, userData });
+  }
+  for (const item of getDefaultFaq()) {
+    await api.setData({ docRef: api.getFaqDoc(item.id), data: item, userData });
+  }
+  for (const item of getDefaultDownloads()) {
+    await api.setData({ docRef: api.getDownloadDoc(item.id), data: item, userData });
+  }
+  for (const item of getDefaultEvents()) {
+    await api.setData({ docRef: api.getEventDoc(item.id), data: item, userData });
+  }
+  for (const item of getDefaultVolunteerOpportunities()) {
+    await api.setData({
+      docRef: api.getVolunteerOpportunityDoc(item.id),
+      data: item,
+      userData,
+    });
   }
 }
 

@@ -254,6 +254,77 @@ class FirestoreApi {
     return this.getSubDocument(COLLECTIONS.team, SITE_ROOT, COLLECTIONS.team, id);
   }
 
+  getFaqCollection() {
+    return this.getSubCollection(COLLECTIONS.faq, SITE_ROOT, COLLECTIONS.faq);
+  }
+
+  getFaqDoc(id: string) {
+    return this.getSubDocument(COLLECTIONS.faq, SITE_ROOT, COLLECTIONS.faq, id);
+  }
+
+  getDownloadsCollection() {
+    return this.getSubCollection(COLLECTIONS.downloads, SITE_ROOT, COLLECTIONS.downloads);
+  }
+
+  getDownloadDoc(id: string) {
+    return this.getSubDocument(COLLECTIONS.downloads, SITE_ROOT, COLLECTIONS.downloads, id);
+  }
+
+  getSuccessStoriesCollection() {
+    return this.getSubCollection(COLLECTIONS.successStories, SITE_ROOT, COLLECTIONS.successStories);
+  }
+
+  getSuccessStoryDoc(id: string) {
+    return this.getSubDocument(
+      COLLECTIONS.successStories,
+      SITE_ROOT,
+      COLLECTIONS.successStories,
+      id
+    );
+  }
+
+  getEventsCollection() {
+    return this.getSubCollection(COLLECTIONS.events, SITE_ROOT, COLLECTIONS.events);
+  }
+
+  getEventDoc(id: string) {
+    return this.getSubDocument(COLLECTIONS.events, SITE_ROOT, COLLECTIONS.events, id);
+  }
+
+  getVolunteerOpportunitiesCollection() {
+    return this.getSubCollection(
+      COLLECTIONS.volunteerOpportunities,
+      SITE_ROOT,
+      COLLECTIONS.volunteerOpportunities
+    );
+  }
+
+  getVolunteerOpportunityDoc(id: string) {
+    return this.getSubDocument(
+      COLLECTIONS.volunteerOpportunities,
+      SITE_ROOT,
+      COLLECTIONS.volunteerOpportunities,
+      id
+    );
+  }
+
+  getVolunteerApplicationsCollection() {
+    return this.getSubCollection(
+      COLLECTIONS.volunteerApplications,
+      SITE_ROOT,
+      COLLECTIONS.volunteerApplications
+    );
+  }
+
+  getVolunteerApplicationDoc(id: string) {
+    return this.getSubDocument(
+      COLLECTIONS.volunteerApplications,
+      SITE_ROOT,
+      COLLECTIONS.volunteerApplications,
+      id
+    );
+  }
+
   getAdminsCollection() {
     return this.getSubCollection(COLLECTIONS.admins, SITE_ROOT, COLLECTIONS.admins);
   }
