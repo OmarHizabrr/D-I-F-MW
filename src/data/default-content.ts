@@ -393,6 +393,7 @@ export function getDefaultSectionTitles() {
     mapSubtitle: L(ar.projectMap.subtitle, en.projectMap.subtitle, ny.projectMap.subtitle),
     mapHint: L(ar.projectMap.clickHint, en.projectMap.clickHint, ny.projectMap.clickHint),
     viewAll: L(ar.common.viewAll, en.common.viewAll, ny.common.viewAll),
+    programsViewProjects: L(ar.programs.viewProjects, en.programs.viewProjects, ny.programs.viewProjects),
     projectsCountry: L(ar.ongoingProjects.country, en.ongoingProjects.country, ny.ongoingProjects.country),
     projectsProgress: L(ar.ongoingProjects.progress, en.ongoingProjects.progress, ny.ongoingProjects.progress),
     projectsLastUpdate: L(ar.ongoingProjects.lastUpdate, en.ongoingProjects.lastUpdate, ny.ongoingProjects.lastUpdate),

@@ -1,6 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import { Trash2 } from "lucide-react";
 import FirestoreApi from "@/services/firestoreApi";
 import { useAuth } from "@/context/AuthContext";
@@ -18,7 +19,16 @@ import { cn } from "@/lib/utils";
 const api = FirestoreApi.Api;
 
 export default function AdminNewsletterPage() {
+  return (
+    <Suspense fallback={<div className="flex justify-center py-16"><Spinner size="lg" /></div>}>
+      <AdminNewsletterContent />
+    </Suspense>
+  );
+}
+
+function AdminNewsletterContent() {
   const { user } = useAuth();
+  const searchParams = useSearchParams();
   const [tab, setTab] = useState<"settings" | "subscribers">("settings");
   const [data, setData] = useState<NewsletterContent>(getDefaultNewsletter());
   const [subscribers, setSubscribers] = useState<NewsletterSubscriber[]>([]);
@@ -27,6 +37,11 @@ export default function AdminNewsletterPage() {
   const [message, setMessage] = useState<string | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<NewsletterSubscriber | null>(null);
   const [deleting, setDeleting] = useState(false);
+
+  useEffect(() => {
+    const t = searchParams.get("tab");
+    if (t === "subscribers") setTab("subscribers");
+  }, [searchParams]);
 
   const loadSubscribers = useCallback(async () => {
     const docs = await api.getOrderedDocuments(api.getNewsletterSubscribersCollection());

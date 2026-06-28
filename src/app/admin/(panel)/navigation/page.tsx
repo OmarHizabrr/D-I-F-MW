@@ -1,9 +1,11 @@
 "use client";
 
-import { Plus } from "lucide-react";
+import { useState } from "react";
+import { Plus, RotateCcw } from "lucide-react";
 import FirestoreApi from "@/services/firestoreApi";
 import { useAuth } from "@/context/AuthContext";
 import { useAdminCrud } from "@/hooks/useAdminCrud";
+import { restoreDefaultNavItems } from "@/services/navService";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { AdminFormDialog } from "@/components/admin/AdminFormDialog";
 import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
@@ -24,6 +26,8 @@ function newItem(order: number): NavItem {
 
 export default function AdminNavigationPage() {
   const { user } = useAuth();
+  const [restoring, setRestoring] = useState(false);
+  const [restoreMessage, setRestoreMessage] = useState<string | null>(null);
   const {
     items,
     loading,
@@ -35,12 +39,30 @@ export default function AdminNavigationPage() {
     setDeleteTarget,
     handleSave,
     handleDeleteConfirm,
+    loadItems,
   } = useAdminCrud<NavItem>({
     getCollection: () => api.getNavItemsCollection(),
     getDocRef: (id) => api.getNavItemDoc(id),
     newIdPrefix: "nav",
     user: user ? { uid: user.uid, displayName: user.email ?? undefined } : null,
   });
+
+  async function handleRestoreDefaults() {
+    setRestoring(true);
+    setRestoreMessage(null);
+    try {
+      await restoreDefaultNavItems({
+        uid: user?.uid,
+        displayName: user?.email ?? undefined,
+      });
+      await loadItems();
+      setRestoreMessage("تم استعادة روابط القائمة الافتراضية");
+    } catch {
+      setRestoreMessage("تعذّر استعادة الروابط");
+    } finally {
+      setRestoring(false);
+    }
+  }
 
   if (loading) {
     return (
@@ -56,12 +78,24 @@ export default function AdminNavigationPage() {
         title="القائمة الرئيسية"
         description="إدارة روابط التنقل في الموقع"
         actions={
-          <Button onClick={() => setEditing(newItem(items.length + 1))}>
-            <Plus className="h-4 w-4" />
-            إضافة رابط
-          </Button>
+          <div className="flex flex-wrap gap-2">
+            <Button variant="outline" loading={restoring} onClick={handleRestoreDefaults}>
+              <RotateCcw className="h-4 w-4" />
+              استعادة الافتراضي
+            </Button>
+            <Button onClick={() => setEditing(newItem(items.length + 1))}>
+              <Plus className="h-4 w-4" />
+              إضافة رابط
+            </Button>
+          </div>
         }
       />
+
+      {restoreMessage && (
+        <p className="mb-4 rounded-xl bg-brand-green/10 px-4 py-3 text-sm text-brand-green-dark">
+          {restoreMessage}
+        </p>
+      )}
 
       <AdminFormDialog
         open={!!editing}

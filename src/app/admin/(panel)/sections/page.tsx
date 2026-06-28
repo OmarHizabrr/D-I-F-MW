@@ -54,6 +54,7 @@ const sectionGroups: { title: string; keys: (keyof SectionTitles)[] }[] = [
       "projectsTableName",
       "newsReadMore",
       "licensesPdf",
+      "programsViewProjects",
     ],
   },
   {
@@ -120,6 +121,7 @@ const fieldLabels: Partial<Record<keyof SectionTitles, string>> = {
   projectsTableName: "عمود اسم المشروع",
   newsReadMore: "زر اقرأ المزيد",
   licensesPdf: "زر PDF",
+  programsViewProjects: "زر عرض مشاريع البرنامج",
   mediaTypePhoto: "نوع: صورة",
   mediaTypeVideo: "نوع: فيديو",
   mediaTypeOpening: "نوع: افتتاح",

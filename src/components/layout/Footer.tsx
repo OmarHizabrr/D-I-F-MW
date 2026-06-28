@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Phone, Mail, MapPin, Clock, Share2 } from "lucide-react";
 import { useSiteContent } from "@/context/SiteContentContext";
+import { DonateButton } from "@/components/donation/DonateButton";
 
 export function Footer() {
   const { footer, topbar, navItems, sectionTitles, text } = useSiteContent();
@@ -33,7 +34,8 @@ export function Footer() {
                 <p className="text-xs text-white/70">EST: 10/15</p>
               </div>
             </div>
-            <p className="text-sm leading-relaxed text-white/80">{text(footer.description)}</p>
+            <p className="mb-4 text-sm leading-relaxed text-white/80">{text(footer.description)}</p>
+            <DonateButton variant="primary" size="sm" />
           </div>
 
           <div>

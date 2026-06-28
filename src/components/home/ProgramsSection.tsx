@@ -22,7 +22,7 @@ export function ProgramsSection() {
         />
         <div className="grid gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3 xl:grid-cols-4">
           {items.map((program) => (
-            <Link key={program.id} href="/projects">
+            <Link key={program.id} href={`/projects?program=${program.id}`}>
               <Card padding="none" className="group overflow-hidden transition-transform hover:scale-[1.02]">
                 <div
                   className={cn(
@@ -43,8 +43,13 @@ export function ProgramsSection() {
                 </div>
                 <div className="p-4 sm:p-5">
                   <CardTitle className="text-base sm:text-lg">{text(program.title)}</CardTitle>
+                  {text(program.description) && (
+                    <p className="mt-2 line-clamp-2 text-xs text-muted-foreground sm:text-sm">
+                      {text(program.description)}
+                    </p>
+                  )}
                   <CardFooter className="mt-3 !p-0 text-sm font-semibold text-brand-green">
-                    → {text(sectionTitles.viewAll)}
+                    → {text(sectionTitles.programsViewProjects)}
                   </CardFooter>
                 </div>
               </Card>

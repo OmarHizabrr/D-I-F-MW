@@ -282,6 +282,11 @@ export type DashboardStats = {
   activeProjects: number;
   completedProjects: number;
   delayedProjects: number;
+  donationIntents: number;
+  totalContactMessages: number;
+  unreadContactMessages: number;
+  newsletterSubscribers: number;
+  teamMembers: number;
 };
 
 export function emptyLocalized(): LocalizedString {

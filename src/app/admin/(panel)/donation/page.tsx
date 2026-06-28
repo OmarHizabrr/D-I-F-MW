@@ -1,6 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import FirestoreApi from "@/services/firestoreApi";
 import { useAuth } from "@/context/AuthContext";
 import { getDefaultDonation } from "@/data/default-content";
@@ -29,13 +30,27 @@ function mergeDonation(doc: Record<string, unknown> | null): DonationContent {
 }
 
 export default function AdminDonationPage() {
+  return (
+    <Suspense fallback={<div className="flex justify-center py-16"><Spinner size="lg" /></div>}>
+      <AdminDonationContent />
+    </Suspense>
+  );
+}
+
+function AdminDonationContent() {
   const { user } = useAuth();
+  const searchParams = useSearchParams();
   const [tab, setTab] = useState<"settings" | "intents">("settings");
   const [data, setData] = useState<DonationContent>(getDefaultDonation());
   const [amountsText, setAmountsText] = useState("10, 25, 50, 100");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
+
+  useEffect(() => {
+    const t = searchParams.get("tab");
+    if (t === "intents") setTab("intents");
+  }, [searchParams]);
 
   useEffect(() => {
     async function load() {
