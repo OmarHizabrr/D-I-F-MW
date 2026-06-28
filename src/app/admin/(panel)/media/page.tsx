@@ -33,8 +33,10 @@ function newItem(order: number): MediaItem {
     id: "",
     type: "photo",
     title: emptyLocalized(),
+    description: emptyLocalized(),
     imageUrl: "",
     youtubeUrl: "",
+    capturedAt: "",
     enabled: true,
     order,
   };
@@ -72,7 +74,7 @@ export default function AdminMediaPage() {
     <div>
       <AdminPageHeader
         title="معرض الوسائط"
-        description="إدارة الصور والفيديوهات في المعرض المتحرك"
+        description="إدارة الصور والفيديوهات — تظهر في المعرض التفاعلي وصفحة /media"
         actions={
           <Button onClick={() => setEditing(newItem(items.length + 1))}>
             <Plus className="h-4 w-4" />
@@ -101,6 +103,12 @@ export default function AdminMediaPage() {
               value={editing.title}
               onChange={(title) => setEditing({ ...editing, title })}
             />
+            <LocalizedInput
+              label="الوصف (يظهر في المعرض)"
+              value={editing.description ?? emptyLocalized()}
+              onChange={(description) => setEditing({ ...editing, description })}
+              multiline
+            />
             <FileUploadField
               label="الصورة"
               folder="media"
@@ -110,6 +118,13 @@ export default function AdminMediaPage() {
             <YouTubeField
               value={editing.youtubeUrl}
               onChange={(youtubeUrl) => setEditing({ ...editing, youtubeUrl })}
+            />
+            <Input
+              label="تاريخ التصوير (اختياري)"
+              type="date"
+              dir="ltr"
+              value={editing.capturedAt ?? ""}
+              onChange={(e) => setEditing({ ...editing, capturedAt: e.target.value })}
             />
             <Input
               label="الترتيب"

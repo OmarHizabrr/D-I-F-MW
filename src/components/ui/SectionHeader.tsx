@@ -1,15 +1,21 @@
 import { cn } from "@/lib/utils";
+import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
 
 export function SectionHeader({
   title,
   subtitle,
   centered = true,
   className,
+  viewAllHref,
+  viewAllLabel = "عرض الكل",
 }: {
   title: string;
   subtitle?: string;
   centered?: boolean;
   className?: string;
+  viewAllHref?: string;
+  viewAllLabel?: string;
 }) {
   return (
     <div className={cn(centered && "text-center", "mb-8 md:mb-12", className)}>
@@ -22,6 +28,18 @@ export function SectionHeader({
         </p>
       )}
       <div className="mx-auto mt-4 h-1 w-16 rounded-full bg-brand-green" />
+      {viewAllHref && (
+        <Link
+          href={viewAllHref}
+          className={cn(
+            "mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-brand-green transition-colors hover:text-brand-green-dark dark:hover:text-brand-green-light",
+            centered && "mx-auto"
+          )}
+        >
+          {viewAllLabel}
+          <ArrowLeft className="h-4 w-4" />
+        </Link>
+      )}
     </div>
   );
 }

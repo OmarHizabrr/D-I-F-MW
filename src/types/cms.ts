@@ -73,6 +73,8 @@ export type ProjectItem = {
   lastUpdate: string;
   donorName: string;
   showDonor: boolean;
+  description?: LocalizedString;
+  youtubeUrl?: string;
   enabled: boolean;
   order: number;
 };
@@ -121,8 +123,10 @@ export type MediaItem = {
   id: string;
   type: "photo" | "video" | "opening" | "visit";
   title: LocalizedString;
+  description?: LocalizedString;
   imageUrl: string;
   youtubeUrl: string;
+  capturedAt?: string;
   enabled: boolean;
   order: number;
 };

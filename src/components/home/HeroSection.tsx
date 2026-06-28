@@ -1,7 +1,7 @@
 "use client";
 
+import Link from "next/link";
 import { useSiteContent } from "@/context/SiteContentContext";
-import { Button } from "@/components/ui/Button";
 import { youTubeEmbedUrl } from "@/lib/firebase/storage";
 
 export function HeroSection() {
@@ -46,17 +46,18 @@ export function HeroSection() {
           {text(hero.subtitle)}
         </p>
         <div className="mt-8 flex w-full flex-col items-stretch justify-center gap-3 sm:mt-10 sm:flex-row sm:items-center sm:gap-4">
-          <Button size="lg" fullWidth className="sm:!w-auto sm:min-w-[200px]">
+          <Link
+            href="/projects"
+            className="inline-flex h-12 items-center justify-center rounded-2xl bg-brand-green px-7 text-base font-semibold text-white shadow-sm transition-colors hover:bg-brand-green-dark w-full sm:w-auto sm:min-w-[200px]"
+          >
             {text(hero.ctaProjects)}
-          </Button>
-          <Button
-            size="lg"
-            variant="outline"
-            fullWidth
-            className="sm:!w-auto sm:min-w-[200px] !border-white !text-white hover:!bg-white/10"
+          </Link>
+          <Link
+            href="/#achievements"
+            className="inline-flex h-12 items-center justify-center rounded-2xl border-2 border-white px-7 text-base font-semibold text-white transition-colors hover:bg-white/10 w-full sm:w-auto sm:min-w-[200px]"
           >
             {text(hero.ctaTrack)}
-          </Button>
+          </Link>
         </div>
       </div>
     </section>

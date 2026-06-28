@@ -121,8 +121,12 @@ export function getDefaultNews(): NewsItem[] {
   return newsData.map((n, i) => ({
     id: String(n.id),
     title: L(n.title.ar, n.title.en, n.title.ny),
-    excerpt: L("", "", ""),
-    body: L("", "", ""),
+    excerpt: L(n.title.ar, n.title.en, n.title.ny),
+    body: L(
+      "تفاصيل الخبر متاحة من لوحة التحكم.",
+      "News details can be edited from the admin panel.",
+      "Zambiri zitha kukonzedwa kuchokera pa panel ya admin."
+    ),
     category: L(n.category.ar, n.category.en, n.category.ny),
     imageUrl: "",
     youtubeUrl: "",
@@ -274,6 +278,7 @@ export function getDefaultSectionTitles() {
     map: L(ar.projectMap.title, en.projectMap.title, ny.projectMap.title),
     mapSubtitle: L(ar.projectMap.subtitle, en.projectMap.subtitle, ny.projectMap.subtitle),
     mapHint: L(ar.projectMap.clickHint, en.projectMap.clickHint, ny.projectMap.clickHint),
+    viewAll: L(ar.common.viewAll, en.common.viewAll, ny.common.viewAll),
     projectsCountry: L(ar.ongoingProjects.country, en.ongoingProjects.country, ny.ongoingProjects.country),
     projectsProgress: L(ar.ongoingProjects.progress, en.ongoingProjects.progress, ny.ongoingProjects.progress),
     projectsLastUpdate: L(ar.ongoingProjects.lastUpdate, en.ongoingProjects.lastUpdate, ny.ongoingProjects.lastUpdate),

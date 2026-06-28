@@ -10,6 +10,7 @@ import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
 import { AdminItemList } from "@/components/admin/AdminItemList";
 import { LocalizedInput } from "@/components/admin/LocalizedInput";
 import { FileUploadField } from "@/components/admin/FileUploadField";
+import { YouTubeField } from "@/components/admin/YouTubeField";
 import { pickAdminLabel } from "@/lib/admin/pickAdminLabel";
 import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
@@ -42,6 +43,8 @@ function newProject(order: number): ProjectItem {
     lastUpdate: new Date().toISOString().slice(0, 10),
     donorName: "",
     showDonor: false,
+    description: emptyLocalized(),
+    youtubeUrl: "",
     enabled: true,
     order,
   };
@@ -124,6 +127,13 @@ export default function AdminProjectsPage() {
               onChange={(country) => setEditing({ ...editing, country })}
             />
 
+            <LocalizedInput
+              label="وصف المشروع (صفحة التفاصيل)"
+              value={editing.description ?? emptyLocalized()}
+              onChange={(description) => setEditing({ ...editing, description })}
+              multiline
+            />
+
             <div className="grid gap-4 sm:grid-cols-2">
               <Input
                 label="معرّف البرنامج"
@@ -173,6 +183,12 @@ export default function AdminProjectsPage() {
               folder="projects"
               value={editing.imageUrl}
               onChange={(imageUrl) => setEditing({ ...editing, imageUrl })}
+            />
+
+            <YouTubeField
+              value={editing.youtubeUrl ?? ""}
+              onChange={(youtubeUrl) => setEditing({ ...editing, youtubeUrl })}
+              label="فيديو المشروع (اختياري)"
             />
 
             <div className="flex flex-wrap gap-4">
