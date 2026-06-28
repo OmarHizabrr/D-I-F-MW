@@ -4,11 +4,43 @@ import Image from "next/image";
 import Link from "next/link";
 import { Phone, Mail, MapPin, Clock, Share2 } from "lucide-react";
 import { useSiteContent } from "@/context/SiteContentContext";
+import { useLocale } from "@/context/LocaleContext";
+import {
+  buildFooterLinkGroups,
+  footerUsesGroupedLinks,
+  navChildLabel,
+  type NavLabels,
+} from "@/lib/nav-utils";
 import { DonateButton } from "@/components/donation/DonateButton";
+import type { LocaleCode } from "@/types/cms";
 
 export function Footer() {
-  const { footer, topbar, navItems, sectionTitles, text } = useSiteContent();
-  const links = navItems
+  const { locale } = useLocale();
+  const { footer, topbar, navItems, programs, sectionTitles, text } = useSiteContent();
+
+  const navLabels: NavLabels = {
+    aboutOverview: sectionTitles.navAboutOverview,
+    team: sectionTitles.navTeam,
+    faq: sectionTitles.navFaq,
+    ourWork: sectionTitles.navOurWork,
+    allProjects: sectionTitles.navAllProjects,
+    successStories: sectionTitles.navSuccessStories,
+    stories: sectionTitles.navStories,
+    news: sectionTitles.navNews,
+    events: sectionTitles.navEvents,
+    media: sectionTitles.navMedia,
+    volunteer: sectionTitles.navVolunteer,
+    contact: sectionTitles.navContact,
+    shareStory: sectionTitles.navShareStory,
+    resources: sectionTitles.navResources,
+  };
+
+  const grouped = footerUsesGroupedLinks(footer.quickLinkIds);
+  const linkGroups = grouped
+    ? buildFooterLinkGroups(navItems, programs, navLabels, footer.quickLinkIds)
+    : [];
+
+  const flatLinks = navItems
     .filter((n) => n.enabled && footer.quickLinkIds.includes(n.id))
     .sort((a, b) => a.order - b.order);
 
@@ -19,8 +51,8 @@ export function Footer() {
   return (
     <footer className="safe-bottom border-t border-border-subtle bg-brand-green-dark text-white">
       <div className="container-dif section-padding !pb-8">
-        <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-4">
-          <div>
+        <div className="grid gap-10 md:grid-cols-2 xl:grid-cols-12">
+          <div className="xl:col-span-3">
             <div className="mb-4 flex items-center gap-3">
               <Image
                 src="/Image/login.png"
@@ -38,20 +70,42 @@ export function Footer() {
             <DonateButton variant="primary" size="sm" />
           </div>
 
-          <div>
+          <div className="xl:col-span-5">
             <h3 className="mb-4 font-bold">{text(sectionTitles.footerQuickLinks)}</h3>
-            <ul className="space-y-2">
-              {links.map((item) => (
-                <li key={item.id}>
-                  <Link href={item.href} className="text-sm text-white/80 hover:text-white">
-                    {text(item.label)}
-                  </Link>
-                </li>
-              ))}
-            </ul>
+            {grouped ? (
+              <div className="grid gap-6 sm:grid-cols-2">
+                {linkGroups.map((group) => (
+                  <div key={group.id}>
+                    <h4 className="mb-2 text-sm font-semibold text-white/90">{text(group.title)}</h4>
+                    <ul className="space-y-1.5">
+                      {group.links.map((link) => (
+                        <li key={link.id}>
+                          <Link
+                            href={link.href}
+                            className="text-sm text-white/75 transition-colors hover:text-white"
+                          >
+                            {navChildLabel(link, locale as LocaleCode)}
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <ul className="space-y-2">
+                {flatLinks.map((item) => (
+                  <li key={item.id}>
+                    <Link href={item.href} className="text-sm text-white/80 hover:text-white">
+                      {text(item.label)}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
 
-          <div>
+          <div className="xl:col-span-2">
             <h3 className="mb-4 font-bold">{text(sectionTitles.footerContactInfo)}</h3>
             <ul className="space-y-3 text-sm text-white/80">
               <li className="flex items-start gap-2">
@@ -84,7 +138,7 @@ export function Footer() {
             </ul>
           </div>
 
-          <div>
+          <div className="xl:col-span-2">
             <h3 className="mb-4 font-bold">{text(sectionTitles.footerWorkingHours)}</h3>
             <p className="mb-4 flex items-start gap-2 text-sm text-white/80">
               <Clock className="mt-0.5 h-4 w-4 shrink-0" />

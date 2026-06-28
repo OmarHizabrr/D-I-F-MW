@@ -304,7 +304,7 @@ export function getDefaultFooter(): FooterContent {
     address: L(ar.footer.address, en.footer.address, ny.footer.address),
     workingHours: L(ar.footer.hours, en.footer.hours, ny.footer.hours),
     rights: L(ar.footer.rights, en.footer.rights, ny.footer.rights),
-    quickLinkIds: ["home", "about", "projects", "news", "stories", "media", "contact"],
+    quickLinkIds: ["about", "impact", "newsEvents", "joinUs", "resources"],
     mapsUrl: "",
   };
 }

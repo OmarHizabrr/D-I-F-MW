@@ -171,7 +171,7 @@ const ny = {
 
   footer: {
     description: "Development and Investment Foundation — tikugwira ntchito chifukwa cha chitukuko chokhalitsa.",
-    quickLinks: "Maulalo Ofulumira",
+    quickLinks: "Yang'anani Tsamba",
     contactInfo: "Zambiri Zamakontakiti",
     address: "Sana'a, Republic of Yemen",
     workingHours: "Nthawi Yogwira Ntchito",

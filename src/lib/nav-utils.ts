@@ -110,3 +110,54 @@ export function navChildLabel(child: NavChild, locale: LocaleCode): string {
 export function navHasDropdown(item: NavItem, programs: ProgramItem[], labels: NavLabels): boolean {
   return resolveNavChildren(item, programs, labels).length > 0;
 }
+
+export type FooterLinkGroup = {
+  id: string;
+  title: LocalizedString;
+  links: NavChild[];
+};
+
+export function buildFooterLinkGroups(
+  navItems: NavItem[],
+  programs: ProgramItem[],
+  labels: NavLabels,
+  selectedIds: string[]
+): FooterLinkGroup[] {
+  const enabled = navItems.filter((n) => n.enabled);
+  const groups: FooterLinkGroup[] = [];
+
+  for (const id of selectedIds) {
+    const item = enabled.find((n) => n.id === id);
+    if (!item) continue;
+
+    const children = resolveNavChildren(item, programs, labels);
+    groups.push({
+      id: item.id,
+      title: item.label,
+      links:
+        children.length > 0
+          ? children
+          : [{ id: `${item.id}-link`, label: item.label, href: item.href }],
+    });
+  }
+
+  return groups;
+}
+
+const LEGACY_FLAT_NAV_IDS = new Set([
+  "home",
+  "ourWork",
+  "projects",
+  "successStories",
+  "news",
+  "events",
+  "stories",
+  "volunteer",
+  "faq",
+  "media",
+  "contact",
+]);
+
+export function footerUsesGroupedLinks(quickLinkIds: string[]): boolean {
+  return quickLinkIds.some((id) => !LEGACY_FLAT_NAV_IDS.has(id));
+}

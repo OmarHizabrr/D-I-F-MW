@@ -171,7 +171,7 @@ const en = {
 
   footer: {
     description: "Development and Investment Foundation — working for sustainable development and positive community impact.",
-    quickLinks: "Quick Links",
+    quickLinks: "Explore the Site",
     contactInfo: "Contact Information",
     address: "Sana'a, Republic of Yemen",
     workingHours: "Working Hours",

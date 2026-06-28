@@ -1,14 +1,18 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { RotateCcw } from "lucide-react";
 import FirestoreApi from "@/services/firestoreApi";
 import { useAuth } from "@/context/AuthContext";
+import { getDefaultFooter, getDefaultPrograms } from "@/data/default-content";
+import { buildFooterLinkGroups, footerUsesGroupedLinks, navHasDropdown } from "@/lib/nav-utils";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { LocalizedInput } from "@/components/admin/LocalizedInput";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent } from "@/components/ui/Card";
 import { Spinner } from "@/components/ui/Spinner";
+import { pickAdminLabel } from "@/lib/admin/pickAdminLabel";
 import type { FooterContent, NavItem } from "@/types/cms";
 import { emptyLocalized } from "@/types/cms";
 
@@ -21,6 +25,23 @@ const defaultFooter: FooterContent = {
   rights: emptyLocalized(),
   mapsUrl: "",
   quickLinkIds: [],
+};
+
+const defaultNavLabels = {
+  aboutOverview: { ar: "نبذة", en: "About", ny: "Za" },
+  team: { ar: "الفريق", en: "Team", ny: "Gulu" },
+  faq: { ar: "FAQ", en: "FAQ", ny: "FAQ" },
+  ourWork: { ar: "أعمالنا", en: "Our Work", ny: "Ntchito" },
+  allProjects: { ar: "المشاريع", en: "Projects", ny: "Mapulojekiti" },
+  successStories: { ar: "قصص النجاح", en: "Success", ny: "Nkhani" },
+  stories: { ar: "قصصنا", en: "Stories", ny: "Nkhani" },
+  news: { ar: "أخبار", en: "News", ny: "Nkhani" },
+  events: { ar: "فعاليات", en: "Events", ny: "Zochitika" },
+  media: { ar: "وسائط", en: "Media", ny: "Media" },
+  volunteer: { ar: "تطوع", en: "Volunteer", ny: "Kuthandiza" },
+  contact: { ar: "تواصل", en: "Contact", ny: "Contact" },
+  shareStory: { ar: "شارك قصتك", en: "Share", ny: "Gawani" },
+  resources: { ar: "موارد", en: "Resources", ny: "Zothandizira" },
 };
 
 export default function AdminFooterPage() {
@@ -84,6 +105,18 @@ export default function AdminFooterPage() {
     }
   }
 
+  function handleRestoreQuickLinks() {
+    setData((prev) => ({
+      ...prev,
+      quickLinkIds: getDefaultFooter().quickLinkIds,
+    }));
+    setMessage("تم استعادة مجموعات روابط التذييل الافتراضية — احفظ لتطبيقها");
+  }
+
+  const groupedPreview = footerUsesGroupedLinks(data.quickLinkIds)
+    ? buildFooterLinkGroups(navItems, getDefaultPrograms(), defaultNavLabels, data.quickLinkIds)
+    : [];
+
   if (loading) {
     return (
       <div className="flex justify-center py-16">
@@ -142,23 +175,66 @@ export default function AdminFooterPage() {
           />
 
           <div>
-            <p className="mb-3 text-sm font-medium">روابط سريعة في التذييل</p>
-            <div className="flex flex-wrap gap-2">
-              {navItems.map((item) => (
-                <label
-                  key={item.id}
-                  className="flex cursor-pointer items-center gap-2 rounded-xl border border-border px-3 py-2 text-sm"
-                >
-                  <input
-                    type="checkbox"
-                    checked={data.quickLinkIds.includes(item.id)}
-                    onChange={() => toggleLink(item.id)}
-                    className="h-4 w-4 rounded border-border text-brand-green"
-                  />
-                  {item.label.ar || item.label.en || item.id}
-                </label>
-              ))}
+            <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+              <p className="text-sm font-medium">مجموعات روابط التذييل</p>
+              <Button type="button" variant="outline" size="sm" onClick={handleRestoreQuickLinks}>
+                <RotateCcw className="h-3.5 w-3.5" />
+                استعادة الافتراضي
+              </Button>
             </div>
+            <p className="mb-3 text-xs text-muted-foreground">
+              اختر مجموعات القائمة الرئيسية — كل مجموعة تعرض روابطها الفرعية في التذييل
+            </p>
+            <div className="flex flex-col gap-2">
+              {navItems
+                .filter((item) => item.enabled)
+                .sort((a, b) => a.order - b.order)
+                .map((item) => {
+                  const hasMenu = navHasDropdown(item, getDefaultPrograms(), defaultNavLabels);
+                  const checked = data.quickLinkIds.includes(item.id);
+                  return (
+                    <label
+                      key={item.id}
+                      className="flex cursor-pointer items-start gap-3 rounded-xl border border-border px-3 py-3 text-sm"
+                    >
+                      <input
+                        type="checkbox"
+                        checked={checked}
+                        onChange={() => toggleLink(item.id)}
+                        className="mt-0.5 h-4 w-4 shrink-0 rounded border-border text-brand-green"
+                      />
+                      <span className="min-w-0">
+                        <span className="font-medium">{pickAdminLabel(item.label)}</span>
+                        <span className="ms-2 text-xs text-muted-foreground" dir="ltr">
+                          {item.href}
+                        </span>
+                        {hasMenu && (
+                          <span className="mt-1 block text-xs text-brand-green">
+                            قائمة منسدلة — تُعرض روابطها الفرعية في التذييل
+                          </span>
+                        )}
+                      </span>
+                    </label>
+                  );
+                })}
+            </div>
+            {groupedPreview.length > 0 && (
+              <div className="mt-4 rounded-xl bg-border-subtle/50 p-4">
+                <p className="mb-2 text-xs font-semibold text-muted-foreground">معاينة التجميع</p>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  {groupedPreview.map((group) => (
+                    <div key={group.id}>
+                      <p className="text-xs font-bold">{pickAdminLabel(group.title)}</p>
+                      <ul className="mt-1 space-y-0.5 text-xs text-muted-foreground">
+                        {group.links.map((link) => (
+                          <li key={link.id}>· {pickAdminLabel(link.label)}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>
