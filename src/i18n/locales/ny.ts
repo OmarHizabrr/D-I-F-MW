@@ -30,6 +30,9 @@ const ny = {
     faq: "Mafunso Ofunsidwa Kawiri",
     volunteer: "Kuthandiza",
     resources: "Zothandizira",
+    impact: "Zotsatira Zathu",
+    newsEvents: "Nkhani ndi Zochitika",
+    joinUs: "Lowani Nafe",
   },
 
   hero: {

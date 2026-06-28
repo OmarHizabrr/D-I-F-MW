@@ -6,6 +6,8 @@ import FirestoreApi from "@/services/firestoreApi";
 import { useAuth } from "@/context/AuthContext";
 import { useAdminCrud } from "@/hooks/useAdminCrud";
 import { restoreDefaultNavItems } from "@/services/navService";
+import { navHasDropdown } from "@/lib/nav-utils";
+import { getDefaultPrograms } from "@/data/default-content";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { AdminFormDialog } from "@/components/admin/AdminFormDialog";
 import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
@@ -23,6 +25,25 @@ const api = FirestoreApi.Api;
 function newItem(order: number): NavItem {
   return { id: "", label: emptyLocalized(), href: "#", order, enabled: true };
 }
+
+const dropdownNavIds = new Set(["about", "impact", "newsEvents", "joinUs", "projects"]);
+
+const defaultNavLabels = {
+  aboutOverview: { ar: "نبذة عن المؤسسة", en: "About", ny: "Za Fundo" },
+  team: { ar: "فريق العمل", en: "Our Team", ny: "Gulu Lathu" },
+  faq: { ar: "الأسئلة الشائعة", en: "FAQ", ny: "Mafunso" },
+  ourWork: { ar: "أعمالنا", en: "Our Work", ny: "Ntchito" },
+  allProjects: { ar: "جميع المشاريع", en: "All Projects", ny: "Mapulojekiti" },
+  successStories: { ar: "قصص النجاح", en: "Success Stories", ny: "Nkhani" },
+  stories: { ar: "قصصنا", en: "Our Stories", ny: "Nkhani" },
+  news: { ar: "الأخبار", en: "News", ny: "Nkhani" },
+  events: { ar: "الفعاليات", en: "Events", ny: "Zochitika" },
+  media: { ar: "مكتبة الوسائط", en: "Media", ny: "Media" },
+  volunteer: { ar: "التطوع", en: "Volunteer", ny: "Kuthandiza" },
+  contact: { ar: "تواصل معنا", en: "Contact", ny: "Contact" },
+  shareStory: { ar: "شارك قصتك", en: "Share Story", ny: "Gawani" },
+  resources: { ar: "الموارد", en: "Resources", ny: "Zothandizira" },
+};
 
 export default function AdminNavigationPage() {
   const { user } = useAuth();
@@ -152,7 +173,13 @@ export default function AdminNavigationPage() {
         onEdit={setEditing}
         onDelete={setDeleteTarget}
         renderTitle={(item) => pickAdminLabel(item.label)}
-        renderSubtitle={(item) => `${item.href} · ترتيب ${item.order}`}
+        renderSubtitle={(item) => {
+          const hasMenu =
+            dropdownNavIds.has(item.id) ||
+            navHasDropdown(item, getDefaultPrograms(), defaultNavLabels);
+          const menuHint = hasMenu ? " · قائمة منسدلة" : "";
+          return `${item.href} · ترتيب ${item.order}${menuHint}`;
+        }}
       />
     </div>
   );

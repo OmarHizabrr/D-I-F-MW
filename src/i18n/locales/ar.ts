@@ -30,6 +30,9 @@ const ar = {
     faq: "الأسئلة الشائعة",
     volunteer: "التطوع",
     resources: "الموارد والتقارير",
+    impact: "أثرنا",
+    newsEvents: "الأخبار والفعاليات",
+    joinUs: "شارك معنا",
   },
 
   hero: {

@@ -30,6 +30,9 @@ const en = {
     faq: "FAQ",
     volunteer: "Volunteer",
     resources: "Resources",
+    impact: "Our Impact",
+    newsEvents: "News & Events",
+    joinUs: "Get Involved",
   },
 
   hero: {

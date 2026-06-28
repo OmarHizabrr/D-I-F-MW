@@ -47,8 +47,8 @@ function DesktopNavItem({
         {label}
         <ChevronDown className="h-3.5 w-3.5 opacity-60 transition-transform group-hover:rotate-180" />
       </Link>
-      <div className="invisible absolute start-0 top-full z-50 min-w-[12rem] pt-1 opacity-0 transition-all group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100">
-        <div className="overflow-hidden rounded-2xl border border-border-subtle bg-nav-bg py-1 shadow-lg">
+      <div className="invisible absolute start-0 top-full z-50 min-w-[14rem] max-w-[min(20rem,calc(100vw-2rem))] pt-1 opacity-0 transition-all group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100">
+        <div className="max-h-[min(70vh,24rem)] overflow-y-auto overflow-x-hidden rounded-2xl border border-border-subtle bg-nav-bg py-1 shadow-lg">
           {children.map((child) => (
             <Link
               key={child.id}
@@ -128,9 +128,20 @@ export function Navigation() {
   const items = navItems.filter((i) => i.enabled).sort((a, b) => a.order - b.order);
 
   const navLabels = {
-    team: sectionTitles.navTeam,
-    allProjects: sectionTitles.navAllProjects,
     aboutOverview: sectionTitles.navAboutOverview,
+    team: sectionTitles.navTeam,
+    faq: sectionTitles.navFaq,
+    ourWork: sectionTitles.navOurWork,
+    allProjects: sectionTitles.navAllProjects,
+    successStories: sectionTitles.navSuccessStories,
+    stories: sectionTitles.navStories,
+    news: sectionTitles.navNews,
+    events: sectionTitles.navEvents,
+    media: sectionTitles.navMedia,
+    volunteer: sectionTitles.navVolunteer,
+    contact: sectionTitles.navContact,
+    shareStory: sectionTitles.navShareStory,
+    resources: sectionTitles.navResources,
   };
 
   useEffect(() => {
