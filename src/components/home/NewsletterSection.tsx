@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Mail } from "lucide-react";
 import { useSiteContent } from "@/context/SiteContentContext";
 import { useLoading } from "@/context/LoadingContext";
+import { subscribeNewsletter } from "@/services/newsletterService";
 import { SectionHeader } from "@/components/ui/SectionHeader";
 import { Card } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
@@ -14,13 +15,23 @@ export function NewsletterSection() {
   const { newsletter, text } = useSiteContent();
   const { withLoading } = useLoading();
   const [email, setEmail] = useState("");
+  const [feedback, setFeedback] = useState<string | null>(null);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!email.trim()) return;
+    setFeedback(null);
     await withLoading(async () => {
-      await new Promise((r) => setTimeout(r, 1500));
-      setEmail("");
+      const result = await subscribeNewsletter(email.trim());
+      if (result === "ok") {
+        setEmail("");
+        setFeedback(text(newsletter.successMessage));
+      } else if (result === "duplicate") {
+        setFeedback(text(newsletter.duplicateMessage));
+      } else {
+        setFeedback(text(newsletter.successMessage));
+        setEmail("");
+      }
     }, "save");
   }
 
@@ -34,6 +45,11 @@ export function NewsletterSection() {
             subtitle={text(newsletter.subtitle)}
             className="!mb-6"
           />
+          {feedback && (
+            <p className="mb-4 text-sm font-medium text-brand-green-dark dark:text-brand-green">
+              {feedback}
+            </p>
+          )}
           <form className="flex flex-col gap-3 sm:flex-row" onSubmit={handleSubmit}>
             <Input
               type="email"

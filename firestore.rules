@@ -105,9 +105,49 @@ service cloud.firestore {
       allow update, delete: if isAdmin();
     }
 
+    // — طلبات التبرع —
+    match /donation_intents/global/donation_intents/{docId} {
+      allow read: if isAdmin();
+      allow create: if
+        request.resource.data.amount is number &&
+        request.resource.data.amount >= 1 &&
+        request.resource.data.amount <= 1000000 &&
+        request.resource.data.currencyCode is string &&
+        request.resource.data.donorName is string &&
+        request.resource.data.donorName.size() >= 2 &&
+        request.resource.data.donorEmail is string &&
+        request.resource.data.donorEmail.matches('.*@.*\\..*') &&
+        request.resource.data.status in ['recorded', 'redirected'] &&
+        request.resource.data.read == false;
+      allow update, delete: if isAdmin();
+    }
+
+    // — رسائل التواصل —
+    match /contact_messages/global/contact_messages/{docId} {
+      allow read: if isAdmin();
+      allow create: if
+        request.resource.data.name is string &&
+        request.resource.data.name.size() >= 2 &&
+        request.resource.data.email is string &&
+        request.resource.data.email.matches('.*@.*\\..*') &&
+        request.resource.data.message is string &&
+        request.resource.data.message.size() >= 5 &&
+        request.resource.data.read == false;
+      allow update, delete: if isAdmin();
+    }
+
+    // — مشتركو النشرة —
+    match /newsletter_subscribers/global/newsletter_subscribers/{docId} {
+      allow read: if isAdmin();
+      allow create: if
+        request.resource.data.email is string &&
+        request.resource.data.email.matches('.*@.*\\..*');
+      allow update, delete: if isAdmin();
+    }
+
     // — محتوى الموقع (قراءة عامة، كتابة للمدراء فقط) —
     match /{collection}/{parentId}/{subCollection}/{documentId} {
-      allow read: if !(collection in ['users', 'testimonials']);
+      allow read: if !(collection in ['users', 'testimonials', 'donation_intents', 'contact_messages', 'newsletter_subscribers']);
       allow write: if isAdmin();
     }
   }

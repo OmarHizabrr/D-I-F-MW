@@ -103,6 +103,53 @@ class FirestoreApi {
     return this.getSubDocument(COLLECTIONS.newsletter, SITE_ROOT, COLLECTIONS.newsletter, "content");
   }
 
+  getDonationDoc() {
+    return this.getSubDocument(COLLECTIONS.donation, SITE_ROOT, COLLECTIONS.donation, "content");
+  }
+
+  getDonationIntentsCollection() {
+    return this.getSubCollection(COLLECTIONS.donationIntents, SITE_ROOT, COLLECTIONS.donationIntents);
+  }
+
+  getDonationIntentDoc(id: string) {
+    return this.getSubDocument(
+      COLLECTIONS.donationIntents,
+      SITE_ROOT,
+      COLLECTIONS.donationIntents,
+      id
+    );
+  }
+
+  getContactMessagesCollection() {
+    return this.getSubCollection(COLLECTIONS.contactMessages, SITE_ROOT, COLLECTIONS.contactMessages);
+  }
+
+  getContactMessageDoc(id: string) {
+    return this.getSubDocument(
+      COLLECTIONS.contactMessages,
+      SITE_ROOT,
+      COLLECTIONS.contactMessages,
+      id
+    );
+  }
+
+  getNewsletterSubscribersCollection() {
+    return this.getSubCollection(
+      COLLECTIONS.newsletterSubscribers,
+      SITE_ROOT,
+      COLLECTIONS.newsletterSubscribers
+    );
+  }
+
+  getNewsletterSubscriberDoc(id: string) {
+    return this.getSubDocument(
+      COLLECTIONS.newsletterSubscribers,
+      SITE_ROOT,
+      COLLECTIONS.newsletterSubscribers,
+      id
+    );
+  }
+
   getNavItemsCollection() {
     return this.getSubCollection(COLLECTIONS.navItems, SITE_ROOT, COLLECTIONS.navItems);
   }
@@ -197,6 +244,14 @@ class FirestoreApi {
 
   getWhyUsDoc(id: string) {
     return this.getSubDocument(COLLECTIONS.whyUs, SITE_ROOT, COLLECTIONS.whyUs, id);
+  }
+
+  getTeamCollection() {
+    return this.getSubCollection(COLLECTIONS.team, SITE_ROOT, COLLECTIONS.team);
+  }
+
+  getTeamDoc(id: string) {
+    return this.getSubDocument(COLLECTIONS.team, SITE_ROOT, COLLECTIONS.team, id);
   }
 
   getAdminsCollection() {

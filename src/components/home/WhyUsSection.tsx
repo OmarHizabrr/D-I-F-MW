@@ -10,7 +10,7 @@ export function WhyUsSection() {
   const items = whyUs.filter((i) => i.enabled).sort((a, b) => a.order - b.order);
 
   return (
-    <section id="about" className="section-padding bg-brand-green/5 dark:bg-brand-green/10">
+    <section id="why-us" className="section-padding bg-brand-green/5 dark:bg-brand-green/10">
       <div className="container-dif">
         <SectionHeader
           title={text(sectionTitles.whyUs)}

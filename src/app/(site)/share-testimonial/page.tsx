@@ -147,7 +147,7 @@ export default function ShareTestimonialPage() {
                 <StatusLinkButton variant="secondary" onClick={() => setSuccess(false)}>
                   مشاركة رأي آخر
                 </StatusLinkButton>
-                <StatusLinkButton onClick={() => router.push("/#about")}>
+                <StatusLinkButton onClick={() => router.push("/about")}>
                   العودة للموقع
                 </StatusLinkButton>
               </>

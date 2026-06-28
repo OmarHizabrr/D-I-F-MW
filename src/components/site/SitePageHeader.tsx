@@ -4,11 +4,17 @@ import Link from "next/link";
 import { ArrowRight, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 
+type Breadcrumb = {
+  label: string;
+  href?: string;
+};
+
 type SitePageHeaderProps = {
   title: string;
   subtitle?: string;
   backHref?: string;
   backLabel?: string;
+  breadcrumbs?: Breadcrumb[];
   className?: string;
 };
 
@@ -17,8 +23,11 @@ export function SitePageHeader({
   subtitle,
   backHref = "/",
   backLabel = "العودة للرئيسية",
+  breadcrumbs,
   className,
 }: SitePageHeaderProps) {
+  const crumbs = breadcrumbs ?? [{ label: title }];
+
   return (
     <div className={cn("border-b border-border-subtle bg-surface", className)}>
       <div className="container-dif py-8 sm:py-10">
@@ -35,12 +44,22 @@ export function SitePageHeader({
         {subtitle && (
           <p className="mt-3 max-w-3xl text-sm text-muted-foreground sm:text-base">{subtitle}</p>
         )}
-        <div className="mt-4 flex items-center gap-1 text-xs text-muted-foreground">
+        <div className="mt-4 flex flex-wrap items-center gap-1 text-xs text-muted-foreground">
           <Link href="/" className="hover:text-brand-green">
             الرئيسية
           </Link>
-          <ChevronRight className="h-3 w-3" />
-          <span>{title}</span>
+          {crumbs.map((crumb, i) => (
+            <span key={`${crumb.label}-${i}`} className="flex items-center gap-1">
+              <ChevronRight className="h-3 w-3" />
+              {crumb.href ? (
+                <Link href={crumb.href} className="hover:text-brand-green">
+                  {crumb.label}
+                </Link>
+              ) : (
+                <span>{crumb.label}</span>
+              )}
+            </span>
+          ))}
         </div>
       </div>
     </div>

@@ -20,6 +20,10 @@ const en = {
     reports: "Reports",
     media: "Media Library",
     contact: "Contact Us",
+    stories: "Our Stories",
+    team: "Our Team",
+    allProjects: "All Projects",
+    aboutOverview: "About the Foundation",
   },
 
   hero: {
@@ -133,6 +137,27 @@ const en = {
     subtitle: "Get the latest news and reports",
     placeholder: "Enter your email",
     subscribe: "Subscribe Now",
+    successMessage: "Successfully subscribed!",
+    duplicateMessage: "This email is already subscribed.",
+  },
+
+  donation: {
+    modalTitle: "Support Our Mission",
+    modalSubtitle: "Your contribution makes a lasting difference in rural communities",
+    amountLabel: "Donation Amount",
+    customAmountLabel: "Other amount",
+    nameLabel: "Full Name",
+    emailLabel: "Email Address",
+    submitLabel: "Donate Securely",
+    successMessage: "Thank you! Your donation has been received.",
+    ctaTitle: "Make a Difference",
+    ctaSubtitle:
+      "Your generous donation helps us continue our vital work and bring lasting change to those who need it most",
+    ctaButton: "Give Now",
+    navButton: "Donate",
+    heroButton: "Donate Now",
+    paymentHintRecord: "Your donation will be recorded and we will contact you soon",
+    paymentHintExternal: "You will be redirected to complete payment securely",
   },
 
   footer: {
@@ -158,6 +183,28 @@ const en = {
     print: "Print",
     loading: "Loading...",
     viewAll: "View All",
+    backHome: "Back to Home",
+    home: "Home",
+    cancel: "Cancel",
+    ok: "OK",
+  },
+
+  pages: {
+    aboutIntro:
+      "The Development and Investment Foundation is a non-profit organization implementing development and humanitarian projects across multiple countries with full transparency and continuous monitoring.",
+    teamTitle: "Our Team",
+    teamSubtitle: "The people leading our field work",
+    contactTitle: "Contact Us",
+    contactSubtitle: "We welcome your questions and suggestions",
+    storiesTitle: "Our Stories",
+    storiesSubtitle: "Real testimonials from beneficiaries and communities",
+    contactFormName: "Full Name",
+    contactFormEmail: "Email Address",
+    contactFormMessage: "Your Message",
+    contactFormSubmit: "Send Message",
+    contactFormSuccess: "Thank you for reaching out! We will respond as soon as possible.",
+    contactMapsLink: "View on Map",
+    shareStory: "Share Your Story",
   },
 
   loading: {

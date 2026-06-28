@@ -13,6 +13,7 @@ import { TestimonialsSection } from "./TestimonialsSection";
 import { LicensesSection } from "./LicensesSection";
 import { ProjectMapSection } from "./ProjectMapSection";
 import { NewsletterSection } from "./NewsletterSection";
+import { DonateSection } from "./DonateSection";
 import { ProjectsTableSection } from "./ProjectsTableSection";
 
 export function HomePage() {
@@ -31,6 +32,7 @@ export function HomePage() {
       <LicensesSection />
       <ProjectMapSection />
       <ProjectsTableSection />
+      <DonateSection />
       <NewsletterSection />
     </div>
   );

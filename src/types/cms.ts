@@ -18,10 +18,27 @@ export type TopbarContent = {
   socialLinks: SocialLink[];
 };
 
+export type NavChild = {
+  id: string;
+  label: LocalizedString;
+  href: string;
+};
+
 export type NavItem = {
   id: string;
   label: LocalizedString;
   href: string;
+  order: number;
+  enabled: boolean;
+  children?: NavChild[];
+};
+
+export type TeamMember = {
+  id: string;
+  name: LocalizedString;
+  role: LocalizedString;
+  bio: LocalizedString;
+  imageUrl: string;
   order: number;
   enabled: boolean;
 };
@@ -178,6 +195,7 @@ export type FooterContent = {
   address: LocalizedString;
   workingHours: LocalizedString;
   rights: LocalizedString;
+  mapsUrl: string;
   quickLinkIds: string[];
 };
 
@@ -186,6 +204,65 @@ export type NewsletterContent = {
   subtitle: LocalizedString;
   placeholder: LocalizedString;
   buttonLabel: LocalizedString;
+  successMessage: LocalizedString;
+  duplicateMessage: LocalizedString;
+};
+
+export type DonationPaymentMode = "external" | "record";
+
+export type DonationContent = {
+  enabled: boolean;
+  currencyCode: string;
+  currencySymbol: string;
+  presetAmounts: number[];
+  allowCustomAmount: boolean;
+  minAmount: number;
+  paymentMode: DonationPaymentMode;
+  externalPaymentUrl: string;
+  modalTitle: LocalizedString;
+  modalSubtitle: LocalizedString;
+  amountLabel: LocalizedString;
+  customAmountLabel: LocalizedString;
+  nameLabel: LocalizedString;
+  emailLabel: LocalizedString;
+  submitLabel: LocalizedString;
+  successMessage: LocalizedString;
+  ctaTitle: LocalizedString;
+  ctaSubtitle: LocalizedString;
+  ctaButtonLabel: LocalizedString;
+  navButtonLabel: LocalizedString;
+  showHeroButton: boolean;
+  heroButtonLabel: LocalizedString;
+  cancelLabel: LocalizedString;
+  okLabel: LocalizedString;
+  paymentHintRecord: LocalizedString;
+  paymentHintExternal: LocalizedString;
+};
+
+export type DonationIntentRecord = {
+  id: string;
+  amount: number;
+  currencyCode: string;
+  donorName: string;
+  donorEmail: string;
+  status: "recorded" | "redirected";
+  submittedAt?: string;
+  read?: boolean;
+};
+
+export type ContactMessage = {
+  id: string;
+  name: string;
+  email: string;
+  message: string;
+  read: boolean;
+  submittedAt: string;
+};
+
+export type NewsletterSubscriber = {
+  id: string;
+  email: string;
+  subscribedAt: string;
 };
 
 export type SiteConfig = {

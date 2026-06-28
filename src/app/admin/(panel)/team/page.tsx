@@ -9,20 +9,29 @@ import { AdminFormDialog } from "@/components/admin/AdminFormDialog";
 import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
 import { AdminItemList } from "@/components/admin/AdminItemList";
 import { LocalizedInput } from "@/components/admin/LocalizedInput";
+import { FileUploadField } from "@/components/admin/FileUploadField";
 import { pickAdminLabel } from "@/lib/admin/pickAdminLabel";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import { Spinner } from "@/components/ui/Spinner";
-import type { NavItem } from "@/types/cms";
+import type { TeamMember } from "@/types/cms";
 import { emptyLocalized } from "@/types/cms";
 
 const api = FirestoreApi.Api;
 
-function newItem(order: number): NavItem {
-  return { id: "", label: emptyLocalized(), href: "#", order, enabled: true };
+function newMember(order: number): TeamMember {
+  return {
+    id: "",
+    name: emptyLocalized(),
+    role: emptyLocalized(),
+    bio: emptyLocalized(),
+    imageUrl: "",
+    order,
+    enabled: true,
+  };
 }
 
-export default function AdminNavigationPage() {
+export default function AdminTeamPage() {
   const { user } = useAuth();
   const {
     items,
@@ -35,10 +44,10 @@ export default function AdminNavigationPage() {
     setDeleteTarget,
     handleSave,
     handleDeleteConfirm,
-  } = useAdminCrud<NavItem>({
-    getCollection: () => api.getNavItemsCollection(),
-    getDocRef: (id) => api.getNavItemDoc(id),
-    newIdPrefix: "nav",
+  } = useAdminCrud<TeamMember>({
+    getCollection: () => api.getTeamCollection(),
+    getDocRef: (id) => api.getTeamDoc(id),
+    newIdPrefix: "team",
     user: user ? { uid: user.uid, displayName: user.email ?? undefined } : null,
   });
 
@@ -53,12 +62,12 @@ export default function AdminNavigationPage() {
   return (
     <div>
       <AdminPageHeader
-        title="القائمة الرئيسية"
-        description="إدارة روابط التنقل في الموقع"
+        title="فريق العمل"
+        description="إدارة أعضاء الفريق في صفحة /about/team"
         actions={
-          <Button onClick={() => setEditing(newItem(items.length + 1))}>
+          <Button onClick={() => setEditing(newMember(items.length + 1))}>
             <Plus className="h-4 w-4" />
-            إضافة رابط
+            إضافة عضو
           </Button>
         }
       />
@@ -66,23 +75,33 @@ export default function AdminNavigationPage() {
       <AdminFormDialog
         open={!!editing}
         onClose={() => setEditing(null)}
-        title={editing?.id ? "تعديل رابط" : "رابط جديد"}
+        title={editing?.id ? "تعديل عضو" : "عضو جديد"}
         onSave={handleSave}
         saving={saving}
       >
         {editing && (
           <>
             <LocalizedInput
-              label="التسمية"
-              value={editing.label}
-              onChange={(label) => setEditing({ ...editing, label })}
+              label="الاسم"
+              value={editing.name}
+              onChange={(name) => setEditing({ ...editing, name })}
             />
-            <Input
-              label="الرابط"
-              dir="ltr"
-              value={editing.href}
-              onChange={(e) => setEditing({ ...editing, href: e.target.value })}
-              hint="مثال: /about أو /projects أو /contact"
+            <LocalizedInput
+              label="المنصب"
+              value={editing.role}
+              onChange={(role) => setEditing({ ...editing, role })}
+            />
+            <LocalizedInput
+              label="نبذة"
+              value={editing.bio}
+              onChange={(bio) => setEditing({ ...editing, bio })}
+              multiline
+            />
+            <FileUploadField
+              label="الصورة"
+              folder="team"
+              value={editing.imageUrl}
+              onChange={(imageUrl) => setEditing({ ...editing, imageUrl })}
             />
             <Input
               label="الترتيب"
@@ -108,17 +127,17 @@ export default function AdminNavigationPage() {
         onClose={() => setDeleteTarget(null)}
         onConfirm={handleDeleteConfirm}
         loading={!!deletingId}
-        message={`هل أنت متأكد من حذف «${pickAdminLabel(deleteTarget?.label)}»؟`}
+        message={`هل أنت متأكد من حذف «${pickAdminLabel(deleteTarget?.name)}»؟`}
       />
 
       <AdminItemList
         items={items}
-        emptyMessage="لا توجد روابط بعد"
+        emptyMessage="لا يوجد أعضاء فريق بعد"
         deletingId={deletingId}
         onEdit={setEditing}
         onDelete={setDeleteTarget}
-        renderTitle={(item) => pickAdminLabel(item.label)}
-        renderSubtitle={(item) => `${item.href} · ترتيب ${item.order}`}
+        renderTitle={(item) => pickAdminLabel(item.name)}
+        renderSubtitle={(item) => `${pickAdminLabel(item.role)} · ترتيب ${item.order}`}
       />
     </div>
   );

@@ -3,9 +3,10 @@
 import Link from "next/link";
 import { useSiteContent } from "@/context/SiteContentContext";
 import { youTubeEmbedUrl } from "@/lib/firebase/storage";
+import { DonateButton } from "@/components/donation/DonateButton";
 
 export function HeroSection() {
-  const { hero, text } = useSiteContent();
+  const { hero, donation, text } = useSiteContent();
   const embedUrl = youTubeEmbedUrl(hero.youtubeUrl);
 
   return (
@@ -45,13 +46,16 @@ export function HeroSection() {
         <p className="mx-auto mt-4 max-w-2xl text-sm leading-relaxed text-white/85 sm:mt-6 sm:text-base md:text-lg">
           {text(hero.subtitle)}
         </p>
-        <div className="mt-8 flex w-full flex-col items-stretch justify-center gap-3 sm:mt-10 sm:flex-row sm:items-center sm:gap-4">
+        <div className="mt-8 flex w-full flex-col items-stretch justify-center gap-3 sm:mt-10 sm:flex-row sm:flex-wrap sm:items-center sm:justify-center sm:gap-4">
           <Link
             href="/projects"
             className="inline-flex h-12 items-center justify-center rounded-2xl bg-brand-green px-7 text-base font-semibold text-white shadow-sm transition-colors hover:bg-brand-green-dark w-full sm:w-auto sm:min-w-[200px]"
           >
             {text(hero.ctaProjects)}
           </Link>
+          {donation.enabled && donation.showHeroButton && (
+            <DonateButton variant="hero" size="lg" className="w-full sm:w-auto sm:min-w-[200px]" />
+          )}
           <Link
             href="/#achievements"
             className="inline-flex h-12 items-center justify-center rounded-2xl border-2 border-white px-7 text-base font-semibold text-white transition-colors hover:bg-white/10 w-full sm:w-auto sm:min-w-[200px]"

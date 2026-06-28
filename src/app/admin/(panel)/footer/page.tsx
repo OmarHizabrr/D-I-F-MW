@@ -5,6 +5,7 @@ import FirestoreApi from "@/services/firestoreApi";
 import { useAuth } from "@/context/AuthContext";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { LocalizedInput } from "@/components/admin/LocalizedInput";
+import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent } from "@/components/ui/Card";
 import { Spinner } from "@/components/ui/Spinner";
@@ -18,6 +19,7 @@ const defaultFooter: FooterContent = {
   address: emptyLocalized(),
   workingHours: emptyLocalized(),
   rights: emptyLocalized(),
+  mapsUrl: "",
   quickLinkIds: [],
 };
 
@@ -43,6 +45,7 @@ export default function AdminFooterPage() {
           address: (doc.address as FooterContent["address"]) ?? emptyLocalized(),
           workingHours: (doc.workingHours as FooterContent["workingHours"]) ?? emptyLocalized(),
           rights: (doc.rights as FooterContent["rights"]) ?? emptyLocalized(),
+          mapsUrl: (doc.mapsUrl as string) ?? "",
           quickLinkIds: (doc.quickLinkIds as string[]) ?? [],
         });
       }
@@ -129,6 +132,13 @@ export default function AdminFooterPage() {
             label="حقوق النشر"
             value={data.rights}
             onChange={(rights) => setData({ ...data, rights })}
+          />
+          <Input
+            label="رابط Google Maps"
+            dir="ltr"
+            value={data.mapsUrl}
+            onChange={(e) => setData({ ...data, mapsUrl: e.target.value })}
+            hint="مثال: https://maps.app.goo.gl/..."
           />
 
           <div>

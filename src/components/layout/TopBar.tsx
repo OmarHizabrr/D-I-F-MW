@@ -1,10 +1,11 @@
 "use client";
 
+import Link from "next/link";
 import { Phone, Mail, Share2, MessageCircle, Play, Camera } from "lucide-react";
 import { useLocale } from "@/context/LocaleContext";
 import { useSiteContent } from "@/context/SiteContentContext";
+import { useDonation } from "@/context/DonationContext";
 import { localeList } from "@/i18n";
-import { Button } from "@/components/ui/Button";
 import { ThemeToggle } from "./ThemeToggle";
 
 const iconMap: Record<string, typeof Share2> = {
@@ -16,7 +17,8 @@ const iconMap: Record<string, typeof Share2> = {
 
 export function TopBar() {
   const { locale, setLocale } = useLocale();
-  const { topbar, text } = useSiteContent();
+  const { topbar, donation, text } = useSiteContent();
+  const { openDonation } = useDonation();
 
   const socialLinks = topbar.socialLinks
     .filter((s) => s.enabled)
@@ -79,14 +81,24 @@ export function TopBar() {
 
             <ThemeToggle variant="topbar" />
 
-            <Button
-              variant="secondary"
-              size="sm"
-              className="!h-8 shrink-0 !border-white/30 !bg-white/10 !px-2 !text-[10px] !text-white hover:!bg-white/20 sm:!h-9 sm:!px-3 sm:!text-xs"
-            >
-              <span className="hidden sm:inline">{text(topbar.donorPortalLabel)}</span>
-              <span className="sm:hidden">{text(topbar.loginLabel)}</span>
-            </Button>
+            {donation.enabled ? (
+              <button
+                type="button"
+                onClick={openDonation}
+                className="inline-flex h-8 shrink-0 items-center justify-center rounded-xl border border-white/30 bg-brand-brown px-2 text-[10px] font-semibold text-white transition-colors hover:bg-brand-brown-light sm:h-9 sm:px-3 sm:text-xs"
+              >
+                <span className="hidden sm:inline">{text(topbar.donorPortalLabel)}</span>
+                <span className="sm:hidden">{text(donation.navButtonLabel)}</span>
+              </button>
+            ) : (
+              <Link
+                href="/admin/login"
+                className="inline-flex h-8 shrink-0 items-center justify-center rounded-xl border border-white/30 bg-white/10 px-2 text-[10px] font-semibold text-white transition-colors hover:bg-white/20 sm:h-9 sm:px-3 sm:text-xs"
+              >
+                <span className="hidden sm:inline">{text(topbar.donorPortalLabel)}</span>
+                <span className="sm:hidden">{text(topbar.loginLabel)}</span>
+              </Link>
+            )}
           </div>
         </div>
       </div>

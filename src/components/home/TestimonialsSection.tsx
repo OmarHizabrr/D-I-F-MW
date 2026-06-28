@@ -20,6 +20,8 @@ export function TestimonialsSection() {
         <SectionHeader
           title={text(sectionTitles.testimonials)}
           subtitle={text(sectionTitles.testimonialsSubtitle)}
+          viewAllHref="/stories"
+          viewAllLabel={text(sectionTitles.viewAll)}
         />
 
         <div className="mb-6 flex justify-center sm:justify-end">

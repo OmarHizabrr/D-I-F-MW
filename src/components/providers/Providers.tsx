@@ -5,6 +5,7 @@ import { LoadingProvider } from "@/context/LoadingContext";
 import { ThemeProvider } from "@/context/ThemeContext";
 import { AuthProvider } from "@/context/AuthContext";
 import { SiteContentProvider } from "@/context/SiteContentContext";
+import { DonationProvider } from "@/context/DonationContext";
 
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
@@ -12,7 +13,9 @@ export function Providers({ children }: { children: React.ReactNode }) {
       <AuthProvider>
         <LocaleProvider>
           <LoadingProvider>
-            <SiteContentProvider>{children}</SiteContentProvider>
+            <SiteContentProvider>
+              <DonationProvider>{children}</DonationProvider>
+            </SiteContentProvider>
           </LoadingProvider>
         </LocaleProvider>
       </AuthProvider>

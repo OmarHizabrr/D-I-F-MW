@@ -20,6 +20,10 @@ const ar = {
     reports: "التقارير",
     media: "مكتبة الوسائط",
     contact: "تواصل معنا",
+    stories: "قصصنا",
+    team: "فريق العمل",
+    allProjects: "جميع المشاريع",
+    aboutOverview: "نبذة عن المؤسسة",
   },
 
   hero: {
@@ -133,6 +137,26 @@ const ar = {
     subtitle: "احصل على آخر الأخبار والتقارير",
     placeholder: "أدخل بريدك الإلكتروني",
     subscribe: "اشترك الآن",
+    successMessage: "تم الاشتراك بنجاح!",
+    duplicateMessage: "هذا البريد مشترك مسبقاً.",
+  },
+
+  donation: {
+    modalTitle: "ادعم رسالتنا",
+    modalSubtitle: "مساهمتك تصنع فرقاً حقيقياً في حياة المجتمعات الريفية",
+    amountLabel: "مبلغ التبرع",
+    customAmountLabel: "مبلغ آخر",
+    nameLabel: "الاسم الكامل",
+    emailLabel: "البريد الإلكتروني",
+    submitLabel: "تبرع بأمان",
+    successMessage: "شكراً لك! تم استلام تبرعك.",
+    ctaTitle: "اصنع فرقاً",
+    ctaSubtitle: "تبرعك السخي يساعدنا على مواصلة عملنا الحيوي وإحداث تغيير دائم لمن يحتاجونه",
+    ctaButton: "تبرع الآن",
+    navButton: "تبرع",
+    heroButton: "تبرع الآن",
+    paymentHintRecord: "سيتم تسجيل تبرعك وسنتواصل معك قريباً",
+    paymentHintExternal: "سيتم توجيهك لإتمام الدفع بأمان",
   },
 
   footer: {
@@ -158,6 +182,28 @@ const ar = {
     print: "طباعة",
     loading: "جاري التحميل...",
     viewAll: "عرض الكل",
+    backHome: "العودة للرئيسية",
+    home: "الرئيسية",
+    cancel: "إلغاء",
+    ok: "حسناً",
+  },
+
+  pages: {
+    aboutIntro:
+      "مؤسسة التطوير والتنمية منظمة غير ربحية تعمل على تنفيذ مشاريع تنموية وإنسانية في عدة دول، بشفافية كاملة ومتابعة مستمرة.",
+    teamTitle: "فريق العمل",
+    teamSubtitle: "الكفاءات التي تقود عملنا الميداني",
+    contactTitle: "تواصل معنا",
+    contactSubtitle: "نسعد باستقبال استفساراتكم واقتراحاتكم",
+    storiesTitle: "قصصنا",
+    storiesSubtitle: "شهادات حقيقية من المستفيدين والمجتمعات",
+    contactFormName: "الاسم الكامل",
+    contactFormEmail: "البريد الإلكتروني",
+    contactFormMessage: "رسالتك",
+    contactFormSubmit: "إرسال الرسالة",
+    contactFormSuccess: "شكراً لتواصلك! سنرد عليك في أقرب وقت.",
+    contactMapsLink: "عرض على الخريطة",
+    shareStory: "شارك قصتك",
   },
 
   loading: {

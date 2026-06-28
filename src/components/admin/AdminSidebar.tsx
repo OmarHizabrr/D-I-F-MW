@@ -23,6 +23,8 @@ import {
   PanelBottom,
   Type,
   X,
+  Heart,
+  Inbox,
   type LucideIcon,
 } from "lucide-react";
 import { HOME_SECTIONS } from "@/lib/firebase/database-structure";
@@ -45,6 +47,9 @@ const sectionIcons: Record<string, LucideIcon> = {
   sections: Type,
   mapPoints: MapPin,
   newsletter: Mail,
+  donation: Heart,
+  team: Users,
+  contactMessages: Inbox,
   footer: PanelBottom,
 };
 

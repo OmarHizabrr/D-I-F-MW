@@ -9,11 +9,13 @@ import {
   getDefaultNavItems,
   getDefaultNews,
   getDefaultNewsletter,
+  getDefaultDonation,
   getDefaultPartners,
   getDefaultPrograms,
   getDefaultProjects,
   getDefaultSiteConfig,
   getDefaultStats,
+  getDefaultTeam,
   getDefaultTestimonials,
   getDefaultTopbar,
   getDefaultWhyUs,
@@ -34,6 +36,7 @@ export async function seedSiteContent(userData: UserMeta = {}) {
   await api.setData({ docRef: api.getHeroDoc(), data: getDefaultHero(), userData });
   await api.setData({ docRef: api.getFooterDoc(), data: getDefaultFooter(), userData });
   await api.setData({ docRef: api.getNewsletterDoc(), data: getDefaultNewsletter(), userData });
+  await api.setData({ docRef: api.getDonationDoc(), data: getDefaultDonation(), userData });
   await api.setData({
     docRef: api.getSiteConfigDoc(),
     data: { sectionTitles: getDefaultSectionTitles() },
@@ -76,6 +79,9 @@ export async function seedSiteContent(userData: UserMeta = {}) {
   }
   for (const item of getDefaultWhyUs()) {
     await api.setData({ docRef: api.getWhyUsDoc(item.id), data: item, userData });
+  }
+  for (const item of getDefaultTeam()) {
+    await api.setData({ docRef: api.getTeamDoc(item.id), data: item, userData });
   }
 }
 

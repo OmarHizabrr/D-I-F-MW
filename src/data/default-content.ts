@@ -12,12 +12,14 @@ import type {
   NavItem,
   NewsItem,
   NewsletterContent,
+  DonationContent,
   PartnerItem,
   ProgramItem,
   ProjectItem,
   SiteConfig,
   StatItem,
   TestimonialItem,
+  TeamMember,
   TopbarContent,
   WhyUsItem,
 } from "@/types/cms";
@@ -30,7 +32,13 @@ function L(arText: string, enText: string, nyText: string): LocalizedString {
 }
 
 const navKeys = [
-  "home", "about", "projects", "programs", "achievements", "news", "reports", "media", "contact",
+  { id: "home", href: "/" },
+  { id: "about", href: "/about" },
+  { id: "projects", href: "/projects" },
+  { id: "news", href: "/news" },
+  { id: "stories", href: "/stories" },
+  { id: "media", href: "/media" },
+  { id: "contact", href: "/contact" },
 ] as const;
 
 export function getDefaultTopbar(): TopbarContent {
@@ -49,13 +57,61 @@ export function getDefaultTopbar(): TopbarContent {
 }
 
 export function getDefaultNavItems(): NavItem[] {
-  return navKeys.map((key, i) => ({
-    id: key,
-    label: L(ar.nav[key], en.nav[key], ny.nav[key]),
-    href: `#${key}`,
+  return navKeys.map((item, i) => ({
+    id: item.id,
+    label: L(
+      ar.nav[item.id as keyof typeof ar.nav],
+      en.nav[item.id as keyof typeof en.nav],
+      ny.nav[item.id as keyof typeof ny.nav]
+    ),
+    href: item.href,
     order: i + 1,
     enabled: true,
   }));
+}
+
+export function getDefaultTeam(): TeamMember[] {
+  return [
+    {
+      id: "team-1",
+      name: L("أحمد المنصور", "Ahmed Al-Mansour", "Ahmed Al-Mansour"),
+      role: L("المدير التنفيذي", "Executive Director", "Mtsogoleri Woyendetsa"),
+      bio: L(
+        "يقود المؤسسة في تنفيذ المشاريع التنموية والإنسانية بخبرة تمتد لأكثر من 15 عاماً.",
+        "Leads the foundation in implementing development and humanitarian projects with over 15 years of experience.",
+        "Akuyendetsa fundo mu kukwaniritsa mapulojekiti a chitukuko ndi anthu ndi zaka zoposa 15."
+      ),
+      imageUrl: "",
+      order: 1,
+      enabled: true,
+    },
+    {
+      id: "team-2",
+      name: L("فاطمة الزبير", "Fatima Al-Zubair", "Fatima Al-Zubair"),
+      role: L("مديرة البرامج", "Programs Director", "Mtsogoleri wa Mapulogalamu"),
+      bio: L(
+        "تشرف على تصميم وتنفيذ البرامج الميدانية في عدة دول.",
+        "Oversees the design and implementation of field programs across multiple countries.",
+        "Amayang'anira kukonza ndi kukwaniritsa mapulogalamu m'maiko ambiri."
+      ),
+      imageUrl: "",
+      order: 2,
+      enabled: true,
+    },
+    {
+      id: "team-3",
+      name: L("محمد الحكيم", "Mohammed Al-Hakim", "Mohammed Al-Hakim"),
+      role: L("مدير العمليات الميدانية", "Field Operations Manager", "Mtsogoleri wa Ntchito za M'munda"),
+      bio: L(
+        "يتابع تنفيذ المشاريع على الأرض ويضمن جودة التسليم.",
+        "Monitors on-the-ground project execution and ensures delivery quality.",
+        "Amatsata kukwaniritsidwa kwa mapulojekiti m'munda ndi kuonetsetsa ubwino."
+      ),
+      imageUrl: "",
+      order: 3,
+      enabled: true,
+    },
+  ];
 }
 
 export function getDefaultHero(): HeroContent {
@@ -233,7 +289,8 @@ export function getDefaultFooter(): FooterContent {
     address: L(ar.footer.address, en.footer.address, ny.footer.address),
     workingHours: L(ar.footer.hours, en.footer.hours, ny.footer.hours),
     rights: L(ar.footer.rights, en.footer.rights, ny.footer.rights),
-    quickLinkIds: ["home", "about", "projects", "programs", "news", "contact"],
+    quickLinkIds: ["home", "about", "projects", "news", "stories", "media", "contact"],
+    mapsUrl: "",
   };
 }
 
@@ -243,6 +300,63 @@ export function getDefaultNewsletter(): NewsletterContent {
     subtitle: L(ar.newsletter.subtitle, en.newsletter.subtitle, ny.newsletter.subtitle),
     placeholder: L(ar.newsletter.placeholder, en.newsletter.placeholder, ny.newsletter.placeholder),
     buttonLabel: L(ar.newsletter.subscribe, en.newsletter.subscribe, ny.newsletter.subscribe),
+    successMessage: L(
+      ar.newsletter.successMessage,
+      en.newsletter.successMessage,
+      ny.newsletter.successMessage
+    ),
+    duplicateMessage: L(
+      ar.newsletter.duplicateMessage,
+      en.newsletter.duplicateMessage,
+      ny.newsletter.duplicateMessage
+    ),
+  };
+}
+
+export function getDefaultDonation(): DonationContent {
+  return {
+    enabled: true,
+    currencyCode: "USD",
+    currencySymbol: "$",
+    presetAmounts: [10, 25, 50, 100],
+    allowCustomAmount: true,
+    minAmount: 1,
+    paymentMode: "record",
+    externalPaymentUrl: "",
+    modalTitle: L(ar.donation.modalTitle, en.donation.modalTitle, ny.donation.modalTitle),
+    modalSubtitle: L(ar.donation.modalSubtitle, en.donation.modalSubtitle, ny.donation.modalSubtitle),
+    amountLabel: L(ar.donation.amountLabel, en.donation.amountLabel, ny.donation.amountLabel),
+    customAmountLabel: L(
+      ar.donation.customAmountLabel,
+      en.donation.customAmountLabel,
+      ny.donation.customAmountLabel
+    ),
+    nameLabel: L(ar.donation.nameLabel, en.donation.nameLabel, ny.donation.nameLabel),
+    emailLabel: L(ar.donation.emailLabel, en.donation.emailLabel, ny.donation.emailLabel),
+    submitLabel: L(ar.donation.submitLabel, en.donation.submitLabel, ny.donation.submitLabel),
+    successMessage: L(
+      ar.donation.successMessage,
+      en.donation.successMessage,
+      ny.donation.successMessage
+    ),
+    ctaTitle: L(ar.donation.ctaTitle, en.donation.ctaTitle, ny.donation.ctaTitle),
+    ctaSubtitle: L(ar.donation.ctaSubtitle, en.donation.ctaSubtitle, ny.donation.ctaSubtitle),
+    ctaButtonLabel: L(ar.donation.ctaButton, en.donation.ctaButton, ny.donation.ctaButton),
+    navButtonLabel: L(ar.donation.navButton, en.donation.navButton, ny.donation.navButton),
+    showHeroButton: true,
+    heroButtonLabel: L(ar.donation.heroButton, en.donation.heroButton, ny.donation.heroButton),
+    cancelLabel: L(ar.common.cancel, en.common.cancel, ny.common.cancel),
+    okLabel: L(ar.common.ok, en.common.ok, ny.common.ok),
+    paymentHintRecord: L(
+      ar.donation.paymentHintRecord,
+      en.donation.paymentHintRecord,
+      ny.donation.paymentHintRecord
+    ),
+    paymentHintExternal: L(
+      ar.donation.paymentHintExternal,
+      en.donation.paymentHintExternal,
+      ny.donation.paymentHintExternal
+    ),
   };
 }
 
@@ -293,5 +407,23 @@ export function getDefaultSectionTitles() {
     footerQuickLinks: L(ar.footer.quickLinks, en.footer.quickLinks, ny.footer.quickLinks),
     footerContactInfo: L(ar.footer.contactInfo, en.footer.contactInfo, ny.footer.contactInfo),
     footerWorkingHours: L(ar.footer.workingHours, en.footer.workingHours, ny.footer.workingHours),
+    aboutTitle: L(ar.nav.about, en.nav.about, ny.nav.about),
+    aboutIntro: L(ar.pages.aboutIntro, en.pages.aboutIntro, ny.pages.aboutIntro),
+    teamTitle: L(ar.pages.teamTitle, en.pages.teamTitle, ny.pages.teamTitle),
+    teamSubtitle: L(ar.pages.teamSubtitle, en.pages.teamSubtitle, ny.pages.teamSubtitle),
+    contactTitle: L(ar.pages.contactTitle, en.pages.contactTitle, ny.pages.contactTitle),
+    contactSubtitle: L(ar.pages.contactSubtitle, en.pages.contactSubtitle, ny.pages.contactSubtitle),
+    storiesTitle: L(ar.pages.storiesTitle, en.pages.storiesTitle, ny.pages.storiesTitle),
+    storiesSubtitle: L(ar.pages.storiesSubtitle, en.pages.storiesSubtitle, ny.pages.storiesSubtitle),
+    navTeam: L(ar.nav.team, en.nav.team, ny.nav.team),
+    navAllProjects: L(ar.nav.allProjects, en.nav.allProjects, ny.nav.allProjects),
+    navAboutOverview: L(ar.nav.aboutOverview, en.nav.aboutOverview, ny.nav.aboutOverview),
+    contactFormName: L(ar.pages.contactFormName, en.pages.contactFormName, ny.pages.contactFormName),
+    contactFormEmail: L(ar.pages.contactFormEmail, en.pages.contactFormEmail, ny.pages.contactFormEmail),
+    contactFormMessage: L(ar.pages.contactFormMessage, en.pages.contactFormMessage, ny.pages.contactFormMessage),
+    contactFormSubmit: L(ar.pages.contactFormSubmit, en.pages.contactFormSubmit, ny.pages.contactFormSubmit),
+    contactFormSuccess: L(ar.pages.contactFormSuccess, en.pages.contactFormSuccess, ny.pages.contactFormSuccess),
+    contactMapsLink: L(ar.pages.contactMapsLink, en.pages.contactMapsLink, ny.pages.contactMapsLink),
+    shareStory: L(ar.pages.shareStory, en.pages.shareStory, ny.pages.shareStory),
   };
 }

@@ -20,10 +20,12 @@ import {
   getDefaultNavItems,
   getDefaultNews,
   getDefaultNewsletter,
+  getDefaultDonation,
   getDefaultPartners,
   getDefaultPrograms,
   getDefaultProjects,
   getDefaultStats,
+  getDefaultTeam,
   getDefaultTestimonials,
   getDefaultTopbar,
   getDefaultWhyUs,
@@ -39,10 +41,12 @@ import type {
   NavItem,
   NewsItem,
   NewsletterContent,
+  DonationContent,
   PartnerItem,
   ProgramItem,
   ProjectItem,
   StatItem,
+  TeamMember,
   TestimonialItem,
   TopbarContent,
   WhyUsItem,
@@ -74,8 +78,10 @@ type SiteContentState = {
   mapPoints: MapPointItem[];
   howWeWork: HowWeWorkStep[];
   whyUs: WhyUsItem[];
+  team: TeamMember[];
   footer: FooterContent;
   newsletter: NewsletterContent;
+  donation: DonationContent;
   sectionTitles: SectionTitles;
 };
 
@@ -96,8 +102,10 @@ const defaults: SiteContentState = {
   mapPoints: getDefaultMapPoints(),
   howWeWork: getDefaultHowWeWork(),
   whyUs: getDefaultWhyUs(),
+  team: getDefaultTeam(),
   footer: getDefaultFooter(),
   newsletter: getDefaultNewsletter(),
+  donation: getDefaultDonation(),
   sectionTitles: getDefaultSectionTitles(),
 };
 
@@ -162,6 +170,7 @@ export function SiteContentProvider({ children }: { children: ReactNode }) {
     subscribeDoc(api.getHeroDoc(), "hero", defaults.hero);
     subscribeDoc(api.getFooterDoc(), "footer", defaults.footer);
     subscribeDoc(api.getNewsletterDoc(), "newsletter", defaults.newsletter);
+    subscribeDoc(api.getDonationDoc(), "donation", defaults.donation);
 
     subscribeList(api.getNavItemsCollection(), "navItems", defaults.navItems);
     subscribeList(api.getStatsCollection(), "stats", defaults.stats);
@@ -180,6 +189,7 @@ export function SiteContentProvider({ children }: { children: ReactNode }) {
     subscribeList(api.getMapPointsCollection(), "mapPoints", defaults.mapPoints);
     subscribeList(api.getHowWeWorkCollection(), "howWeWork", defaults.howWeWork);
     subscribeList(api.getWhyUsCollection(), "whyUs", defaults.whyUs);
+    subscribeList(api.getTeamCollection(), "team", defaults.team);
 
     unsubs.push(
       api.subscribeDocSnapshot(api.getSiteConfigDoc(), (docSnap) => {

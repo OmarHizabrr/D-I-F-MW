@@ -16,10 +16,7 @@ export function Footer() {
     .sort((a, b) => a.order - b.order);
 
   return (
-    <footer
-      id="contact"
-      className="safe-bottom border-t border-border-subtle bg-brand-green-dark text-white"
-    >
+    <footer className="safe-bottom border-t border-border-subtle bg-brand-green-dark text-white">
       <div className="container-dif section-padding !pb-8">
         <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-4">
           <div>
@@ -57,7 +54,22 @@ export function Footer() {
             <ul className="space-y-3 text-sm text-white/80">
               <li className="flex items-start gap-2">
                 <MapPin className="mt-0.5 h-4 w-4 shrink-0" />
-                {text(footer.address)}
+                <span>
+                  {text(footer.address)}
+                  {footer.mapsUrl && (
+                    <>
+                      {" · "}
+                      <a
+                        href={footer.mapsUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="underline hover:text-white"
+                      >
+                        {text(sectionTitles.contactMapsLink)}
+                      </a>
+                    </>
+                  )}
+                </span>
               </li>
               <li className="flex items-center gap-2">
                 <Phone className="h-4 w-4 shrink-0" />

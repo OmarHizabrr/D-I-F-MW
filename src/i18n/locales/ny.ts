@@ -20,6 +20,10 @@ const ny = {
     reports: "Malipoti",
     media: "Laibulale ya Media",
     contact: "Lumikizanani",
+    stories: "Nkhani Zathu",
+    team: "Gulu Lathu",
+    allProjects: "Mapulojekiti Onse",
+    aboutOverview: "Za Fundo",
   },
 
   hero: {
@@ -133,6 +137,27 @@ const ny = {
     subtitle: "Landirani nkhani ndi malipoti aposachedwa",
     placeholder: "Lowetsani imelo yanu",
     subscribe: "Lembetsani Tsopano",
+    successMessage: "Mwasankha kulembetsa!",
+    duplicateMessage: "Imelo iyi yalembetsedwa kale.",
+  },
+
+  donation: {
+    modalTitle: "Thandizani Ntchito Yathu",
+    modalSubtitle: "Chithandizo chanu chimapanga kusintha kwakukulu m'madera",
+    amountLabel: "Ndalama Zothandizira",
+    customAmountLabel: "Ndalama zina",
+    nameLabel: "Dzina Lonse",
+    emailLabel: "Imelo",
+    submitLabel: "Perekani Motetezeka",
+    successMessage: "Zikomo! Talandira chithandizo chanu.",
+    ctaTitle: "Pangani Kusintha",
+    ctaSubtitle:
+      "Chithandizo chanu chimatithandiza kupitiriza ntchito yathu yofunika ndi kubweretsa kusintha kwakukulu",
+    ctaButton: "Perekani Tsopano",
+    navButton: "Perekani",
+    heroButton: "Perekani Tsopano",
+    paymentHintRecord: "Chithandizo chanu chidzalembedwa ndipo tidzakulumikizani posachedwa",
+    paymentHintExternal: "Mudzatengedwa kuti mumalize kulipira motetezeka",
   },
 
   footer: {
@@ -158,6 +183,28 @@ const ny = {
     print: "Sindikizani",
     loading: "Tikukweza...",
     viewAll: "Onani Zonse",
+    backHome: "Bwererani Kwanu",
+    home: "Kwanu",
+    cancel: "Khanani",
+    ok: "OK",
+  },
+
+  pages: {
+    aboutIntro:
+      "Development and Investment Foundation ndi bungwe losagwira ntchito chuma lokhudza chitukuko ndi anthu m'maiko ambiri, ndi kuwonekera kwathunthu ndi kutsatira kosalekeza.",
+    teamTitle: "Gulu Lathu",
+    teamSubtitle: "Anthu oyendetsa ntchito zathu m'munda",
+    contactTitle: "Lumikizanani",
+    contactSubtitle: "Tikukondwera kumva mafunso ndi lingaliro lanu",
+    storiesTitle: "Nkhani Zathu",
+    storiesSubtitle: "Umboni weniweni kuchokera kwa othandizidwa ndi madera",
+    contactFormName: "Dzina Lonse",
+    contactFormEmail: "Imelo",
+    contactFormMessage: "Uthenga Wanu",
+    contactFormSubmit: "Tumizani Uthenga",
+    contactFormSuccess: "Zikomo! Tidzakuyankhani posachedwa.",
+    contactMapsLink: "Onani pa Mapu",
+    shareStory: "Gawani Nkhani Yanu",
   },
 
   loading: {

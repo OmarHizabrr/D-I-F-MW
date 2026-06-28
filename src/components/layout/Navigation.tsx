@@ -3,17 +3,135 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Menu, X } from "lucide-react";
+import { ChevronDown, Menu, X } from "lucide-react";
 import { useSiteContent } from "@/context/SiteContentContext";
 import { useLocale } from "@/context/LocaleContext";
+import { resolveNavChildren, navChildLabel } from "@/lib/nav-utils";
+import { DonateButton } from "@/components/donation/DonateButton";
 import { cn } from "@/lib/utils";
+import type { LocaleCode, NavItem } from "@/types/cms";
+
+function DesktopNavItem({
+  item,
+  label,
+  children,
+  onNavigate,
+}: {
+  item: NavItem;
+  label: string;
+  children: ReturnType<typeof resolveNavChildren>;
+  onNavigate?: () => void;
+}) {
+  const { locale } = useLocale();
+  const hasChildren = children.length > 0;
+
+  if (!hasChildren) {
+    return (
+      <Link
+        href={item.href}
+        onClick={onNavigate}
+        className="rounded-xl px-2.5 py-2 text-sm font-medium text-foreground/80 transition-colors hover:bg-brand-green/10 hover:text-brand-green-dark dark:hover:text-brand-green"
+      >
+        {label}
+      </Link>
+    );
+  }
+
+  return (
+    <div className="group relative">
+      <Link
+        href={item.href}
+        onClick={onNavigate}
+        className="inline-flex items-center gap-0.5 rounded-xl px-2.5 py-2 text-sm font-medium text-foreground/80 transition-colors hover:bg-brand-green/10 hover:text-brand-green-dark dark:hover:text-brand-green"
+      >
+        {label}
+        <ChevronDown className="h-3.5 w-3.5 opacity-60 transition-transform group-hover:rotate-180" />
+      </Link>
+      <div className="invisible absolute start-0 top-full z-50 min-w-[12rem] pt-1 opacity-0 transition-all group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100">
+        <div className="overflow-hidden rounded-2xl border border-border-subtle bg-nav-bg py-1 shadow-lg">
+          {children.map((child) => (
+            <Link
+              key={child.id}
+              href={child.href}
+              onClick={onNavigate}
+              className="block px-4 py-2.5 text-sm text-foreground/80 transition-colors hover:bg-brand-green/10 hover:text-brand-green-dark dark:hover:text-brand-green"
+            >
+              {navChildLabel(child, locale as LocaleCode)}
+            </Link>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function MobileNavItem({
+  item,
+  label,
+  children,
+  onNavigate,
+}: {
+  item: NavItem;
+  label: string;
+  children: ReturnType<typeof resolveNavChildren>;
+  onNavigate: () => void;
+}) {
+  const { locale } = useLocale();
+  const [open, setOpen] = useState(false);
+  const hasChildren = children.length > 0;
+
+  if (!hasChildren) {
+    return (
+      <Link
+        href={item.href}
+        onClick={onNavigate}
+        className="rounded-2xl px-4 py-3.5 text-base font-medium transition-colors active:bg-brand-green/10 hover:bg-brand-green/10"
+      >
+        {label}
+      </Link>
+    );
+  }
+
+  return (
+    <div>
+      <button
+        type="button"
+        onClick={() => setOpen(!open)}
+        className="flex w-full items-center justify-between rounded-2xl px-4 py-3.5 text-base font-medium transition-colors hover:bg-brand-green/10"
+      >
+        <span>{label}</span>
+        <ChevronDown className={cn("h-4 w-4 transition-transform", open && "rotate-180")} />
+      </button>
+      {open && (
+        <div className="ms-3 flex flex-col border-s border-border-subtle ps-2">
+          {children.map((child) => (
+            <Link
+              key={child.id}
+              href={child.href}
+              onClick={onNavigate}
+              className="rounded-xl px-4 py-2.5 text-sm text-muted-foreground transition-colors hover:bg-brand-green/10 hover:text-foreground"
+            >
+              {navChildLabel(child, locale as LocaleCode)}
+            </Link>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
 
 export function Navigation() {
   const { locale } = useLocale();
-  const { navItems, text } = useSiteContent();
+  const { navItems, programs, sectionTitles, text } = useSiteContent();
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const items = navItems.filter((i) => i.enabled).sort((a, b) => a.order - b.order);
+
+  const navLabels = {
+    team: sectionTitles.navTeam,
+    allProjects: sectionTitles.navAllProjects,
+    aboutOverview: sectionTitles.navAboutOverview,
+  };
 
   useEffect(() => {
     document.body.style.overflow = mobileOpen ? "hidden" : "";
@@ -22,8 +140,10 @@ export function Navigation() {
     };
   }, [mobileOpen]);
 
+  const closeMobile = () => setMobileOpen(false);
+
   return (
-    <header className="relative sticky top-0 z-40 w-full max-w-[100vw] overflow-hidden border-b border-border-subtle bg-nav-bg/95 text-nav-fg backdrop-blur-md">
+    <header className="relative sticky top-0 z-40 w-full max-w-[100vw] overflow-visible border-b border-border-subtle bg-nav-bg/95 text-nav-fg backdrop-blur-md">
       <div className="container-dif flex h-14 min-w-0 items-center gap-2 sm:h-16 md:h-[4.5rem]">
         <Link
           href="/"
@@ -48,14 +168,20 @@ export function Navigation() {
 
         <nav className="hidden shrink-0 items-center gap-0.5 xl:flex">
           {items.map((item) => (
-            <Link
+            <DesktopNavItem
               key={item.id}
-              href={item.href}
-              className="rounded-xl px-2.5 py-2 text-sm font-medium text-foreground/80 transition-colors hover:bg-brand-green/10 hover:text-brand-green-dark dark:hover:text-brand-green"
-            >
-              {text(item.label)}
-            </Link>
+              item={item}
+              label={text(item.label)}
+              children={resolveNavChildren(item, programs, navLabels)}
+            />
           ))}
+          <DonateButton variant="nav" size="sm" className="ms-1" />
+          <Link
+            href="/admin/login"
+            className="ms-1 rounded-xl px-2.5 py-2 text-sm font-medium text-foreground/60 transition-colors hover:bg-brand-green/10 hover:text-brand-green"
+          >
+            {locale === "ar" ? "دخول" : "Login"}
+          </Link>
         </nav>
 
         <button
@@ -73,7 +199,7 @@ export function Navigation() {
         <>
           <div
             className="fixed inset-0 z-30 bg-black/40 xl:hidden"
-            onClick={() => setMobileOpen(false)}
+            onClick={closeMobile}
             aria-hidden="true"
           />
           <nav
@@ -84,15 +210,22 @@ export function Navigation() {
           >
             <div className="container-dif flex flex-col gap-0.5 py-3 pb-safe">
               {items.map((item) => (
-                <Link
+                <MobileNavItem
                   key={item.id}
-                  href={item.href}
-                  onClick={() => setMobileOpen(false)}
-                  className="rounded-2xl px-4 py-3.5 text-base font-medium transition-colors active:bg-brand-green/10 hover:bg-brand-green/10"
-                >
-                  {text(item.label)}
-                </Link>
+                  item={item}
+                  label={text(item.label)}
+                  children={resolveNavChildren(item, programs, navLabels)}
+                  onNavigate={closeMobile}
+                />
               ))}
+              <DonateButton variant="nav" size="md" className="mx-4 mt-2" />
+              <Link
+                href="/admin/login"
+                onClick={closeMobile}
+                className="rounded-2xl px-4 py-3.5 text-base font-medium text-muted-foreground transition-colors hover:bg-brand-green/10"
+              >
+                {locale === "ar" ? "تسجيل الدخول" : "Login"}
+              </Link>
             </div>
           </nav>
         </>
