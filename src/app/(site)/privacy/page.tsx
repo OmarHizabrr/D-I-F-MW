@@ -1,11 +1,13 @@
 "use client";
 
 import { useSiteContent } from "@/context/SiteContentContext";
+import { useLocale } from "@/context/LocaleContext";
 import { SitePageHeader } from "@/components/site/SitePageHeader";
 import { SitePageSkeleton } from "@/components/admin/AdminPageSkeleton";
 
 export default function PrivacyPage() {
   const { privacy, sectionTitles, text, loading } = useSiteContent();
+  const { t } = useLocale();
 
   if (loading) {
     return (
@@ -25,7 +27,7 @@ export default function PrivacyPage() {
       <div className="section-padding bg-background">
         <article className="container-dif mx-auto max-w-3xl">
           <p className="mb-6 text-xs text-muted-foreground">
-            {privacy.lastUpdated ? `آخر تحديث: ${privacy.lastUpdated}` : null}
+            {privacy.lastUpdated ? `${t.common.lastUpdated} ${privacy.lastUpdated}` : null}
           </p>
           <div className="prose prose-sm max-w-none dark:prose-invert">
             <p className="whitespace-pre-line leading-relaxed text-foreground/90">

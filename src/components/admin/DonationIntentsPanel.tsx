@@ -1,9 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { Trash2, Mail } from "lucide-react";
+import { Trash2, Mail, RefreshCw, FolderKanban } from "lucide-react";
 import FirestoreApi from "@/services/firestoreApi";
-import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
@@ -64,7 +63,10 @@ export function DonationIntentsPanel() {
       ) : (
         <div className="space-y-3">
           {items.map((item) => (
-            <Card key={item.id} className="p-4">
+            <Card
+              key={item.id}
+              className={cn("p-4", item.read === false && "border-brand-green/40 bg-brand-green/5")}
+            >
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
                   <p className="text-lg font-bold text-brand-green-dark dark:text-brand-green">
@@ -78,6 +80,20 @@ export function DonationIntentsPanel() {
                   >
                     {item.donorEmail}
                   </a>
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    {item.recurring && (
+                      <Badge variant="outline" className="gap-1">
+                        <RefreshCw className="h-3 w-3" />
+                        شهري
+                      </Badge>
+                    )}
+                    {item.projectName && (
+                      <Badge variant="outline" className="gap-1">
+                        <FolderKanban className="h-3 w-3" />
+                        {item.projectName}
+                      </Badge>
+                    )}
+                  </div>
                   <p className="mt-2 text-xs text-muted-foreground">
                     {item.submittedAt ? new Date(item.submittedAt).toLocaleString("ar") : "—"}
                   </p>

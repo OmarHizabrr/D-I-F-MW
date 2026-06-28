@@ -23,7 +23,8 @@ const labels = { ar, en, ny };
 export function SiteSearchButton({ className }: { className?: string }) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
-  const { projects, news, successStories, faq, programs } = useSiteContent();
+  const { projects, news, successStories, faq, programs, events, downloads, sectionTitles, text } =
+    useSiteContent();
   const { locale: loc } = useLocale();
   const L = labels[loc as LocaleCode] ?? ar;
 
@@ -86,9 +87,39 @@ export function SiteSearchButton({ className }: { className?: string }) {
         });
       }
     }
+    for (const ev of events.filter((x) => x.enabled)) {
+      if (pick(ev.title).includes(q) || pick(ev.excerpt).includes(q)) {
+        items.push({
+          id: `e-${ev.id}`,
+          title: pickLocalized(ev.title, loc as LocaleCode),
+          href: `/events/${ev.id}`,
+          type: L.nav.events,
+        });
+      }
+    }
+    for (const d of downloads.filter((x) => x.enabled)) {
+      if (pick(d.title).includes(q) || pick(d.description).includes(q)) {
+        items.push({
+          id: `d-${d.id}`,
+          title: pickLocalized(d.title, loc as LocaleCode),
+          href: "/resources",
+          type: L.nav.resources,
+        });
+      }
+    }
+
+    const staticPages: SearchResult[] = [
+      { id: "sp-transparency", title: text(sectionTitles.transparencyPageTitle), href: "/transparency", type: L.nav.transparency },
+      { id: "sp-ways", title: text(sectionTitles.waysToGivePageTitle), href: "/ways-to-give", type: L.nav.waysToGive },
+      { id: "sp-zakat", title: text(sectionTitles.navZakatCalculator), href: "/zakat-calculator", type: L.nav.zakatCalculator },
+      { id: "sp-privacy", title: text(sectionTitles.privacyPageTitle), href: "/privacy", type: L.nav.privacy },
+    ];
+    for (const page of staticPages) {
+      if (page.title.toLowerCase().includes(q)) items.push(page);
+    }
 
     return items.slice(0, 12);
-  }, [query, projects, news, successStories, faq, programs, loc, L]);
+  }, [query, projects, news, successStories, faq, programs, events, downloads, sectionTitles, text, loc, L]);
 
   return (
     <>

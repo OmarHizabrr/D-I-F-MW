@@ -39,41 +39,63 @@ export function HomePage() {
       <HeroSection />
       <StatsSection />
       <TrustBadgesSection />
-      <ProgramsSection />
-      <OngoingProjectsSection />
+      <LazySection minHeight="16rem">
+        <ProgramsSection />
+      </LazySection>
+      <LazySection minHeight="18rem">
+        <OngoingProjectsSection />
+      </LazySection>
       <LazySection minHeight="18rem">
         <SuccessStoriesSection />
       </LazySection>
       <LazySection minHeight="18rem">
         <OurWorkSection />
       </LazySection>
-      <HowWeWorkSection />
-      <WhyUsSection />
+      <LazySection minHeight="14rem">
+        <HowWeWorkSection />
+      </LazySection>
+      <LazySection minHeight="14rem">
+        <WhyUsSection />
+      </LazySection>
       <LazySection minHeight="16rem">
         <EventsSection />
       </LazySection>
       <LazySection minHeight="20rem">
         <MediaGallerySection />
       </LazySection>
-      <LatestNewsSection />
+      <LazySection minHeight="16rem">
+        <LatestNewsSection />
+      </LazySection>
       <LazySection minHeight="14rem">
         <VolunteerSection />
       </LazySection>
-      <PartnersSection />
-      <TestimonialsSection />
+      <LazySection minHeight="12rem">
+        <PartnersSection />
+      </LazySection>
+      <LazySection minHeight="14rem">
+        <TestimonialsSection />
+      </LazySection>
       <LazySection minHeight="14rem">
         <FaqSection />
       </LazySection>
-      <LicensesSection />
+      <LazySection minHeight="12rem">
+        <LicensesSection />
+      </LazySection>
       <LazySection minHeight="14rem">
         <DownloadsSection />
       </LazySection>
       <LazySection minHeight="22rem">
         <ProjectMapSection />
       </LazySection>
-      <ProjectsTableSection />
-      <DonateSection />
-      <NewsletterSection />
+      <LazySection minHeight="16rem">
+        <ProjectsTableSection />
+      </LazySection>
+      <LazySection minHeight="12rem">
+        <DonateSection />
+      </LazySection>
+      <LazySection minHeight="10rem">
+        <NewsletterSection />
+      </LazySection>
     </div>
   );
 }

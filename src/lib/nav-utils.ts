@@ -63,6 +63,7 @@ export function resolveNavChildren(
       { id: "about-team", label: labels.team, href: "/about/team" },
       { id: "about-faq", label: labels.faq, href: "/faq" },
       { id: "about-transparency", label: labels.transparency, href: "/transparency" },
+      { id: "about-privacy", label: labels.privacy, href: "/privacy" },
     ];
   }
 
@@ -104,7 +105,10 @@ export function resolveNavChildren(
   }
 
   if (item.id === "resources") {
-    return [];
+    return [
+      { id: "resources-page", label: labels.resources, href: "/resources" },
+      { id: "resources-transparency", label: labels.transparency, href: "/transparency" },
+    ];
   }
 
   return [];

@@ -66,7 +66,7 @@ export default function TransparencyPage() {
               {t.transparency.reportsTitle}
             </h2>
             {reports.length === 0 ? (
-              <p className="text-muted-foreground">لا توجد تقارير منشورة بعد</p>
+              <p className="text-muted-foreground">{t.common.noReports}</p>
             ) : (
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {reports.map((item) => (

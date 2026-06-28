@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Heart, PartyPopper } from "lucide-react";
 import { useSiteContent } from "@/context/SiteContentContext";
+import { useLocale } from "@/context/LocaleContext";
 import { useLoading } from "@/context/LoadingContext";
 import { Dialog } from "@/components/ui/Dialog";
 import { Input } from "@/components/ui/Input";
@@ -20,6 +21,7 @@ type DonationModalProps = {
 
 export function DonationModal({ open, onClose, options = {} }: DonationModalProps) {
   const { donation, text } = useSiteContent();
+  const { t } = useLocale();
   const { withLoading } = useLoading();
   const [selectedAmount, setSelectedAmount] = useState<number | null>(null);
   const [customAmount, setCustomAmount] = useState("");
@@ -27,6 +29,7 @@ export function DonationModal({ open, onClose, options = {} }: DonationModalProp
   const [email, setEmail] = useState("");
   const [recurring, setRecurring] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [submitError, setSubmitError] = useState(false);
 
   const amounts = useMemo(
     () => donation.presetAmounts.filter((a) => a > 0).slice(0, 8),
@@ -43,6 +46,7 @@ export function DonationModal({ open, onClose, options = {} }: DonationModalProp
   useEffect(() => {
     if (!open) return;
     setSuccess(false);
+    setSubmitError(false);
     const preset = options.amount ?? amounts[1] ?? amounts[0] ?? null;
     setSelectedAmount(preset);
     setCustomAmount(options.amount ? String(options.amount) : "");
@@ -64,7 +68,7 @@ export function DonationModal({ open, onClose, options = {} }: DonationModalProp
           ? ("redirected" as const)
           : ("recorded" as const);
 
-      await submitDonationIntent({
+      const id = await submitDonationIntent({
         amount: resolvedAmount,
         currencyCode: donation.currencyCode,
         donorName: name.trim(),
@@ -74,6 +78,11 @@ export function DonationModal({ open, onClose, options = {} }: DonationModalProp
         projectId: options.projectId,
         projectName: options.projectName,
       });
+
+      if (!id) {
+        setSubmitError(true);
+        return;
+      }
 
       if (status === "redirected") {
         const url = buildDonationPaymentUrl(donation.externalPaymentUrl, {
@@ -235,6 +244,11 @@ export function DonationModal({ open, onClose, options = {} }: DonationModalProp
                 ? text(donation.paymentHintExternal)
                 : text(donation.paymentHintRecord)}
           </p>
+          {submitError && (
+            <p className="rounded-xl bg-destructive/10 px-3 py-2 text-xs text-destructive">
+              {t.donation.submitError}
+            </p>
+          )}
         </form>
       )}
     </Dialog>

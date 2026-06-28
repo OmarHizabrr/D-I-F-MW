@@ -1,12 +1,14 @@
 "use client";
 
 import { useSiteContent } from "@/context/SiteContentContext";
+import { useLocale } from "@/context/LocaleContext";
 import { SitePageHeader } from "@/components/site/SitePageHeader";
 import { ZakatCalculatorWidget } from "@/components/zakat/ZakatCalculatorWidget";
 import { SitePageSkeleton } from "@/components/admin/AdminPageSkeleton";
 
 export default function ZakatCalculatorPage() {
-  const { zakatSettings, sectionTitles, text, loading } = useSiteContent();
+  const { zakatSettings, text, loading } = useSiteContent();
+  const { t } = useLocale();
 
   if (loading) {
     return (
@@ -19,7 +21,7 @@ export default function ZakatCalculatorPage() {
   if (!zakatSettings.enabled) {
     return (
       <div className="section-padding text-center text-muted-foreground">
-        حاسبة الزكاة غير متاحة حالياً
+        {t.common.zakatDisabled}
       </div>
     );
   }

@@ -1,6 +1,7 @@
 "use client";
 
 import { useSiteContent } from "@/context/SiteContentContext";
+import { useLocale } from "@/context/LocaleContext";
 import { SitePageHeader } from "@/components/site/SitePageHeader";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
@@ -9,6 +10,7 @@ import { SitePageSkeleton } from "@/components/admin/AdminPageSkeleton";
 
 export default function ResourcesPage() {
   const { downloads, sectionTitles, text, loading } = useSiteContent();
+  const { t } = useLocale();
   const items = downloads.filter((d) => d.enabled).sort((a, b) => a.order - b.order);
 
   if (loading) {
@@ -29,7 +31,7 @@ export default function ResourcesPage() {
       <div className="section-padding bg-background">
         <div className="container-dif">
           {items.length === 0 ? (
-            <p className="py-16 text-center text-muted-foreground">لا توجد موارد للتحميل حالياً</p>
+            <p className="py-16 text-center text-muted-foreground">{t.common.noResources}</p>
           ) : (
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {items.map((item) => (

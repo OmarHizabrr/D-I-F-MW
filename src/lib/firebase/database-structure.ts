@@ -70,6 +70,7 @@ export const HOME_SECTIONS = [
   { id: "donation", label: "التبرعات", href: "/admin/donation" },
   { id: "campaignBanner", label: "بانر الحملات", href: "/admin/campaign-banner" },
   { id: "zakatSettings", label: "حاسبة الزكاة", href: "/admin/zakat" },
+  { id: "privacy", label: "سياسة الخصوصية", href: "/admin/privacy" },
   { id: "contactMessages", label: "رسائل التواصل", href: "/admin/contact-messages" },
   { id: "footer", label: "التذييل", href: "/admin/footer" },
 ] as const;

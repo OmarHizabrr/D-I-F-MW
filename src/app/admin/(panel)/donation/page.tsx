@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/Button";
 import { Card, CardContent } from "@/components/ui/Card";
 import { Spinner } from "@/components/ui/Spinner";
 import type { DonationContent, DonationPaymentMode } from "@/types/cms";
+import { emptyLocalized } from "@/types/cms";
 import { cn } from "@/lib/utils";
 
 const api = FirestoreApi.Api;
@@ -20,12 +21,16 @@ const api = FirestoreApi.Api;
 function mergeDonation(doc: Record<string, unknown> | null): DonationContent {
   const defaults = getDefaultDonation();
   if (!doc) return defaults;
+  const d = doc as DonationContent;
+  const presetImpacts =
+    Array.isArray(d.presetImpacts) && d.presetImpacts.length
+      ? d.presetImpacts
+      : defaults.presetImpacts;
   return {
     ...defaults,
-    ...(doc as DonationContent),
-    presetAmounts: Array.isArray(doc.presetAmounts)
-      ? (doc.presetAmounts as number[])
-      : defaults.presetAmounts,
+    ...d,
+    presetAmounts: Array.isArray(d.presetAmounts) ? d.presetAmounts : defaults.presetAmounts,
+    presetImpacts,
   };
 }
 
@@ -74,9 +79,15 @@ function AdminDonationContent() {
       .map((s) => Number(s.trim()))
       .filter((n) => Number.isFinite(n) && n > 0);
 
+    const defaultImpacts = getDefaultDonation().presetImpacts ?? [];
+    const presetImpacts = (presetAmounts.length ? presetAmounts : getDefaultDonation().presetAmounts).map(
+      (_, i) => data.presetImpacts?.[i] ?? defaultImpacts[i] ?? emptyLocalized()
+    );
+
     const payload: DonationContent = {
       ...data,
       presetAmounts: presetAmounts.length ? presetAmounts : getDefaultDonation().presetAmounts,
+      presetImpacts,
     };
 
     try {
@@ -191,6 +202,54 @@ function AdminDonationContent() {
             hint="مثال: 10, 25, 50, 100"
           />
 
+          {data.presetImpacts && data.presetImpacts.length > 0 && (
+            <div className="space-y-3">
+              <p className="text-sm font-medium">تأثير كل مبلغ (يظهر تحت الزر في نافذة التبرع)</p>
+              {data.presetImpacts.map((impact, idx) => (
+                <LocalizedInput
+                  key={idx}
+                  label={`تأثير المبلغ ${data.presetAmounts[idx] ?? idx + 1}`}
+                  value={impact}
+                  onChange={(value) => {
+                    const presetImpacts = [...(data.presetImpacts ?? [])];
+                    presetImpacts[idx] = value;
+                    setData({ ...data, presetImpacts });
+                  }}
+                />
+              ))}
+            </div>
+          )}
+
+          <label className="flex items-center gap-2 text-sm">
+            <input
+              type="checkbox"
+              checked={data.allowRecurring !== false}
+              onChange={(e) => setData({ ...data, allowRecurring: e.target.checked })}
+              className="h-4 w-4 rounded border-border text-brand-green"
+            />
+            السماح بالتبرع الشهري / المتكرر
+          </label>
+          {data.allowRecurring !== false && (
+            <>
+              <LocalizedInput
+                label="زر — لمرة واحدة"
+                value={data.oneTimeLabel ?? emptyLocalized()}
+                onChange={(oneTimeLabel) => setData({ ...data, oneTimeLabel })}
+              />
+              <LocalizedInput
+                label="زر — شهري"
+                value={data.recurringLabel ?? emptyLocalized()}
+                onChange={(recurringLabel) => setData({ ...data, recurringLabel })}
+              />
+              <LocalizedInput
+                label="تلميح التبرع الشهري"
+                value={data.recurringHint ?? emptyLocalized()}
+                onChange={(recurringHint) => setData({ ...data, recurringHint })}
+                multiline
+              />
+            </>
+          )}
+
           <label className="flex items-center gap-2 text-sm">
             <input
               type="checkbox"
@@ -242,6 +301,26 @@ function AdminDonationContent() {
       <Card padding="lg">
         <CardContent className="flex flex-col gap-6">
           <p className="text-sm font-bold text-muted-foreground">نافذة التبرع</p>
+          <LocalizedInput
+            label="تسمية المبلغ"
+            value={data.amountLabel}
+            onChange={(amountLabel) => setData({ ...data, amountLabel })}
+          />
+          <LocalizedInput
+            label="تسمية المبلغ المخصص"
+            value={data.customAmountLabel}
+            onChange={(customAmountLabel) => setData({ ...data, customAmountLabel })}
+          />
+          <LocalizedInput
+            label="تسمية الاسم"
+            value={data.nameLabel}
+            onChange={(nameLabel) => setData({ ...data, nameLabel })}
+          />
+          <LocalizedInput
+            label="تسمية البريد"
+            value={data.emailLabel}
+            onChange={(emailLabel) => setData({ ...data, emailLabel })}
+          />
           <LocalizedInput
             label="العنوان"
             value={data.modalTitle}

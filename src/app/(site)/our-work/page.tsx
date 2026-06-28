@@ -33,11 +33,7 @@ export default function OurWorkPage() {
           ) : (
             <div className="grid gap-4 sm:gap-6 md:grid-cols-2 xl:grid-cols-3">
               {items.map((item) => (
-                <ProjectCard
-                  key={item.id}
-                  project={item}
-                  viewDetailsLabel={text(sectionTitles.projectsViewDetails)}
-                />
+                <ProjectCard key={item.id} project={item} />
               ))}
             </div>
           )}

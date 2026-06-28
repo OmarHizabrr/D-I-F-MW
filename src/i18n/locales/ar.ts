@@ -246,6 +246,7 @@ const ar = {
     impact25: "حقيبة مدرسية",
     impact50: "وجبات إغاثة",
     impact100: "دعم مشروع",
+    submitError: "تعذّر إرسال التبرع. تحقق من الاتصال وحاول مجدداً.",
   },
 
   footer: {
@@ -275,6 +276,18 @@ const ar = {
     home: "الرئيسية",
     cancel: "إلغاء",
     ok: "حسناً",
+    close: "إغلاق",
+    lastUpdated: "آخر تحديث:",
+    filterAll: "الكل",
+    contentPending: "المحتوى قيد التحديث من لوحة التحكم.",
+    noReports: "لا توجد تقارير منشورة بعد",
+    noResources: "لا توجد موارد للتحميل حالياً",
+    zakatDisabled: "حاسبة الزكاة غير متاحة حالياً",
+    backToAllProjects: "العودة لجميع المشاريع",
+    projectLocation: "موقع المشروع",
+    supportedBy: "الجهة الداعمة",
+    allProjects: "جميع المشاريع",
+    noProjects: "لا توجد مشاريع مطابقة للتصفية الحالية",
   },
 
   pages: {

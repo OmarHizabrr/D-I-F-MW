@@ -11,17 +11,17 @@ import { PROJECT_STATUS_LABELS } from "@/lib/project-status";
 import type { LocaleCode, ProjectStatus } from "@/types/cms";
 import { cn } from "@/lib/utils";
 
-const statusFilters: Array<{ key: "all" | ProjectStatus; label: string }> = [
-  { key: "all", label: "الكل" },
-  { key: "ongoing", label: "جاري" },
-  { key: "completed", label: "مكتمل" },
-  { key: "delayed", label: "متأخر" },
-  { key: "needs_update", label: "يحتاج تحديث" },
+const statusFilterKeys: Array<"all" | ProjectStatus> = [
+  "all",
+  "ongoing",
+  "completed",
+  "delayed",
+  "needs_update",
 ];
 
 function ProjectsContent() {
   const { projects, programs, sectionTitles, text, loading } = useSiteContent();
-  const { locale } = useLocale();
+  const { locale, t } = useLocale();
   const searchParams = useSearchParams();
   const programFilter = searchParams.get("program") ?? "all";
   const [statusFilter, setStatusFilter] = useState<"all" | ProjectStatus>("all");
@@ -94,35 +94,31 @@ function ProjectsContent() {
           </div>
 
           <div className="mb-6 flex flex-wrap gap-2">
-            {statusFilters.map((f) => (
+            {statusFilterKeys.map((key) => (
               <button
-                key={f.key}
+                key={key}
                 type="button"
-                onClick={() => setStatusFilter(f.key)}
+                onClick={() => setStatusFilter(key)}
                 className={cn(
                   "rounded-full px-3 py-1.5 text-xs font-medium sm:text-sm",
-                  statusFilter === f.key
+                  statusFilter === key
                     ? "bg-brand-brown text-white"
                     : "bg-border-subtle text-muted-foreground hover:text-foreground"
                 )}
               >
-                {f.key === "all"
-                  ? f.label
-                  : PROJECT_STATUS_LABELS[f.key][locale as LocaleCode] ?? f.label}
+                {key === "all"
+                  ? t.common.filterAll
+                  : PROJECT_STATUS_LABELS[key][locale as LocaleCode] ?? key}
               </button>
             ))}
           </div>
 
           {items.length === 0 ? (
-            <p className="py-16 text-center text-muted-foreground">لا توجد مشاريع في هذا القسم</p>
+            <p className="py-16 text-center text-muted-foreground">{t.common.noProjects}</p>
           ) : (
             <div className="grid gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">
               {items.map((project) => (
-                <ProjectCard
-                  key={project.id}
-                  project={project}
-                  viewDetailsLabel={text(sectionTitles.projectsViewDetails)}
-                />
+                <ProjectCard key={project.id} project={project} />
               ))}
             </div>
           )}

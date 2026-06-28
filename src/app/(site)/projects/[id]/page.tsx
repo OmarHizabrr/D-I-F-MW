@@ -29,8 +29,8 @@ const MapView = dynamic(
 export default function ProjectDetailPage() {
   const params = useParams();
   const id = String(params.id ?? "");
-  const { projects, mapPoints, donation, text, loading } = useSiteContent();
-  const { locale } = useLocale();
+  const { projects, mapPoints, donation, sectionTitles, text, loading } = useSiteContent();
+  const { locale, t } = useLocale();
   const { openDonation } = useDonation();
 
   const project = useMemo(
@@ -65,7 +65,7 @@ export default function ProjectDetailPage() {
         title={text(project.name)}
         subtitle={`${text(project.country)}${project.city ? ` · ${project.city}` : ""}`}
         backHref="/projects"
-        backLabel="جميع المشاريع"
+        backLabel={text(sectionTitles.navAllProjects)}
       />
 
       <article className="section-padding bg-background">
@@ -97,9 +97,7 @@ export default function ProjectDetailPage() {
                 </p>
               </div>
             ) : (
-              <p className="text-sm text-muted-foreground">
-                تفاصيل المشروع قيد التحديث من لوحة التحكم.
-              </p>
+              <p className="text-sm text-muted-foreground">{t.common.contentPending}</p>
             )}
           </div>
 
@@ -111,7 +109,7 @@ export default function ProjectDetailPage() {
               </div>
               <dl className="space-y-3 text-sm">
                 <div>
-                  <dt className="text-muted-foreground">نسبة الإنجاز</dt>
+                  <dt className="text-muted-foreground">{text(sectionTitles.projectsProgress)}</dt>
                   <dd className="mt-1 font-bold text-brand-green">{project.progress}%</dd>
                   <div className="mt-2 h-2 overflow-hidden rounded-full bg-border-subtle">
                     <div
@@ -121,12 +119,12 @@ export default function ProjectDetailPage() {
                   </div>
                 </div>
                 <div>
-                  <dt className="text-muted-foreground">آخر تحديث</dt>
+                  <dt className="text-muted-foreground">{text(sectionTitles.projectsLastUpdate)}</dt>
                   <dd className="mt-1 font-medium">{project.lastUpdate}</dd>
                 </div>
                 {project.showDonor && project.donorName && (
                   <div>
-                    <dt className="text-muted-foreground">الجهة الداعمة</dt>
+                    <dt className="text-muted-foreground">{t.common.supportedBy}</dt>
                     <dd className="mt-1 font-medium">{project.donorName}</dd>
                   </div>
                 )}
@@ -143,7 +141,7 @@ export default function ProjectDetailPage() {
 
             {mapPoint && (
               <Card padding="md">
-                <h3 className="mb-3 font-semibold">موقع المشروع</h3>
+                <h3 className="mb-3 font-semibold">{t.common.projectLocation}</h3>
                 <MapView
                   markers={[
                     {
@@ -176,7 +174,7 @@ export default function ProjectDetailPage() {
               href="/projects"
               className="block rounded-2xl border border-border-subtle bg-surface px-4 py-3 text-center text-sm font-semibold text-brand-green hover:bg-brand-green/5"
             >
-              ← العودة لجميع المشاريع
+              ← {t.common.backToAllProjects}
             </Link>
           </aside>
         </div>

@@ -4,13 +4,17 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { X } from "lucide-react";
 import { useSiteContent } from "@/context/SiteContentContext";
+import { useLocale } from "@/context/LocaleContext";
 import { cn } from "@/lib/utils";
 
 const DISMISS_KEY = "dif-campaign-banner-dismissed";
 
 export function CampaignBanner() {
   const { campaignBanner, text } = useSiteContent();
+  const { t } = useLocale();
   const [dismissed, setDismissed] = useState(true);
+
+  const messageKey = text(campaignBanner.message);
 
   useEffect(() => {
     if (!campaignBanner.enabled) return;
@@ -18,12 +22,12 @@ export function CampaignBanner() {
       return;
     }
     if (campaignBanner.dismissible) {
-      const wasDismissed = localStorage.getItem(DISMISS_KEY) === campaignBanner.message.ar;
+      const wasDismissed = localStorage.getItem(DISMISS_KEY) === messageKey;
       setDismissed(wasDismissed);
     } else {
       setDismissed(false);
     }
-  }, [campaignBanner]);
+  }, [campaignBanner, messageKey]);
 
   if (!campaignBanner.enabled || dismissed) return null;
   if (campaignBanner.endDate && campaignBanner.endDate < new Date().toISOString().slice(0, 10)) {
@@ -33,7 +37,7 @@ export function CampaignBanner() {
   function handleDismiss() {
     setDismissed(true);
     if (campaignBanner.dismissible) {
-      localStorage.setItem(DISMISS_KEY, campaignBanner.message.ar);
+      localStorage.setItem(DISMISS_KEY, messageKey);
     }
   }
 
@@ -62,7 +66,7 @@ export function CampaignBanner() {
           type="button"
           onClick={handleDismiss}
           className="absolute end-3 top-1/2 -translate-y-1/2 rounded-lg p-1 hover:bg-white/15"
-          aria-label="إغلاق"
+          aria-label={t.common.close}
         >
           <X className="h-4 w-4" />
         </button>

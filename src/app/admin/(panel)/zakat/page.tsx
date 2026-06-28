@@ -66,8 +66,20 @@ export default function AdminZakatPage() {
             <Input label="سعر الفضة/غرام" type="number" dir="ltr" value={data.silverPricePerGram} onChange={(e) => setData({ ...data, silverPricePerGram: Number(e.target.value) })} />
             <Input label="نصاب الذهب (غرام)" type="number" dir="ltr" value={data.nisabGoldGrams} onChange={(e) => setData({ ...data, nisabGoldGrams: Number(e.target.value) })} />
             <Input label="نصاب الفضة (غرام)" type="number" dir="ltr" value={data.nisabSilverGrams} onChange={(e) => setData({ ...data, nisabSilverGrams: Number(e.target.value) })} />
+            <Input label="نسبة الزكاة (%)" type="number" dir="ltr" value={data.zakatRate * 100} onChange={(e) => setData({ ...data, zakatRate: Number(e.target.value) / 100 })} hint="مثال: 2.5" />
             <Input label="رمز العملة" dir="ltr" value={data.currencySymbol} onChange={(e) => setData({ ...data, currencySymbol: e.target.value })} />
+            <Input label="كود العملة" dir="ltr" value={data.currencyCode} onChange={(e) => setData({ ...data, currencyCode: e.target.value })} />
           </div>
+          <LocalizedInput label="تسمية النتيجة" value={data.resultLabel} onChange={(resultLabel) => setData({ ...data, resultLabel })} />
+          <LocalizedInput label="أقل من النصاب" value={data.belowNisabLabel} onChange={(belowNisabLabel) => setData({ ...data, belowNisabLabel })} />
+          <LocalizedInput label="زر تبرع الزكاة" value={data.donateZakatLabel} onChange={(donateZakatLabel) => setData({ ...data, donateZakatLabel })} />
+          <LocalizedInput label="حقل النقد" value={data.fieldCash} onChange={(fieldCash) => setData({ ...data, fieldCash })} />
+          <LocalizedInput label="حقل الذهب" value={data.fieldGold} onChange={(fieldGold) => setData({ ...data, fieldGold })} />
+          <LocalizedInput label="حقل الفضة" value={data.fieldSilver} onChange={(fieldSilver) => setData({ ...data, fieldSilver })} />
+          <LocalizedInput label="حقل الاستثمارات" value={data.fieldInvestments} onChange={(fieldInvestments) => setData({ ...data, fieldInvestments })} />
+          <LocalizedInput label="حقل الديون" value={data.fieldDebts} onChange={(fieldDebts) => setData({ ...data, fieldDebts })} />
+          <LocalizedInput label="زر الحساب" value={data.calculateLabel} onChange={(calculateLabel) => setData({ ...data, calculateLabel })} />
+          <LocalizedInput label="ملاحظة النصاب" value={data.nisabNote} onChange={(nisabNote) => setData({ ...data, nisabNote })} multiline />
         </CardContent>
       </Card>
     </div>

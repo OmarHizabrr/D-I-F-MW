@@ -243,6 +243,7 @@ const en = {
     recurringLabel: "Monthly",
     oneTimeLabel: "One-time",
     recurringHint: "Monthly giving multiplies your impact throughout the year",
+    submitError: "Could not submit your donation. Check your connection and try again.",
   },
 
   footer: {
@@ -272,6 +273,18 @@ const en = {
     home: "Home",
     cancel: "Cancel",
     ok: "OK",
+    close: "Close",
+    lastUpdated: "Last updated:",
+    filterAll: "All",
+    contentPending: "Content is being updated from the admin panel.",
+    noReports: "No reports published yet",
+    noResources: "No downloadable resources at the moment",
+    zakatDisabled: "Zakat calculator is currently unavailable",
+    backToAllProjects: "Back to all projects",
+    projectLocation: "Project location",
+    supportedBy: "Supported by",
+    allProjects: "All projects",
+    noProjects: "No projects match the current filters",
   },
 
   pages: {

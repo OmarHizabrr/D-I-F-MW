@@ -243,6 +243,7 @@ const ny = {
     recurringLabel: "Mwezi uliwonse",
     oneTimeLabel: "Kamodzi",
     recurringHint: "Kuthandiza mwezi uliwonse kukulitsa zotsatira",
+    submitError: "Sitinathe kutumiza zopereka. Onani kulumikizana ndi yesaninso.",
   },
 
   footer: {
@@ -272,6 +273,18 @@ const ny = {
     home: "Kwanu",
     cancel: "Khanani",
     ok: "OK",
+    close: "Tseka",
+    lastUpdated: "Kusinthidwa komaliza:",
+    filterAll: "Zonse",
+    contentPending: "Zomwe zikukonzedwa kuchokera pa panel ya admin.",
+    noReports: "Palibe malipoti omwe adachitika",
+    noResources: "Palibe zothandizira kupanga tsopano",
+    zakatDisabled: "Kuwerengera Zakat sikugwira ntchito pano",
+    backToAllProjects: "Bwererani ku mapulojekiti onse",
+    projectLocation: "Malo a pulojekiti",
+    supportedBy: "Wothandizira",
+    allProjects: "Mapulojekiti onse",
+    noProjects: "Palibe mapulojekiti omwe akugwirizana ndi zosankha",
   },
 
   pages: {

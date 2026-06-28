@@ -30,10 +30,7 @@ export function OurWorkSection() {
         <div className="grid gap-4 sm:gap-6 md:grid-cols-2 xl:grid-cols-4">
           {items.map((item, i) => (
             <Reveal key={item.id} delay={i * 60}>
-              <ProjectCard
-                project={item}
-                viewDetailsLabel={text(sectionTitles.projectsViewDetails)}
-              />
+              <ProjectCard project={item} />
             </Reveal>
           ))}
         </div>

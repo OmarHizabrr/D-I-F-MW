@@ -168,7 +168,7 @@ export function SiteContentProvider({ children }: { children: ReactNode }) {
 
     const unsubs: (() => void)[] = [];
 
-    const subscribeDoc = <T,>(
+    const subscribeDoc = <T extends Record<string, unknown>>(
       docRef: ReturnType<typeof api.getTopbarDoc>,
       key: keyof SiteContentState,
       fallback: T
@@ -176,7 +176,10 @@ export function SiteContentProvider({ children }: { children: ReactNode }) {
       unsubs.push(
         api.subscribeDocSnapshot(docRef, (docSnap) => {
           if (docSnap.exists()) {
-            setState((prev) => ({ ...prev, [key]: docSnap.data() as T }));
+            setState((prev) => ({
+              ...prev,
+              [key]: { ...fallback, ...(docSnap.data() as T) },
+            }));
           } else {
             setState((prev) => ({ ...prev, [key]: fallback }));
           }
@@ -246,7 +249,10 @@ export function SiteContentProvider({ children }: { children: ReactNode }) {
           setState((prev) => ({
             ...prev,
             seeded: Boolean(data.seeded),
-            sectionTitles: (data.sectionTitles as SectionTitles) || prev.sectionTitles,
+            sectionTitles: {
+              ...getDefaultSectionTitles(),
+              ...(data.sectionTitles as SectionTitles),
+            },
             loading: false,
           }));
         } else {
