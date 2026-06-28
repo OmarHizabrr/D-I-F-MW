@@ -38,6 +38,11 @@ import {
   getDefaultEvents,
   getDefaultVolunteerOpportunities,
 } from "@/data/extended-defaults";
+import {
+  getDefaultCampaignBanner,
+  getDefaultZakatSettings,
+  getDefaultPrivacy,
+} from "@/data/trust-features-defaults";
 import type {
   FooterContent,
   HeroContent,
@@ -63,6 +68,9 @@ import type {
   DownloadItem,
   EventItem,
   VolunteerOpportunity,
+  CampaignBannerContent,
+  ZakatSettings,
+  PrivacyPageContent,
 } from "@/types/cms";
 import { pickLocalized, type LocaleCode } from "@/types/cms";
 import { useLocale } from "@/context/LocaleContext";
@@ -99,6 +107,9 @@ type SiteContentState = {
   footer: FooterContent;
   newsletter: NewsletterContent;
   donation: DonationContent;
+  campaignBanner: CampaignBannerContent;
+  zakatSettings: ZakatSettings;
+  privacy: PrivacyPageContent;
   sectionTitles: SectionTitles;
 };
 
@@ -128,6 +139,9 @@ const defaults: SiteContentState = {
   footer: getDefaultFooter(),
   newsletter: getDefaultNewsletter(),
   donation: getDefaultDonation(),
+  campaignBanner: getDefaultCampaignBanner(),
+  zakatSettings: getDefaultZakatSettings(),
+  privacy: getDefaultPrivacy(),
   sectionTitles: getDefaultSectionTitles(),
 };
 
@@ -193,6 +207,9 @@ export function SiteContentProvider({ children }: { children: ReactNode }) {
     subscribeDoc(api.getFooterDoc(), "footer", defaults.footer);
     subscribeDoc(api.getNewsletterDoc(), "newsletter", defaults.newsletter);
     subscribeDoc(api.getDonationDoc(), "donation", defaults.donation);
+    subscribeDoc(api.getCampaignBannerDoc(), "campaignBanner", defaults.campaignBanner);
+    subscribeDoc(api.getZakatSettingsDoc(), "zakatSettings", defaults.zakatSettings);
+    subscribeDoc(api.getPrivacyDoc(), "privacy", defaults.privacy);
 
     subscribeList(api.getNavItemsCollection(), "navItems", defaults.navItems);
     subscribeList(api.getStatsCollection(), "stats", defaults.stats);

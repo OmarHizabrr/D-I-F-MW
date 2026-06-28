@@ -3,6 +3,7 @@
 import dynamic from "next/dynamic";
 import { HeroSection } from "./HeroSection";
 import { StatsSection } from "./StatsSection";
+import { TrustBadgesSection } from "./TrustBadgesSection";
 import { ProgramsSection } from "./ProgramsSection";
 import { OngoingProjectsSection } from "./OngoingProjectsSection";
 import { SuccessStoriesSection } from "./SuccessStoriesSection";
@@ -37,6 +38,7 @@ export function HomePage() {
     <div className="w-full min-w-0 overflow-x-hidden">
       <HeroSection />
       <StatsSection />
+      <TrustBadgesSection />
       <ProgramsSection />
       <OngoingProjectsSection />
       <LazySection minHeight="18rem">

@@ -40,6 +40,9 @@ export default function AdminTopbarPage() {
             donorPortalLabel: (doc.donorPortalLabel as TopbarContent["donorPortalLabel"]) ?? emptyLocalized(),
             loginLabel: (doc.loginLabel as TopbarContent["loginLabel"]) ?? emptyLocalized(),
             socialLinks: (doc.socialLinks as TopbarContent["socialLinks"]) ?? [],
+            whatsAppNumber: (doc.whatsAppNumber as string) ?? "",
+            whatsAppEnabled: doc.whatsAppEnabled !== false,
+            whatsAppMessage: (doc.whatsAppMessage as TopbarContent["whatsAppMessage"]) ?? emptyLocalized(),
           });
         }
       } finally {
@@ -120,6 +123,28 @@ export default function AdminTopbarPage() {
             label="نص تسجيل الدخول"
             value={data.loginLabel}
             onChange={(loginLabel) => setData({ ...data, loginLabel })}
+          />
+
+          <p className="text-sm font-medium">WhatsApp</p>
+          <label className="flex items-center gap-2 text-sm">
+            <input
+              type="checkbox"
+              checked={data.whatsAppEnabled !== false}
+              onChange={(e) => setData({ ...data, whatsAppEnabled: e.target.checked })}
+            />
+            إظهار زر WhatsApp العائم
+          </label>
+          <Input
+            label="رقم WhatsApp (بدون +)"
+            dir="ltr"
+            value={data.whatsAppNumber ?? ""}
+            onChange={(e) => setData({ ...data, whatsAppNumber: e.target.value })}
+            hint="مثال: 967777000000"
+          />
+          <LocalizedInput
+            label="رسالة WhatsApp الافتراضية"
+            value={data.whatsAppMessage ?? emptyLocalized()}
+            onChange={(whatsAppMessage) => setData({ ...data, whatsAppMessage })}
           />
         </CardContent>
       </Card>

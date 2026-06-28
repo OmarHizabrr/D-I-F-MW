@@ -10,19 +10,22 @@ import { Button } from "@/components/ui/Button";
 import { buildDonationPaymentUrl, formatDonationAmount } from "@/lib/donation-url";
 import { submitDonationIntent } from "@/services/donationService";
 import { cn } from "@/lib/utils";
+import type { DonationOpenOptions } from "@/context/DonationContext";
 
 type DonationModalProps = {
   open: boolean;
   onClose: () => void;
+  options?: DonationOpenOptions;
 };
 
-export function DonationModal({ open, onClose }: DonationModalProps) {
+export function DonationModal({ open, onClose, options = {} }: DonationModalProps) {
   const { donation, text } = useSiteContent();
   const { withLoading } = useLoading();
   const [selectedAmount, setSelectedAmount] = useState<number | null>(null);
   const [customAmount, setCustomAmount] = useState("");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [recurring, setRecurring] = useState(false);
   const [success, setSuccess] = useState(false);
 
   const amounts = useMemo(
@@ -40,11 +43,13 @@ export function DonationModal({ open, onClose }: DonationModalProps) {
   useEffect(() => {
     if (!open) return;
     setSuccess(false);
-    setSelectedAmount(amounts[1] ?? amounts[0] ?? null);
-    setCustomAmount("");
+    const preset = options.amount ?? amounts[1] ?? amounts[0] ?? null;
+    setSelectedAmount(preset);
+    setCustomAmount(options.amount ? String(options.amount) : "");
+    setRecurring(options.recurring ?? false);
     setName("");
     setEmail("");
-  }, [open, amounts]);
+  }, [open, amounts, options.amount, options.recurring]);
 
   if (!donation.enabled) return null;
 
@@ -65,6 +70,9 @@ export function DonationModal({ open, onClose }: DonationModalProps) {
         donorName: name.trim(),
         donorEmail: email.trim(),
         status,
+        recurring,
+        projectId: options.projectId,
+        projectName: options.projectName,
       });
 
       if (status === "redirected") {
@@ -128,10 +136,41 @@ export function DonationModal({ open, onClose }: DonationModalProps) {
         </div>
       ) : (
         <form id="donation-form" className="flex flex-col gap-5" onSubmit={handleSubmit}>
+          {options.projectName && (
+            <p className="rounded-xl bg-brand-green/10 px-4 py-2.5 text-sm font-medium text-brand-green-dark dark:text-brand-green">
+              {options.projectName}
+            </p>
+          )}
+
+          {donation.allowRecurring !== false && (
+            <div className="flex rounded-2xl border border-border p-1">
+              <button
+                type="button"
+                onClick={() => setRecurring(false)}
+                className={cn(
+                  "flex-1 rounded-xl py-2 text-sm font-semibold transition-colors",
+                  !recurring ? "bg-brand-green text-white" : "text-muted-foreground"
+                )}
+              >
+                {text(donation.oneTimeLabel)}
+              </button>
+              <button
+                type="button"
+                onClick={() => setRecurring(true)}
+                className={cn(
+                  "flex-1 rounded-xl py-2 text-sm font-semibold transition-colors",
+                  recurring ? "bg-brand-green text-white" : "text-muted-foreground"
+                )}
+              >
+                {text(donation.recurringLabel)}
+              </button>
+            </div>
+          )}
+
           <div>
             <p className="mb-3 text-sm font-medium">{text(donation.amountLabel)}</p>
             <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-              {amounts.map((amount) => (
+              {amounts.map((amount, idx) => (
                 <button
                   key={amount}
                   type="button"
@@ -146,7 +185,12 @@ export function DonationModal({ open, onClose }: DonationModalProps) {
                       : "border-border hover:border-brand-green/40"
                   )}
                 >
-                  {formatDonationAmount(amount, donation.currencySymbol)}
+                  <span className="block">{formatDonationAmount(amount, donation.currencySymbol)}</span>
+                  {donation.presetImpacts?.[idx] && text(donation.presetImpacts[idx]) && (
+                    <span className="mt-1 block text-[10px] font-normal leading-tight text-muted-foreground">
+                      {text(donation.presetImpacts[idx])}
+                    </span>
+                  )}
                 </button>
               ))}
             </div>
@@ -185,9 +229,11 @@ export function DonationModal({ open, onClose }: DonationModalProps) {
 
           <p className="flex items-center gap-2 text-xs text-muted-foreground">
             <Heart className="h-3.5 w-3.5 shrink-0 text-brand-green" />
-            {donation.paymentMode === "external" && donation.externalPaymentUrl
-              ? text(donation.paymentHintExternal)
-              : text(donation.paymentHintRecord)}
+            {recurring && donation.recurringHint
+              ? text(donation.recurringHint)
+              : donation.paymentMode === "external" && donation.externalPaymentUrl
+                ? text(donation.paymentHintExternal)
+                : text(donation.paymentHintRecord)}
           </p>
         </form>
       )}

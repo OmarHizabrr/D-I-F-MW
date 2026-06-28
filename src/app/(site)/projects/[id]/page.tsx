@@ -7,6 +7,7 @@ import Image from "next/image";
 import dynamic from "next/dynamic";
 import { useSiteContent } from "@/context/SiteContentContext";
 import { useLocale } from "@/context/LocaleContext";
+import { useDonation } from "@/context/DonationContext";
 import { SitePageHeader } from "@/components/site/SitePageHeader";
 import { YouTubePlayer } from "@/components/site/YouTubePlayer";
 import { SitePageSkeleton } from "@/components/admin/AdminPageSkeleton";
@@ -18,6 +19,7 @@ import { formatCoordinates, googleMapsUrl, isValidLatLng } from "@/lib/map/const
 import { sectionIcons } from "@/lib/icons";
 import type { LocaleCode } from "@/types/cms";
 import { ExternalLink } from "lucide-react";
+import { Button } from "@/components/ui/Button";
 
 const MapView = dynamic(
   () => import("@/components/map/MapView").then((m) => m.MapView),
@@ -27,8 +29,9 @@ const MapView = dynamic(
 export default function ProjectDetailPage() {
   const params = useParams();
   const id = String(params.id ?? "");
-  const { projects, mapPoints, text, loading } = useSiteContent();
+  const { projects, mapPoints, donation, text, loading } = useSiteContent();
   const { locale } = useLocale();
+  const { openDonation } = useDonation();
 
   const project = useMemo(
     () => projects.find((p) => p.id === id && p.enabled),
@@ -128,6 +131,14 @@ export default function ProjectDetailPage() {
                   </div>
                 )}
               </dl>
+              <Button
+                className="mt-4 w-full"
+                onClick={() =>
+                  openDonation({ projectId: project.id, projectName: text(project.name) })
+                }
+              >
+                {text(donation.navButtonLabel)}
+              </Button>
             </Card>
 
             {mapPoint && (

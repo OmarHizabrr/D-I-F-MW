@@ -325,6 +325,28 @@ class FirestoreApi {
     );
   }
 
+  getCampaignBannerDoc() {
+    return this.getSubDocument(
+      COLLECTIONS.campaignBanner,
+      SITE_ROOT,
+      COLLECTIONS.campaignBanner,
+      "content"
+    );
+  }
+
+  getZakatSettingsDoc() {
+    return this.getSubDocument(
+      COLLECTIONS.zakatSettings,
+      SITE_ROOT,
+      COLLECTIONS.zakatSettings,
+      "content"
+    );
+  }
+
+  getPrivacyDoc() {
+    return this.getSubDocument(COLLECTIONS.privacy, SITE_ROOT, COLLECTIONS.privacy, "content");
+  }
+
   getAdminsCollection() {
     return this.getSubCollection(COLLECTIONS.admins, SITE_ROOT, COLLECTIONS.admins);
   }

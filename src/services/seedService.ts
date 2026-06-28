@@ -28,6 +28,11 @@ import {
   getDefaultEvents,
   getDefaultVolunteerOpportunities,
 } from "@/data/extended-defaults";
+import {
+  getDefaultCampaignBanner,
+  getDefaultZakatSettings,
+  getDefaultPrivacy,
+} from "@/data/trust-features-defaults";
 import type { UserMeta } from "@/services/firestoreApi";
 
 const api = FirestoreApi.Api;
@@ -109,6 +114,21 @@ export async function seedSiteContent(userData: UserMeta = {}) {
       userData,
     });
   }
+  await api.setData({
+    docRef: api.getCampaignBannerDoc(),
+    data: getDefaultCampaignBanner(),
+    userData,
+  });
+  await api.setData({
+    docRef: api.getZakatSettingsDoc(),
+    data: getDefaultZakatSettings(),
+    userData,
+  });
+  await api.setData({
+    docRef: api.getPrivacyDoc(),
+    data: getDefaultPrivacy(),
+    userData,
+  });
 }
 
 export async function registerAdmin(uid: string, email: string, userData: UserMeta = {}) {

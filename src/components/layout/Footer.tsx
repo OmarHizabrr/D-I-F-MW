@@ -33,6 +33,10 @@ export function Footer() {
     contact: sectionTitles.navContact,
     shareStory: sectionTitles.navShareStory,
     resources: sectionTitles.navResources,
+    transparency: sectionTitles.navTransparency,
+    zakatCalculator: sectionTitles.navZakatCalculator,
+    waysToGive: sectionTitles.navWaysToGive,
+    privacy: sectionTitles.navPrivacy,
   };
 
   const grouped = footerUsesGroupedLinks(footer.quickLinkIds);
@@ -182,6 +186,10 @@ export function Footer() {
 
         <div className="mt-10 border-t border-white/20 pt-6 text-center text-sm text-white/70">
           {text(footer.rights)}
+          {" · "}
+          <Link href="/privacy" className="underline hover:text-white">
+            {text(sectionTitles.privacyPageTitle)}
+          </Link>
         </div>
       </div>
     </footer>

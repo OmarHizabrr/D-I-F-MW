@@ -31,6 +31,7 @@ import {
   getDefaultEvents,
   getDefaultVolunteerOpportunities,
 } from "@/data/extended-defaults";
+import { getDefaultDonationImpacts } from "@/data/trust-features-defaults";
 
 export {
   getDefaultSuccessStories,
@@ -61,6 +62,13 @@ export function getDefaultTopbar(): TopbarContent {
     email: ar.topBar.email,
     donorPortalLabel: L(ar.topBar.donorPortal, en.topBar.donorPortal, ny.topBar.donorPortal),
     loginLabel: L(ar.topBar.login, en.topBar.login, ny.topBar.login),
+    whatsAppNumber: "967777000000",
+    whatsAppEnabled: true,
+    whatsAppMessage: L(
+      ar.topBar.whatsAppMessage,
+      en.topBar.whatsAppMessage,
+      ny.topBar.whatsAppMessage
+    ),
     socialLinks: [
       { id: "fb", platform: "facebook", url: "#", enabled: true, order: 1 },
       { id: "tw", platform: "twitter", url: "#", enabled: true, order: 2 },
@@ -373,6 +381,11 @@ export function getDefaultDonation(): DonationContent {
       en.donation.paymentHintExternal,
       ny.donation.paymentHintExternal
     ),
+    presetImpacts: getDefaultDonationImpacts(),
+    allowRecurring: true,
+    recurringLabel: L(ar.donation.recurringLabel, en.donation.recurringLabel, ny.donation.recurringLabel),
+    oneTimeLabel: L(ar.donation.oneTimeLabel, en.donation.oneTimeLabel, ny.donation.oneTimeLabel),
+    recurringHint: L(ar.donation.recurringHint, en.donation.recurringHint, ny.donation.recurringHint),
   };
 }
 
@@ -446,6 +459,25 @@ export function getDefaultSectionTitles() {
     navContact: L(ar.nav.contact, en.nav.contact, ny.nav.contact),
     navShareStory: L(ar.pages.shareStory, en.pages.shareStory, ny.pages.shareStory),
     navResources: L(ar.nav.resources, en.nav.resources, ny.nav.resources),
+    navTransparency: L(ar.nav.transparency, en.nav.transparency, ny.nav.transparency),
+    navZakatCalculator: L(ar.nav.zakatCalculator, en.nav.zakatCalculator, ny.nav.zakatCalculator),
+    navWaysToGive: L(ar.nav.waysToGive, en.nav.waysToGive, ny.nav.waysToGive),
+    navPrivacy: L(ar.nav.privacy, en.nav.privacy, ny.nav.privacy),
+    trustTitle: L(ar.trust.title, en.trust.title, ny.trust.title),
+    trustBadge1: L(ar.trust.badge1, en.trust.badge1, ny.trust.badge1),
+    trustBadge1Desc: L(ar.trust.badge1Desc, en.trust.badge1Desc, ny.trust.badge1Desc),
+    trustBadge2: L(ar.trust.badge2, en.trust.badge2, ny.trust.badge2),
+    trustBadge2Desc: L(ar.trust.badge2Desc, en.trust.badge2Desc, ny.trust.badge2Desc),
+    trustBadge3: L(ar.trust.badge3, en.trust.badge3, ny.trust.badge3),
+    trustBadge3Desc: L(ar.trust.badge3Desc, en.trust.badge3Desc, ny.trust.badge3Desc),
+    trustBadge4: L(ar.trust.badge4, en.trust.badge4, ny.trust.badge4),
+    trustBadge4Desc: L(ar.trust.badge4Desc, en.trust.badge4Desc, ny.trust.badge4Desc),
+    transparencyPageTitle: L(ar.transparency.title, en.transparency.title, ny.transparency.title),
+    transparencyPageSubtitle: L(ar.transparency.subtitle, en.transparency.subtitle, ny.transparency.subtitle),
+    waysToGivePageTitle: L(ar.waysToGive.title, en.waysToGive.title, ny.waysToGive.title),
+    waysToGivePageSubtitle: L(ar.waysToGive.subtitle, en.waysToGive.subtitle, ny.waysToGive.subtitle),
+    privacyPageTitle: L(ar.privacy.title, en.privacy.title, ny.privacy.title),
+    privacyPageSubtitle: L(ar.privacy.subtitle, en.privacy.subtitle, ny.privacy.subtitle),
     contactFormName: L(ar.pages.contactFormName, en.pages.contactFormName, ny.pages.contactFormName),
     contactFormEmail: L(ar.pages.contactFormEmail, en.pages.contactFormEmail, ny.pages.contactFormEmail),
     contactFormMessage: L(ar.pages.contactFormMessage, en.pages.contactFormMessage, ny.pages.contactFormMessage),

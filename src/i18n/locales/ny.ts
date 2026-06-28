@@ -8,6 +8,7 @@ const ny = {
     email: "info@dif.org",
     donorPortal: "Chipata cha Othandizira",
     login: "Lowani",
+    whatsAppMessage: "Moni, ndikufuna kufunsa za mapulojekiti anu",
   },
 
   nav: {
@@ -33,6 +34,78 @@ const ny = {
     impact: "Zotsatira Zathu",
     newsEvents: "Nkhani ndi Zochitika",
     joinUs: "Lowani Nafe",
+    zakatCalculator: "Zakat Calculator",
+    transparency: "Kuwonekera",
+    waysToGive: "Njira Zothandizira",
+    privacy: "Chinsinsi",
+  },
+
+  zakat: {
+    title: "Zakat Calculator",
+    subtitle: "Werengani Zakat yanu",
+    intro: "Lowetsani chuma chanu ndi ngongole.",
+    resultLabel: "Zakat yofunika",
+    belowNisab: "Chuma sichikwanira nisab",
+    donateZakat: "Perekani Zakat kudzera kwathu",
+    fieldCash: "Ndalama",
+    fieldGold: "Golide (grams)",
+    fieldSilver: "Siliva (grams)",
+    fieldInvestments: "Investments",
+    fieldDebts: "Ngongole",
+    calculate: "Werengani Zakat",
+    nisabNote: "Nisab ya golide kapena siliva imagwiritsidwa ntchito",
+  },
+
+  transparency: {
+    title: "Kuwonekera ndi Udindo",
+    subtitle: "Kudalirika kumanga ndi zoona",
+    intro: "Timapanga malipoti ndi zizindikiro kuti othandizira adziwe.",
+    reportsTitle: "Malipoti",
+    statsTitle: "Ziwerengero",
+    licensesTitle: "Zizindikiro",
+    whyTitle: "Chifukwa chiyani mutidalirize",
+    downloadReport: "Tsitsani lipoti",
+    viewLicenses: "Onani zizindikiro",
+  },
+
+  waysToGive: {
+    title: "Njira Zothandizira",
+    subtitle: "Sankhani njira yabwino",
+    zakatTitle: "Zakat",
+    zakatDesc: "Perekani Zakat molondola",
+    sadaqahTitle: "Sadaqah",
+    sadaqahDesc: "Chothandizo chilichonse",
+    monthlyTitle: "Mwezi uliwonse",
+    monthlyDesc: "Thandizo lachikhalire",
+    projectTitle: "Thandizani pulojekiti",
+    projectDesc: "Thandizani pulojekiti mwachindunji",
+    calculatorLink: "Zakat calculator",
+    transparencyLink: "Kuwonekera",
+  },
+
+  privacy: {
+    title: "Policy ya Chinsinsi",
+    subtitle: "Momwe timateteza deta yanu",
+    body: "Timalemekeza chinsinsi chanu. Deta imagwiritsidwa ntchito pokha pazolinga za kulumikizana ndi kuthandiza.",
+  },
+
+  trust: {
+    title: "Chifukwa chiyani othandizira amatidaliriza",
+    badge1: "Kuwonekera kwa ndalama",
+    badge1Desc: "Malipoti opatulika",
+    badge2: "Zolemba za m'dera",
+    badge2Desc: "Zithunzi pa pulojekiti",
+    badge3: "Zakat yolondola",
+    badge3Desc: "Calculator ndi njira zoyenera",
+    badge4: "Kutsatira kosalekeza",
+    badge4Desc: "Tsatirani mapulojekiti",
+  },
+
+  search: {
+    title: "Sakani tsamba",
+    placeholder: "Sakani mapulojekiti, nkhani...",
+    noResults: "Palibe zotsatira za",
+    hint: "Sakani mapulojekiti ndi nkhani",
   },
 
   hero: {
@@ -167,6 +240,9 @@ const ny = {
     heroButton: "Perekani Tsopano",
     paymentHintRecord: "Chithandizo chanu chidzalembedwa ndipo tidzakulumikizani posachedwa",
     paymentHintExternal: "Mudzatengedwa kuti mumalize kulipira motetezeka",
+    recurringLabel: "Mwezi uliwonse",
+    oneTimeLabel: "Kamodzi",
+    recurringHint: "Kuthandiza mwezi uliwonse kukulitsa zotsatira",
   },
 
   footer: {

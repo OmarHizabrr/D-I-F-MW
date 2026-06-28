@@ -25,7 +25,7 @@ export function DonateSection() {
               subtitle={text(donation.ctaSubtitle)}
               className="!mb-8"
             />
-            <Button size="lg" onClick={openDonation} className="min-w-[200px]">
+            <Button size="lg" onClick={() => openDonation()} className="min-w-[200px]">
               {text(donation.ctaButtonLabel)}
             </Button>
           </div>

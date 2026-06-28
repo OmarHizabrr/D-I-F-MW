@@ -16,6 +16,9 @@ export type TopbarContent = {
   donorPortalLabel: LocalizedString;
   loginLabel: LocalizedString;
   socialLinks: SocialLink[];
+  whatsAppNumber?: string;
+  whatsAppEnabled?: boolean;
+  whatsAppMessage?: LocalizedString;
 };
 
 export type NavChild = {
@@ -239,6 +242,52 @@ export type DonationContent = {
   okLabel: LocalizedString;
   paymentHintRecord: LocalizedString;
   paymentHintExternal: LocalizedString;
+  presetImpacts?: LocalizedString[];
+  allowRecurring?: boolean;
+  recurringLabel?: LocalizedString;
+  oneTimeLabel?: LocalizedString;
+  recurringHint?: LocalizedString;
+};
+
+export type CampaignBannerContent = {
+  enabled: boolean;
+  message: LocalizedString;
+  linkLabel: LocalizedString;
+  linkHref: string;
+  dismissible: boolean;
+  variant: "urgent" | "info" | "campaign";
+  endDate: string;
+};
+
+export type ZakatSettings = {
+  enabled: boolean;
+  goldPricePerGram: number;
+  silverPricePerGram: number;
+  nisabGoldGrams: number;
+  nisabSilverGrams: number;
+  zakatRate: number;
+  currencyCode: string;
+  currencySymbol: string;
+  pageTitle: LocalizedString;
+  pageSubtitle: LocalizedString;
+  pageIntro: LocalizedString;
+  resultLabel: LocalizedString;
+  belowNisabLabel: LocalizedString;
+  donateZakatLabel: LocalizedString;
+  fieldCash: LocalizedString;
+  fieldGold: LocalizedString;
+  fieldSilver: LocalizedString;
+  fieldInvestments: LocalizedString;
+  fieldDebts: LocalizedString;
+  calculateLabel: LocalizedString;
+  nisabNote: LocalizedString;
+};
+
+export type PrivacyPageContent = {
+  title: LocalizedString;
+  subtitle: LocalizedString;
+  body: LocalizedString;
+  lastUpdated: string;
 };
 
 export type DonationIntentRecord = {
@@ -248,6 +297,9 @@ export type DonationIntentRecord = {
   donorName: string;
   donorEmail: string;
   status: "recorded" | "redirected";
+  recurring?: boolean;
+  projectId?: string;
+  projectName?: string;
   submittedAt?: string;
   read?: boolean;
 };

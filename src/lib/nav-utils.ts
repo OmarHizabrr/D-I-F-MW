@@ -16,6 +16,10 @@ export type NavLabels = {
   contact: LocalizedString;
   shareStory: LocalizedString;
   resources: LocalizedString;
+  transparency: LocalizedString;
+  zakatCalculator: LocalizedString;
+  waysToGive: LocalizedString;
+  privacy: LocalizedString;
 };
 
 function programLinks(programs: ProgramItem[]): NavChild[] {
@@ -58,6 +62,7 @@ export function resolveNavChildren(
       { id: "about-overview", label: labels.aboutOverview, href: "/about" },
       { id: "about-team", label: labels.team, href: "/about/team" },
       { id: "about-faq", label: labels.faq, href: "/faq" },
+      { id: "about-transparency", label: labels.transparency, href: "/transparency" },
     ];
   }
 
@@ -91,6 +96,8 @@ export function resolveNavChildren(
   if (item.id === "joinUs") {
     return [
       { id: "join-volunteer", label: labels.volunteer, href: "/volunteer" },
+      { id: "join-ways", label: labels.waysToGive, href: "/ways-to-give" },
+      { id: "join-zakat", label: labels.zakatCalculator, href: "/zakat-calculator" },
       { id: "join-contact", label: labels.contact, href: "/contact" },
       { id: "join-share-story", label: labels.shareStory, href: "/share-testimonial" },
     ];

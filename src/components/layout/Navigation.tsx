@@ -8,6 +8,7 @@ import { useSiteContent } from "@/context/SiteContentContext";
 import { useLocale } from "@/context/LocaleContext";
 import { resolveNavChildren, navChildLabel } from "@/lib/nav-utils";
 import { DonateButton } from "@/components/donation/DonateButton";
+import { SiteSearchButton } from "@/components/site/SiteSearch";
 import { cn } from "@/lib/utils";
 import type { LocaleCode, NavItem } from "@/types/cms";
 
@@ -142,6 +143,10 @@ export function Navigation() {
     contact: sectionTitles.navContact,
     shareStory: sectionTitles.navShareStory,
     resources: sectionTitles.navResources,
+    transparency: sectionTitles.navTransparency,
+    zakatCalculator: sectionTitles.navZakatCalculator,
+    waysToGive: sectionTitles.navWaysToGive,
+    privacy: sectionTitles.navPrivacy,
   };
 
   useEffect(() => {
@@ -187,6 +192,7 @@ export function Navigation() {
             />
           ))}
           <DonateButton variant="nav" size="sm" className="ms-1" />
+          <SiteSearchButton className="ms-1 rounded-xl p-2 text-foreground/70 hover:bg-brand-green/10 hover:text-brand-green" />
           <Link
             href="/admin/login"
             className="ms-1 rounded-xl px-2.5 py-2 text-sm font-medium text-foreground/60 transition-colors hover:bg-brand-green/10 hover:text-brand-green"

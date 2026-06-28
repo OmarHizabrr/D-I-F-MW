@@ -43,6 +43,10 @@ const defaultNavLabels = {
   contact: { ar: "تواصل", en: "Contact", ny: "Contact" },
   shareStory: { ar: "شارك قصتك", en: "Share", ny: "Gawani" },
   resources: { ar: "موارد", en: "Resources", ny: "Zothandizira" },
+  transparency: { ar: "الشفافية", en: "Transparency", ny: "Kuwonekera" },
+  zakatCalculator: { ar: "حاسبة الزكاة", en: "Zakat Calculator", ny: "Zakat" },
+  waysToGive: { ar: "طرق التبرع", en: "Ways to Give", ny: "Kupereka" },
+  privacy: { ar: "الخصوصية", en: "Privacy", ny: "Chinsinsi" },
 };
 
 export default function AdminFooterPage() {

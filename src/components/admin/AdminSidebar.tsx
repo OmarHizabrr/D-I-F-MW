@@ -31,6 +31,8 @@ import {
   Download,
   HandHeart,
   Briefcase,
+  Megaphone,
+  Calculator,
   type LucideIcon,
 } from "lucide-react";
 import { HOME_SECTIONS } from "@/lib/firebase/database-structure";
@@ -60,6 +62,8 @@ const sectionIcons: Record<string, LucideIcon> = {
   mapPoints: MapPin,
   newsletter: Mail,
   donation: Heart,
+  campaignBanner: Megaphone,
+  zakatSettings: Calculator,
   team: Users,
   contactMessages: Inbox,
   footer: PanelBottom,

@@ -10,29 +10,44 @@ import {
 } from "react";
 import { DonationModal } from "@/components/donation/DonationModal";
 
+export type DonationOpenOptions = {
+  projectId?: string;
+  projectName?: string;
+  amount?: number;
+  recurring?: boolean;
+};
+
 type DonationContextValue = {
-  openDonation: () => void;
+  openDonation: (options?: DonationOpenOptions) => void;
   closeDonation: () => void;
   isOpen: boolean;
+  options: DonationOpenOptions;
 };
 
 const DonationContext = createContext<DonationContextValue | null>(null);
 
 export function DonationProvider({ children }: { children: ReactNode }) {
   const [isOpen, setIsOpen] = useState(false);
+  const [options, setOptions] = useState<DonationOpenOptions>({});
 
-  const openDonation = useCallback(() => setIsOpen(true), []);
-  const closeDonation = useCallback(() => setIsOpen(false), []);
+  const openDonation = useCallback((opts?: DonationOpenOptions) => {
+    setOptions(opts ?? {});
+    setIsOpen(true);
+  }, []);
+  const closeDonation = useCallback(() => {
+    setIsOpen(false);
+    setOptions({});
+  }, []);
 
   const value = useMemo(
-    () => ({ openDonation, closeDonation, isOpen }),
-    [openDonation, closeDonation, isOpen]
+    () => ({ openDonation, closeDonation, isOpen, options }),
+    [openDonation, closeDonation, isOpen, options]
   );
 
   return (
     <DonationContext.Provider value={value}>
       {children}
-      <DonationModal open={isOpen} onClose={closeDonation} />
+      <DonationModal open={isOpen} onClose={closeDonation} options={options} />
     </DonationContext.Provider>
   );
 }

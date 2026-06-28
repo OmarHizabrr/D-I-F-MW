@@ -84,7 +84,7 @@ export function TopBar() {
             {donation.enabled ? (
               <button
                 type="button"
-                onClick={openDonation}
+                onClick={() => openDonation()}
                 className="inline-flex h-8 shrink-0 items-center justify-center rounded-xl border border-white/30 bg-brand-brown px-2 text-[10px] font-semibold text-white transition-colors hover:bg-brand-brown-light sm:h-9 sm:px-3 sm:text-xs"
               >
                 <span className="hidden sm:inline">{text(topbar.donorPortalLabel)}</span>

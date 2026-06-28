@@ -8,6 +8,7 @@ const en = {
     email: "info@dif.org",
     donorPortal: "Donor Portal",
     login: "Login",
+    whatsAppMessage: "Hello, I would like to inquire about your projects",
   },
 
   nav: {
@@ -33,6 +34,78 @@ const en = {
     impact: "Our Impact",
     newsEvents: "News & Events",
     joinUs: "Get Involved",
+    zakatCalculator: "Zakat Calculator",
+    transparency: "Transparency",
+    waysToGive: "Ways to Give",
+    privacy: "Privacy",
+  },
+
+  zakat: {
+    title: "Zakat Calculator",
+    subtitle: "Calculate your Zakat based on gold and silver nisab",
+    intro: "Enter your zakatable assets and debts. Rates are updated from the admin panel.",
+    resultLabel: "Zakat due",
+    belowNisab: "Wealth is below nisab — no Zakat due currently",
+    donateZakat: "Give your Zakat through us",
+    fieldCash: "Cash & deposits",
+    fieldGold: "Gold (grams)",
+    fieldSilver: "Silver (grams)",
+    fieldInvestments: "Investments",
+    fieldDebts: "Debts (deducted)",
+    calculate: "Calculate Zakat",
+    nisabNote: "Lower nisab of gold (85g) or silver (595g) applies at current prices",
+  },
+
+  transparency: {
+    title: "Transparency & Accountability",
+    subtitle: "Trust is built with clarity and numbers",
+    intro: "We publish reports, licenses, and impact stats so donors know where funds go.",
+    reportsTitle: "Reports & documents",
+    statsTitle: "Impact numbers",
+    licensesTitle: "Licenses & certifications",
+    whyTitle: "Why trust us",
+    downloadReport: "Download report",
+    viewLicenses: "View licenses",
+  },
+
+  waysToGive: {
+    title: "Ways to Give",
+    subtitle: "Choose the best way to support our mission",
+    zakatTitle: "Zakat",
+    zakatDesc: "Fulfill Zakat through our Shariah-compliant channels",
+    sadaqahTitle: "Sadaqah & donations",
+    sadaqahDesc: "General or project-specific gifts",
+    monthlyTitle: "Monthly giving",
+    monthlyDesc: "Sustainable impact through recurring support",
+    projectTitle: "Fund a project",
+    projectDesc: "Support an active or completed project directly",
+    calculatorLink: "Zakat calculator",
+    transparencyLink: "Transparency & reports",
+  },
+
+  privacy: {
+    title: "Privacy Policy",
+    subtitle: "How we protect and use your data",
+    body: "We respect your privacy. Data from donation, contact, and newsletter forms is used only for communication, processing gifts, and improving our services. We do not sell your data. Contact us to request deletion.",
+  },
+
+  trust: {
+    title: "Why donors trust us",
+    badge1: "Financial transparency",
+    badge1Desc: "Published reports & documents",
+    badge2: "Field documentation",
+    badge2Desc: "Photos & reports per project",
+    badge3: "Zakat compliant",
+    badge3Desc: "Calculator & proper channels",
+    badge4: "Continuous follow-up",
+    badge4Desc: "Track project progress",
+  },
+
+  search: {
+    title: "Search site",
+    placeholder: "Search projects, news, stories...",
+    noResults: "No results for",
+    hint: "Search across projects, news, and success stories",
   },
 
   hero: {
@@ -167,6 +240,9 @@ const en = {
     heroButton: "Donate Now",
     paymentHintRecord: "Your donation will be recorded and we will contact you soon",
     paymentHintExternal: "You will be redirected to complete payment securely",
+    recurringLabel: "Monthly",
+    oneTimeLabel: "One-time",
+    recurringHint: "Monthly giving multiplies your impact throughout the year",
   },
 
   footer: {

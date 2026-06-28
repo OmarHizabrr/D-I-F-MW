@@ -28,7 +28,7 @@ export function DonateButton({ className, size = "md", variant = "primary" }: Do
   return (
     <button
       type="button"
-      onClick={openDonation}
+      onClick={() => openDonation()}
       className={cn(
         "inline-flex items-center justify-center rounded-2xl font-semibold transition-colors",
         variant === "primary" &&

@@ -36,6 +36,9 @@ export const COLLECTIONS = {
   events: "events",
   volunteerOpportunities: "volunteer_opportunities",
   volunteerApplications: "volunteer_applications",
+  campaignBanner: "campaign_banner",
+  zakatSettings: "zakat_settings",
+  privacy: "privacy",
   team: "team",
 } as const;
 
@@ -65,6 +68,8 @@ export const HOME_SECTIONS = [
   { id: "mapPoints", label: "خريطة المشاريع", href: "/admin/map" },
   { id: "newsletter", label: "النشرة البريدية", href: "/admin/newsletter" },
   { id: "donation", label: "التبرعات", href: "/admin/donation" },
+  { id: "campaignBanner", label: "بانر الحملات", href: "/admin/campaign-banner" },
+  { id: "zakatSettings", label: "حاسبة الزكاة", href: "/admin/zakat" },
   { id: "contactMessages", label: "رسائل التواصل", href: "/admin/contact-messages" },
   { id: "footer", label: "التذييل", href: "/admin/footer" },
 ] as const;
