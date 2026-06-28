@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { Phone, Mail, MapPin, Clock, Share2 } from "lucide-react";
+import { Phone, Mail, MapPin, Clock, Share2, Home } from "lucide-react";
 import { useSiteContent } from "@/context/SiteContentContext";
 import { useLocale } from "@/context/LocaleContext";
 import {
@@ -44,6 +44,9 @@ export function Footer() {
     .filter((n) => n.enabled && footer.quickLinkIds.includes(n.id))
     .sort((a, b) => a.order - b.order);
 
+  const homeNav = navItems.find((n) => n.id === "home" && n.enabled);
+  const showHomeLink = footer.showHomeLink !== false && !!homeNav;
+
   const socialLinks = topbar.socialLinks
     .filter((s) => s.enabled)
     .sort((a, b) => a.order - b.order);
@@ -53,7 +56,7 @@ export function Footer() {
       <div className="container-dif section-padding !pb-8">
         <div className="grid gap-10 md:grid-cols-2 xl:grid-cols-12">
           <div className="xl:col-span-3">
-            <div className="mb-4 flex items-center gap-3">
+            <Link href="/" className="mb-4 inline-flex items-center gap-3 transition-opacity hover:opacity-90">
               <Image
                 src="/Image/login.png"
                 alt="D.I.F"
@@ -65,13 +68,22 @@ export function Footer() {
                 <p className="font-bold">D.I.F</p>
                 <p className="text-xs text-white/70">EST: 10/15</p>
               </div>
-            </div>
+            </Link>
             <p className="mb-4 text-sm leading-relaxed text-white/80">{text(footer.description)}</p>
             <DonateButton variant="primary" size="sm" />
           </div>
 
           <div className="xl:col-span-5">
             <h3 className="mb-4 font-bold">{text(sectionTitles.footerQuickLinks)}</h3>
+            {showHomeLink && homeNav && (
+              <Link
+                href={homeNav.href}
+                className="mb-4 inline-flex items-center gap-2 rounded-xl bg-white/10 px-3 py-2 text-sm font-semibold text-white transition-colors hover:bg-white/20"
+              >
+                <Home className="h-4 w-4 shrink-0" />
+                {text(homeNav.label)}
+              </Link>
+            )}
             {grouped ? (
               <div className="grid gap-6 sm:grid-cols-2">
                 {linkGroups.map((group) => (
@@ -94,6 +106,13 @@ export function Footer() {
               </div>
             ) : (
               <ul className="space-y-2">
+                {showHomeLink && homeNav && !flatLinks.some((i) => i.id === "home") && (
+                  <li>
+                    <Link href={homeNav.href} className="text-sm font-semibold text-white hover:text-white/90">
+                      {text(homeNav.label)}
+                    </Link>
+                  </li>
+                )}
                 {flatLinks.map((item) => (
                   <li key={item.id}>
                     <Link href={item.href} className="text-sm text-white/80 hover:text-white">

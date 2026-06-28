@@ -25,6 +25,7 @@ const defaultFooter: FooterContent = {
   rights: emptyLocalized(),
   mapsUrl: "",
   quickLinkIds: [],
+  showHomeLink: true,
 };
 
 const defaultNavLabels = {
@@ -68,6 +69,7 @@ export default function AdminFooterPage() {
           rights: (doc.rights as FooterContent["rights"]) ?? emptyLocalized(),
           mapsUrl: (doc.mapsUrl as string) ?? "",
           quickLinkIds: (doc.quickLinkIds as string[]) ?? [],
+          showHomeLink: doc.showHomeLink !== false,
         });
       }
       setNavItems(navDocs.map((d) => api.docToData<NavItem>(d)));
@@ -106,9 +108,11 @@ export default function AdminFooterPage() {
   }
 
   function handleRestoreQuickLinks() {
+    const defaults = getDefaultFooter();
     setData((prev) => ({
       ...prev,
-      quickLinkIds: getDefaultFooter().quickLinkIds,
+      quickLinkIds: defaults.quickLinkIds,
+      showHomeLink: defaults.showHomeLink !== false,
     }));
     setMessage("تم استعادة مجموعات روابط التذييل الافتراضية — احفظ لتطبيقها");
   }
@@ -173,6 +177,16 @@ export default function AdminFooterPage() {
             onChange={(e) => setData({ ...data, mapsUrl: e.target.value })}
             hint="مثال: https://maps.app.goo.gl/..."
           />
+
+          <label className="flex items-center gap-2 text-sm">
+            <input
+              type="checkbox"
+              checked={data.showHomeLink !== false}
+              onChange={(e) => setData({ ...data, showHomeLink: e.target.checked })}
+              className="h-4 w-4 rounded border-border text-brand-green"
+            />
+            إظهار رابط «الرئيسية» في أعلى روابط التذييل
+          </label>
 
           <div>
             <div className="mb-3 flex flex-wrap items-center justify-between gap-2">

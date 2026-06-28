@@ -198,6 +198,7 @@ export type FooterContent = {
   rights: LocalizedString;
   mapsUrl: string;
   quickLinkIds: string[];
+  showHomeLink?: boolean;
 };
 
 export type NewsletterContent = {

@@ -127,6 +127,7 @@ export function buildFooterLinkGroups(
   const groups: FooterLinkGroup[] = [];
 
   for (const id of selectedIds) {
+    if (id === "home") continue;
     const item = enabled.find((n) => n.id === id);
     if (!item) continue;
 

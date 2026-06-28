@@ -306,6 +306,7 @@ export function getDefaultFooter(): FooterContent {
     rights: L(ar.footer.rights, en.footer.rights, ny.footer.rights),
     quickLinkIds: ["about", "impact", "newsEvents", "joinUs", "resources"],
     mapsUrl: "",
+    showHomeLink: true,
   };
 }
 
