@@ -1,7 +1,8 @@
 import { getDocs, query, where } from "firebase/firestore";
 import FirestoreApi, { type UserMeta } from "@/services/firestoreApi";
 import { normalizeDonorEmail } from "@/lib/donor-email";
-import { syncPortalAccess } from "@/services/portalAccessService";
+import { isDonorPortalActive } from "@/lib/portal/donor-access";
+import { syncPortalAccess, removePortalAccess } from "@/services/portalAccessService";
 import type { Donor } from "@/types/project-management";
 
 const api = FirestoreApi.Api;
@@ -85,31 +86,54 @@ export async function updateDonor(
   if (rest.fullName !== undefined || rest.portalUsername !== undefined || rest.portalPin !== undefined || rest.portalEnabled !== undefined) {
     const donor = await getDonor(donorId);
     if (donor) {
+      const previousUsername = donor.portalUsername?.trim().toLowerCase();
+      const nextUsername = (rest.portalUsername ?? donor.portalUsername)?.trim().toLowerCase();
+      if (previousUsername && previousUsername !== nextUsername) {
+        await removePortalAccess(previousUsername, user);
+      }
       await syncPortalAccess(
         donorId,
-        donor.fullName,
-        donor.portalUsername,
-        donor.portalPin,
-        donor.portalEnabled,
+        rest.fullName ?? donor.fullName,
+        rest.portalUsername ?? donor.portalUsername,
+        rest.portalPin ?? donor.portalPin,
+        rest.portalEnabled ?? donor.portalEnabled,
         user
       );
     }
   }
 }
 
-export async function deleteDonor(donorId: string): Promise<void> {
+export async function deleteDonor(donorId: string, user?: UserMeta): Promise<void> {
+  const donor = await getDonor(donorId);
+  if (donor) {
+    const meta = user ?? {};
+    if (donor.secureLinkToken) {
+      await api.deleteData(api.getPortalTokenDoc(donor.secureLinkToken));
+    }
+    if (donor.qrCodeToken && donor.qrCodeToken !== donor.secureLinkToken) {
+      await api.deleteData(api.getPortalTokenDoc(donor.qrCodeToken));
+    }
+    if (donor.portalUsername) {
+      await removePortalAccess(donor.portalUsername, meta);
+    }
+  }
   await api.deleteData(api.getDonorDoc(donorId));
+}
+
+async function resolveDonorIfPortalActive(donor: Donor | null): Promise<Donor | null> {
+  if (!donor || !isDonorPortalActive(donor)) return null;
+  return donor;
 }
 
 export async function findDonorByToken(token: string): Promise<Donor | null> {
   const tokenDoc = await api.getData(api.getPortalTokenDoc(token));
   if (tokenDoc && typeof tokenDoc.donorId === "string") {
-    return getDonor(tokenDoc.donorId);
+    return resolveDonorIfPortalActive(await getDonor(tokenDoc.donorId));
   }
   const q = query(api.getDonorsCollection(), where("secureLinkToken", "==", token));
   const snap = await getDocs(q);
   if (snap.empty) return null;
-  return api.docToData<Donor>(snap.docs[0]);
+  return resolveDonorIfPortalActive(api.docToData<Donor>(snap.docs[0]));
 }
 
 export async function findDonorByQrToken(token: string): Promise<Donor | null> {
@@ -126,7 +150,9 @@ export async function findDonorByProjectNumber(
   if (!project?.donorId) return null;
   const donor = await getDonor(project.donorId);
   if (!donor) return null;
-  return { donor, projectId: project.id };
+  const active = await resolveDonorIfPortalActive(donor);
+  if (!active) return null;
+  return { donor: active, projectId: project.id };
 }
 
 export function getDonorPortalUrl(donor: Donor): string {

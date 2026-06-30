@@ -1,5 +1,6 @@
 import { getDocs, query, where, orderBy } from "firebase/firestore";
 import FirestoreApi from "@/services/firestoreApi";
+import { getSystemSettings } from "@/services/settingsService";
 import type { AppNotification } from "@/types/project-management";
 
 const api = FirestoreApi.Api;
@@ -13,7 +14,10 @@ export type SendNotificationInput = {
   groupId?: string;
 };
 
-export async function sendNotification(input: SendNotificationInput): Promise<string> {
+export async function sendNotification(input: SendNotificationInput): Promise<string | null> {
+  const settings = await getSystemSettings();
+  if (!settings.enableNotifications) return null;
+
   const id = api.getNewId("notification");
   await api.setData({
     docRef: api.getNotificationDoc(id),

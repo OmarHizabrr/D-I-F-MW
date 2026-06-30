@@ -8,10 +8,19 @@ import {
   findDonorByProjectNumber,
   getDonor,
 } from "@/services/donorService";
-import { validatePortalLogin } from "@/services/portalAccessService";
 import { listOrgProjects } from "@/services/projectManagementService";
 import { filterDonorProjects } from "@/lib/donor-project-utils";
 import { FORM_PLACEHOLDERS } from "@/lib/admin/form-placeholders";
+import {
+  DONOR_PORTAL_DISABLED_MESSAGE,
+  isDonorPortalActive,
+} from "@/lib/portal/donor-access";
+import { loginDonorWithCredentials } from "@/lib/portal/portal-login-client";
+import {
+  clearDonorSession,
+  getDonorSession,
+  saveDonorSession,
+} from "@/lib/portal/donor-session";
 import { DonorProjectDashboard } from "@/components/portal/DonorProjectDashboard";
 import { SitePageHeader } from "@/components/site/SitePageHeader";
 import { Card } from "@/components/ui/Card";
@@ -27,6 +36,7 @@ function DonorPortalContent() {
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
   const qr = searchParams.get("qr");
+  const projectParam = searchParams.get("project");
   const { portalEnabled, loading: settingsLoading } = useSystemSettings();
 
   const [donor, setDonor] = useState<Donor | null>(null);
@@ -34,15 +44,26 @@ function DonorPortalContent() {
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [loginMode, setLoginMode] = useState<LoginMode>("project");
-  const [projectNumberInput, setProjectNumberInput] = useState("");
+  const [projectNumberInput, setProjectNumberInput] = useState(projectParam ?? "");
   const [usernameInput, setUsernameInput] = useState("");
   const [pinInput, setPinInput] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
 
-  const loadDonorProjects = useCallback(async (d: Donor) => {
+  const loadDonorProjects = useCallback(async (d: Donor, preferredProjectId?: string) => {
+    if (!isDonorPortalActive(d)) {
+      setError(DONOR_PORTAL_DISABLED_MESSAGE);
+      setDonor(null);
+      return;
+    }
     setDonor(d);
+    saveDonorSession(d.id);
     const all = await listOrgProjects();
-    setProjects(filterDonorProjects(all, d.id));
+    const mine = filterDonorProjects(all, d.id);
+    setProjects(mine);
+    if (preferredProjectId && mine.some((p) => p.id === preferredProjectId)) {
+      setSelectedProjectId(preferredProjectId);
+    }
   }, []);
 
   useEffect(() => {
@@ -51,7 +72,7 @@ function DonorPortalContent() {
       if (token) {
         const d = await findDonorByToken(token);
         if (cancelled) return;
-        if (!d) setError("رابط غير صالح");
+        if (!d) setError("رابط غير صالح أو البوابة غير مفعّلة لهذا المتبرع");
         else await loadDonorProjects(d);
         setLoading(false);
         return;
@@ -59,11 +80,23 @@ function DonorPortalContent() {
       if (qr) {
         const d = await findDonorByQrToken(qr);
         if (cancelled) return;
-        if (!d) setError("رمز QR غير صالح");
+        if (!d) setError("رمز QR غير صالح أو البوابة غير مفعّلة");
         else await loadDonorProjects(d);
         setLoading(false);
         return;
       }
+
+      const session = getDonorSession();
+      if (session?.donorId) {
+        const d = await getDonor(session.donorId);
+        if (!cancelled && d && isDonorPortalActive(d)) {
+          await loadDonorProjects(d);
+          setLoading(false);
+          return;
+        }
+        clearDonorSession();
+      }
+
       setLoading(false);
     })();
     return () => {
@@ -73,35 +106,36 @@ function DonorPortalContent() {
 
   async function handleProjectNumberLogin() {
     setError(null);
-    setLoading(true);
+    setSubmitting(true);
     const result = await findDonorByProjectNumber(projectNumberInput.trim());
     if (!result) {
-      setError("رقم المشروع غير موجود أو غير مرتبط بمتبرع");
-      setLoading(false);
+      setError("رقم المشروع غير موجود أو البوابة غير مفعّلة لهذا المتبرع");
+      setSubmitting(false);
       return;
     }
-    await loadDonorProjects(result.donor);
-    if (result.projectId) setSelectedProjectId(result.projectId);
-    setLoading(false);
+    await loadDonorProjects(result.donor, result.projectId);
+    setSubmitting(false);
   }
 
   async function handleUsernameLogin() {
     setError(null);
-    setLoading(true);
-    const access = await validatePortalLogin(usernameInput, pinInput);
-    if (!access) {
-      setError("اسم المستخدم أو الرمز غير صحيح");
-      setLoading(false);
+    setSubmitting(true);
+    const result = await loginDonorWithCredentials(usernameInput, pinInput);
+    if (!result.ok) {
+      setError(result.message);
+      setSubmitting(false);
       return;
     }
-    const d = await getDonor(access.donorId);
-    if (!d) {
-      setError("حساب المتبرع غير موجود");
-      setLoading(false);
-      return;
-    }
-    await loadDonorProjects(d);
-    setLoading(false);
+    await loadDonorProjects(result.donor);
+    setSubmitting(false);
+  }
+
+  function handleLogout() {
+    clearDonorSession();
+    setDonor(null);
+    setProjects([]);
+    setSelectedProjectId(null);
+    setError(null);
   }
 
   if (settingsLoading || loading) {
@@ -131,6 +165,7 @@ function DonorPortalContent() {
         projectId={selectedProjectId}
         donor={donor}
         onBack={() => setSelectedProjectId(null)}
+        onLogout={handleLogout}
       />
     );
   }
@@ -183,7 +218,7 @@ function DonorPortalContent() {
                   value={projectNumberInput}
                   onChange={(e) => setProjectNumberInput(e.target.value)}
                 />
-                <Button className="w-full" onClick={handleProjectNumberLogin}>
+                <Button className="w-full" loading={submitting} onClick={handleProjectNumberLogin}>
                   دخول
                 </Button>
               </>
@@ -207,7 +242,7 @@ function DonorPortalContent() {
                   value={pinInput}
                   onChange={(e) => setPinInput(e.target.value)}
                 />
-                <Button className="w-full" onClick={handleUsernameLogin}>
+                <Button className="w-full" loading={submitting} onClick={handleUsernameLogin}>
                   دخول
                 </Button>
               </>
@@ -228,6 +263,11 @@ function DonorPortalContent() {
       />
       <div className="section-padding bg-background">
         <div className="container-dif mx-auto max-w-4xl">
+          <div className="mb-4 flex justify-end">
+            <Button variant="outline" size="sm" onClick={handleLogout}>
+              تسجيل الخروج
+            </Button>
+          </div>
           <div className="grid gap-4 sm:grid-cols-2">
             {projects.map((p) => (
               <Card

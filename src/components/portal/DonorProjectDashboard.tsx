@@ -45,9 +45,15 @@ type DonorProjectDashboardProps = {
   projectId: string;
   donor: Donor;
   onBack: () => void;
+  onLogout?: () => void;
 };
 
-export function DonorProjectDashboard({ projectId, donor, onBack }: DonorProjectDashboardProps) {
+export function DonorProjectDashboard({
+  projectId,
+  donor,
+  onBack,
+  onLogout,
+}: DonorProjectDashboardProps) {
   const { t } = useLocale();
   const [project, setProject] = useState<OrgProject | null>(null);
   const [updates, setUpdates] = useState<ProjectUpdate[]>([]);
@@ -130,9 +136,16 @@ export function DonorProjectDashboard({ projectId, donor, onBack }: DonorProject
   return (
     <div className="section-padding bg-background">
       <div className="container-dif mx-auto max-w-4xl">
-        <button type="button" onClick={onBack} className="mb-4 text-sm font-semibold text-brand-green">
-          ← العودة للمشاريع
-        </button>
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
+          <button type="button" onClick={onBack} className="text-sm font-semibold text-brand-green">
+            ← العودة للمشاريع
+          </button>
+          {onLogout && (
+            <Button variant="outline" size="sm" onClick={onLogout}>
+              تسجيل الخروج
+            </Button>
+          )}
+        </div>
 
         <h1 className="mb-2 text-2xl font-bold">{project.projectName}</h1>
         <p className="mb-6 text-muted-foreground">

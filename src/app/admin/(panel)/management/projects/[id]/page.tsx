@@ -24,6 +24,7 @@ import {
   listGroupMembers,
   addGroupMember,
   removeGroupMember,
+  updateMemberRole,
 } from "@/services/memberService";
 import { listDonors } from "@/services/donorService";
 import { getProjectFinancial, saveProjectFinancial } from "@/services/financialService";
@@ -231,6 +232,17 @@ export default function ProjectDetailPage() {
       setAddMemberOpen(false);
       setNewMemberUserId("");
       await loadAll();
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function handleMemberRoleChange(groupId: string, userId: string, role: ProjectRole) {
+    if (!userMeta) return;
+    setSaving(true);
+    try {
+      await updateMemberRole(groupId, userId, role, userMeta);
+      setMembers(await listGroupMembers(groupId));
     } finally {
       setSaving(false);
     }
@@ -613,7 +625,6 @@ export default function ProjectDetailPage() {
       {tab === "members" && group && (
         <div>
           <p className="mb-4 text-sm text-muted-foreground">{FORM_HINTS.project.membersTab}</p>
-          <p className="mb-4 text-sm text-muted-foreground">{FORM_HINTS.project.membersTab}</p>
           <div className="mb-4 flex justify-end">
             <Button onClick={() => setAddMemberOpen(true)}>
               <Plus className="h-4 w-4" />
@@ -625,22 +636,37 @@ export default function ProjectDetailPage() {
               const u = allUsers.find((x) => x.uid === m.userId);
               return (
                 <Card key={m.userId} padding="md">
-                  <div className="flex items-center justify-between">
-                    <div>
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <div className="min-w-0 flex-1">
                       <p className="font-medium">{u?.displayName ?? m.userId}</p>
-                      <p className="text-sm text-muted-foreground">
-                        {ROLE_LABELS[m.role]} · {m.title || "—"}
-                      </p>
+                      <p className="text-sm text-muted-foreground">{m.title || "—"}</p>
                     </div>
-                    {!m.isOwner && (
-                      <Button
-                        variant="destructive"
-                        size="sm"
-                        onClick={() => setDeleteMemberTarget(m)}
-                      >
-                        إزالة
-                      </Button>
-                    )}
+                    <div className="flex flex-wrap items-center gap-2">
+                      {!m.isOwner ? (
+                        <Select
+                          label=""
+                          value={m.role}
+                          onChange={(role) =>
+                            void handleMemberRoleChange(group!.id, m.userId, role as ProjectRole)
+                          }
+                          options={PROJECT_ROLES.filter((r) => r !== "Owner").map((r) => ({
+                            value: r,
+                            label: ROLE_LABELS[r],
+                          }))}
+                        />
+                      ) : (
+                        <span className="text-sm text-muted-foreground">{ROLE_LABELS[m.role]}</span>
+                      )}
+                      {!m.isOwner && (
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          onClick={() => setDeleteMemberTarget(m)}
+                        >
+                          إزالة
+                        </Button>
+                      )}
+                    </div>
                   </div>
                 </Card>
               );

@@ -78,14 +78,12 @@ export default function ManagementProjectsPage() {
     if (!editing || !user) return;
     setSaving(true);
     try {
-      await createProjectWithGroup(editing, user.uid, {
+      const { projectId } = await createProjectWithGroup(editing, user.uid, {
         uid: user.uid,
         displayName: user.email ?? undefined,
       });
       setEditing(null);
-      const [projects, donorList] = await Promise.all([listOrgProjects(), listDonors()]);
-      setItems(projects);
-      setDonors(donorList);
+      router.push(`/admin/management/projects/${projectId}`);
     } finally {
       setSaving(false);
     }

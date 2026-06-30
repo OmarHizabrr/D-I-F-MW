@@ -98,10 +98,10 @@ export default function ManagementDonorsPage() {
   }
 
   async function handleDeleteConfirm() {
-    if (!deleteTarget) return;
+    if (!deleteTarget || !user) return;
     setDeletingId(deleteTarget.id);
     try {
-      await deleteDonor(deleteTarget.id);
+      await deleteDonor(deleteTarget.id, { uid: user.uid, displayName: user.email ?? undefined });
       setDeleteTarget(null);
       await loadItems();
     } finally {

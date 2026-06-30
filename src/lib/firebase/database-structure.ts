@@ -65,13 +65,12 @@ export const COLLECTIONS = {
 } as const;
 
 export const HOME_SECTIONS = [
-  { id: "users", label: "إدارة المستخدمين", href: "/admin/users" },
   { id: "topbar", label: "الشريط العلوي", href: "/admin/topbar", publicHref: "/" },
   { id: "nav", label: "القائمة الرئيسية", href: "/admin/navigation", publicHref: "/" },
   { id: "hero", label: "الواجهة الرئيسية", href: "/admin/hero", publicHref: "/" },
   { id: "stats", label: "الإحصائيات", href: "/admin/stats", publicHref: "/transparency" },
   { id: "programs", label: "البرامج", href: "/admin/programs", publicHref: "/our-work" },
-  { id: "projects", label: "المشاريع", href: "/admin/projects", publicHref: "/projects" },
+  { id: "projects", label: "مشاريع الموقع (بطاقات)", href: "/admin/projects", publicHref: "/projects" },
   { id: "successStories", label: "قصص النجاح", href: "/admin/success-stories", publicHref: "/success-stories" },
   { id: "howWeWork", label: "كيف نعمل", href: "/admin/how-we-work", publicHref: "/about" },
   { id: "whyUs", label: "لماذا نحن", href: "/admin/why-us", publicHref: "/about" },

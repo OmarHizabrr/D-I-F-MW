@@ -61,6 +61,11 @@ export function ProjectCard({ project }: ProjectCardProps) {
             {project.code}
           </p>
         )}
+        {project.showDonor && project.donorName && (
+          <p className="mt-2 text-xs text-muted-foreground">
+            بدعم <span className="font-medium text-foreground">{project.donorName}</span>
+          </p>
+        )}
         <div className="mt-4">
           <div className="mb-1.5 flex justify-between text-sm">
             <span>{text(sectionTitles.projectsProgress)}</span>

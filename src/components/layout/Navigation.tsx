@@ -6,6 +6,7 @@ import Link from "next/link";
 import { ChevronDown, Menu, X } from "lucide-react";
 import { useSiteContent } from "@/context/SiteContentContext";
 import { useLocale } from "@/context/LocaleContext";
+import { useSystemSettings } from "@/hooks/useSystemSettings";
 import { resolveNavChildren, navChildLabel } from "@/lib/nav-utils";
 import { DonateButton } from "@/components/donation/DonateButton";
 import { SiteSearchButton } from "@/components/site/SiteSearch";
@@ -123,6 +124,7 @@ function MobileNavItem({
 
 export function Navigation() {
   const { locale } = useLocale();
+  const { portalEnabled } = useSystemSettings();
   const { navItems, programs, sectionTitles, text } = useSiteContent();
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -192,6 +194,14 @@ export function Navigation() {
             />
           ))}
           <DonateButton variant="nav" size="sm" className="ms-1" />
+          {portalEnabled && (
+            <Link
+              href="/portal"
+              className="ms-1 rounded-xl px-2.5 py-2 text-sm font-medium text-foreground/80 transition-colors hover:bg-brand-green/10 hover:text-brand-green"
+            >
+              {locale === "ar" ? "بوابة المتبرعين" : "Donor portal"}
+            </Link>
+          )}
           <SiteSearchButton className="ms-1 rounded-xl p-2 text-foreground/70 hover:bg-brand-green/10 hover:text-brand-green" />
           <Link
             href="/admin/login"
@@ -236,6 +246,15 @@ export function Navigation() {
                 />
               ))}
               <DonateButton variant="nav" size="md" className="mx-4 mt-2" />
+              {portalEnabled && (
+                <Link
+                  href="/portal"
+                  onClick={closeMobile}
+                  className="rounded-2xl px-4 py-3.5 text-base font-medium text-foreground/80 transition-colors hover:bg-brand-green/10"
+                >
+                  {locale === "ar" ? "بوابة المتبرعين" : "Donor portal"}
+                </Link>
+              )}
               <Link
                 href="/admin/login"
                 onClick={closeMobile}

@@ -6,6 +6,7 @@ import { useSiteContent } from "@/context/SiteContentContext";
 import { useMergedPublicProjects } from "@/hooks/useMergedPublicProjects";
 import { useDonation } from "@/context/DonationContext";
 import { useLocale } from "@/context/LocaleContext";
+import { useSystemSettings } from "@/hooks/useSystemSettings";
 import { SitePageHeader } from "@/components/site/SitePageHeader";
 import { SitePageSkeleton } from "@/components/admin/AdminPageSkeleton";
 import { Card, CardContent, CardTitle } from "@/components/ui/Card";
@@ -15,9 +16,14 @@ export default function WaysToGivePage() {
   const { sectionTitles, donation, text, loading: cmsLoading } = useSiteContent();
   const { projects, loading: mergedLoading } = useMergedPublicProjects();
   const { openDonation } = useDonation();
-  const { t } = useLocale();
+  const { t, locale } = useLocale();
+  const { portalEnabled } = useSystemSettings();
 
-  const featuredProjects = projects.slice(0, 4);
+  const featuredProjects = (
+    projects.filter((p) => p.featured).length > 0
+      ? projects.filter((p) => p.featured)
+      : projects
+  ).slice(0, 4);
 
   if (cmsLoading || mergedLoading) {
     return (
@@ -56,6 +62,20 @@ export default function WaysToGivePage() {
       href: "/transparency",
       cta: t.waysToGive.transparencyLink,
     },
+    ...(portalEnabled
+      ? [
+          {
+            icon: FolderKanban,
+            title: locale === "ar" ? "بوابة المتبرعين" : "Donor portal",
+            desc:
+              locale === "ar"
+                ? "تابع مشاريعك التي تدعمها المؤسسة"
+                : "Track projects you support",
+            href: "/portal",
+            cta: locale === "ar" ? "دخول البوابة" : "Open portal",
+          },
+        ]
+      : []),
   ];
 
   return (

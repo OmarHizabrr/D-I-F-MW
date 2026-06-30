@@ -22,6 +22,8 @@ import {
   HandHeart,
 } from "lucide-react";
 import FirestoreApi from "@/services/firestoreApi";
+import { listOrgProjects } from "@/services/projectManagementService";
+import { listDonors } from "@/services/donorService";
 import { COLLECTIONS, SITE_ROOT } from "@/lib/firebase/database-structure";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { AdminPreviewLink } from "@/components/admin/AdminPreviewLink";
@@ -91,6 +93,7 @@ const inboxLinks = [
 
 export default function AdminDashboardPage() {
   const [stats, setStats] = useState<DashboardStats | null>(null);
+  const [orgStats, setOrgStats] = useState({ projects: 0, donors: 0, published: 0 });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -136,10 +139,12 @@ export default function AdminDashboardPage() {
           ),
         ]);
 
-        const [projectDocs, contactDocs, volunteerDocs] = await Promise.all([
+        const [projectDocs, contactDocs, volunteerDocs, orgProjects, donors] = await Promise.all([
           api.getOrderedDocuments(api.getProjectsCollection()),
           api.getOrderedDocuments(api.getContactMessagesCollection()),
           api.getOrderedDocuments(api.getVolunteerApplicationsCollection()),
+          listOrgProjects(),
+          listDonors(),
         ]);
 
         let activeProjects = 0;
@@ -157,6 +162,12 @@ export default function AdminDashboardPage() {
         const totalContactMessages = contactDocs.length;
         const unreadVolunteerApplications = volunteerDocs.filter((d) => !d.data().read).length;
         const volunteerApplications = volunteerDocs.length;
+
+        setOrgStats({
+          projects: orgProjects.length,
+          donors: donors.length,
+          published: orgProjects.filter((p) => p.publishedOnSite).length,
+        });
 
         setStats({
           projects,
@@ -234,7 +245,9 @@ export default function AdminDashboardPage() {
               </div>
               <div>
                 <CardTitle className="text-sm font-medium">المشاريع</CardTitle>
-                <p className="text-xs text-muted-foreground">إنشاء ومتابعة المشاريع</p>
+                <p className="text-xs text-muted-foreground">
+                  {orgStats.projects} تشغيلي · {orgStats.published} منشور
+                </p>
               </div>
               <ArrowLeft className="ms-auto h-4 w-4 text-muted-foreground" />
             </CardContent>
@@ -252,7 +265,7 @@ export default function AdminDashboardPage() {
               </div>
               <div>
                 <CardTitle className="text-sm font-medium">المتبرعون</CardTitle>
-                <p className="text-xs text-muted-foreground">البوابة والروابط</p>
+                <p className="text-xs text-muted-foreground">{orgStats.donors} متبرع مسجّل</p>
               </div>
               <ArrowLeft className="ms-auto h-4 w-4 text-muted-foreground" />
             </CardContent>

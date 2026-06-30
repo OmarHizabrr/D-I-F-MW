@@ -210,7 +210,7 @@ service cloud.firestore {
     }
 
     match /portal_access/{username} {
-      allow get: if true;
+      allow get: if isAdmin();
       allow write: if isAdmin();
     }
 
@@ -227,7 +227,7 @@ service cloud.firestore {
     }
 
     match /settings/{docId} {
-      allow read: if isAdmin();
+      allow read: if docId == 'global' || isAdmin();
       allow write: if isAdmin();
     }
   }

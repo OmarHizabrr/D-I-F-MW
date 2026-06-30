@@ -8,6 +8,12 @@ export async function getPortalAccess(username: string): Promise<PortalAccess | 
   return data as PortalAccess | null;
 }
 
+export async function removePortalAccess(username: string, user: UserMeta): Promise<void> {
+  const normalized = username.trim().toLowerCase();
+  if (!normalized) return;
+  await api.deleteData(api.getPortalAccessDoc(normalized));
+}
+
 export async function syncPortalAccess(
   donorId: string,
   fullName: string,
@@ -17,7 +23,12 @@ export async function syncPortalAccess(
   user: UserMeta
 ): Promise<void> {
   const normalized = username?.trim().toLowerCase();
-  if (!normalized || !pin || !enabled) return;
+  if (!normalized) return;
+
+  if (!pin || !enabled) {
+    await removePortalAccess(normalized, user);
+    return;
+  }
 
   await api.setData({
     docRef: api.getPortalAccessDoc(normalized),
@@ -27,6 +38,7 @@ export async function syncPortalAccess(
   });
 }
 
+/** @deprecated استخدم loginDonorWithCredentials عبر API — لا تقرأ الرمز من العميل */
 export async function validatePortalLogin(
   username: string,
   pin: string

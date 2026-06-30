@@ -313,7 +313,7 @@ export function PublicOrgProjectDetail({ projectId }: PublicOrgProjectDetailProp
             )}
             {portalEnabled && (
               <Link
-                href="/portal"
+                href={`/portal?project=${encodeURIComponent(project.projectNumber)}`}
                 className="mt-2 block text-center text-sm text-brand-green hover:underline"
               >
                 {t.topBar.donorPortal}
