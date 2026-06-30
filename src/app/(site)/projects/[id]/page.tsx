@@ -6,9 +6,11 @@ import Link from "next/link";
 import Image from "next/image";
 import dynamic from "next/dynamic";
 import { useSiteContent } from "@/context/SiteContentContext";
+import { useMergedPublicProjects } from "@/hooks/useMergedPublicProjects";
 import { useLocale } from "@/context/LocaleContext";
 import { useDonation } from "@/context/DonationContext";
 import { SitePageHeader } from "@/components/site/SitePageHeader";
+import { PublicOrgProjectDetail } from "@/components/site/PublicOrgProjectDetail";
 import { YouTubePlayer } from "@/components/site/YouTubePlayer";
 import { SitePageSkeleton } from "@/components/admin/AdminPageSkeleton";
 import { Card } from "@/components/ui/Card";
@@ -29,19 +31,19 @@ const MapView = dynamic(
 export default function ProjectDetailPage() {
   const params = useParams();
   const id = String(params.id ?? "");
-  const { projects, mapPoints, donation, sectionTitles, text, loading } = useSiteContent();
+  const { mapPoints, donation, sectionTitles, text, loading: cmsLoading } = useSiteContent();
+  const { projects, loading: mergedLoading } = useMergedPublicProjects();
   const { locale, t } = useLocale();
   const { openDonation } = useDonation();
 
-  const project = useMemo(
-    () => projects.find((p) => p.id === id && p.enabled),
-    [projects, id]
-  );
+  const project = useMemo(() => projects.find((p) => p.id === id), [projects, id]);
 
   const mapPoint = useMemo(
     () => mapPoints.find((m) => m.enabled && m.projectId === id && isValidLatLng(m.lat, m.lng)),
     [mapPoints, id]
   );
+
+  const loading = cmsLoading || mergedLoading;
 
   if (loading) {
     return (
@@ -55,15 +57,29 @@ export default function ProjectDetailPage() {
     notFound();
   }
 
+  if (project.source === "org") {
+    return (
+      <>
+        <SitePageHeader
+          title={project.name}
+          subtitle={`${project.country}${project.city ? ` · ${project.city}` : ""}`}
+          backHref="/projects"
+          backLabel={text(sectionTitles.navAllProjects)}
+        />
+        <PublicOrgProjectDetail projectId={project.id} />
+      </>
+    );
+  }
+
   const statusLabel =
     PROJECT_STATUS_LABELS[project.status][locale as LocaleCode] ?? project.status;
-  const description = text(project.description);
+  const description = project.description ?? "";
 
   return (
     <>
       <SitePageHeader
-        title={text(project.name)}
-        subtitle={`${text(project.country)}${project.city ? ` · ${project.city}` : ""}`}
+        title={project.name}
+        subtitle={`${project.country}${project.city ? ` · ${project.city}` : ""}`}
         backHref="/projects"
         backLabel={text(sectionTitles.navAllProjects)}
       />
@@ -75,7 +91,7 @@ export default function ProjectDetailPage() {
               <div className="relative aspect-[16/10] overflow-hidden rounded-3xl border border-border-subtle">
                 <Image
                   src={project.imageUrl}
-                  alt={text(project.name)}
+                  alt={project.name}
                   fill
                   className="object-cover"
                   priority
@@ -87,7 +103,7 @@ export default function ProjectDetailPage() {
             )}
 
             {project.youtubeUrl && (
-              <YouTubePlayer url={project.youtubeUrl} title={text(project.name)} />
+              <YouTubePlayer url={project.youtubeUrl} title={project.name} />
             )}
 
             {description ? (
@@ -118,10 +134,12 @@ export default function ProjectDetailPage() {
                     />
                   </div>
                 </div>
-                <div>
-                  <dt className="text-muted-foreground">{text(sectionTitles.projectsLastUpdate)}</dt>
-                  <dd className="mt-1 font-medium">{project.lastUpdate}</dd>
-                </div>
+                {project.lastUpdate && (
+                  <div>
+                    <dt className="text-muted-foreground">{text(sectionTitles.projectsLastUpdate)}</dt>
+                    <dd className="mt-1 font-medium">{project.lastUpdate}</dd>
+                  </div>
+                )}
                 {project.showDonor && project.donorName && (
                   <div>
                     <dt className="text-muted-foreground">{t.common.supportedBy}</dt>
@@ -132,7 +150,7 @@ export default function ProjectDetailPage() {
               <Button
                 className="mt-4 w-full"
                 onClick={() =>
-                  openDonation({ projectId: project.id, projectName: text(project.name) })
+                  openDonation({ projectId: project.id, projectName: project.name })
                 }
               >
                 {text(donation.navButtonLabel)}

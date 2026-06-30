@@ -2,22 +2,22 @@
 
 import Link from "next/link";
 import { useSiteContent } from "@/context/SiteContentContext";
+import { useMergedPublicProjects } from "@/hooks/useMergedPublicProjects";
 import { SectionHeader } from "@/components/ui/SectionHeader";
 import { Table } from "@/components/ui/Table";
 import { Badge } from "@/components/ui/Badge";
 
 export function ProjectsTableSection() {
-  const { projects, sectionTitles, text } = useSiteContent();
+  const { sectionTitles, text } = useSiteContent();
+  const { projects } = useMergedPublicProjects();
 
-  const enabledProjects = projects.filter((p) => p.enabled).sort((a, b) => a.order - b.order);
-
-  const tableData = enabledProjects.map((p) => ({
+  const tableData = projects.map((p) => ({
     projectId: p.id,
     id: p.code || p.id,
-    name: text(p.name),
-    country: text(p.country),
+    name: p.name,
+    country: p.country,
     progress: `${p.progress}%`,
-    lastUpdate: p.lastUpdate,
+    lastUpdate: p.lastUpdate ?? "—",
   }));
 
   return (

@@ -1,10 +1,32 @@
 /**
  * هيكل قاعدة بيانات Firestore — مؤسسة D.I.F
  *
- * النمط: {collection}/{parentId}/{subCollection}/{documentId}
+ * CMS: {collection}/{parentId}/{subCollection}/{documentId}
+ * إدارة المشاريع: مجموعات جذرية مستقلة (groups, members, MyGroups, donors, …)
+ * المشاريع التشغيلية: projects/{projectId} مع SubCollections
  */
 
 export const SITE_ROOT = "global" as const;
+
+/** مستند الوسيط لمحتوى CMS داخل مجموعة projects */
+export const CMS_PROJECTS_ROOT = "global" as const;
+
+/** مجموعات نظام إدارة المشاريع (جذر Firestore) */
+export const PM_COLLECTIONS = {
+  groups: "groups",
+  members: "members",
+  myGroups: "MyGroups",
+  donors: "donors",
+  notifications: "notifications",
+  settings: "settings",
+  portalAccess: "portal_access",
+  portalTokens: "portal_tokens",
+} as const;
+
+export const PM_SUBCOLLECTIONS = {
+  groupMembers: "members",
+  userMyGroups: "MyGroups",
+} as const;
 
 export const COLLECTIONS = {
   siteConfig: "site_config",
@@ -73,4 +95,14 @@ export const HOME_SECTIONS = [
   { id: "privacy", label: "سياسة الخصوصية", href: "/admin/privacy" },
   { id: "contactMessages", label: "رسائل التواصل", href: "/admin/contact-messages" },
   { id: "footer", label: "التذييل", href: "/admin/footer" },
+] as const;
+
+/** أقسام إدارة المشاريع والمتبرعين */
+export const MANAGEMENT_SECTIONS = [
+  { id: "mgmtDashboard", label: "لوحة المشاريع", href: "/admin/management" },
+  { id: "mgmtProjects", label: "المشاريع التشغيلية", href: "/admin/management/projects" },
+  { id: "mgmtGroups", label: "المجموعات", href: "/admin/management/groups" },
+  { id: "mgmtDonors", label: "المتبرعون", href: "/admin/management/donors" },
+  { id: "mgmtNotifications", label: "الإشعارات", href: "/admin/management/notifications" },
+  { id: "mgmtSettings", label: "إعدادات النظام", href: "/admin/management/settings" },
 ] as const;

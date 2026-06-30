@@ -1,5 +1,14 @@
 export type UserRole = "admin" | "superadmin" | "member";
 
+export type UserDepartment =
+  | "management"
+  | "engineering"
+  | "finance"
+  | "media"
+  | "supervision"
+  | "field"
+  | "other";
+
 export type AppUser = {
   id: string;
   uid: string;
@@ -11,6 +20,10 @@ export type AppUser = {
   active: boolean;
   profileComplete: boolean;
   banned: boolean;
+  /** حقول إدارة المشاريع */
+  jobTitle?: string;
+  department?: UserDepartment;
+  status?: "active" | "inactive" | "suspended";
   createdAt?: string;
   updatedAt?: string;
 };

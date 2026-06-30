@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { Heart, Calculator, RefreshCw, FolderKanban, Shield } from "lucide-react";
 import { useSiteContent } from "@/context/SiteContentContext";
+import { useMergedPublicProjects } from "@/hooks/useMergedPublicProjects";
 import { useDonation } from "@/context/DonationContext";
 import { useLocale } from "@/context/LocaleContext";
 import { SitePageHeader } from "@/components/site/SitePageHeader";
@@ -11,13 +12,14 @@ import { Card, CardContent, CardTitle } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 
 export default function WaysToGivePage() {
-  const { sectionTitles, projects, donation, text, loading } = useSiteContent();
+  const { sectionTitles, donation, text, loading: cmsLoading } = useSiteContent();
+  const { projects, loading: mergedLoading } = useMergedPublicProjects();
   const { openDonation } = useDonation();
   const { t } = useLocale();
 
-  const featuredProjects = projects.filter((p) => p.enabled).slice(0, 4);
+  const featuredProjects = projects.slice(0, 4);
 
-  if (loading) {
+  if (cmsLoading || mergedLoading) {
     return (
       <div className="section-padding">
         <SitePageSkeleton />
@@ -103,15 +105,15 @@ export default function WaysToGivePage() {
             <p className="mb-4 text-muted-foreground">{t.waysToGive.projectDesc}</p>
             <div className="grid gap-3 sm:grid-cols-2">
               {featuredProjects.map((p) => (
-                <Card key={p.id} className="flex items-center justify-between gap-4 p-4">
+                <Card key={`${p.source}-${p.id}`} className="flex items-center justify-between gap-4 p-4">
                   <div>
-                    <p className="font-semibold">{text(p.name)}</p>
-                    <p className="text-xs text-muted-foreground">{text(p.country)}</p>
+                    <p className="font-semibold">{p.name}</p>
+                    <p className="text-xs text-muted-foreground">{p.country}</p>
                   </div>
                   <Button
                     size="sm"
                     onClick={() =>
-                      openDonation({ projectId: p.id, projectName: text(p.name) })
+                      openDonation({ projectId: p.id, projectName: p.name })
                     }
                   >
                     {text(donation.navButtonLabel)}

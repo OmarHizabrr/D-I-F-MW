@@ -164,5 +164,71 @@ service cloud.firestore {
       allow read: if !(collection in ['users', 'testimonials', 'donation_intents', 'contact_messages', 'newsletter_subscribers', 'volunteer_applications']);
       allow write: if isAdmin();
     }
+
+    // — نظام إدارة المشاريع —
+
+    function isOrgProjectId(projectId) {
+      return projectId != 'global';
+    }
+
+    // مشاريع تشغيلية: projects/{projectId} — قراءة عامة للبوابة
+    match /projects/{projectId} {
+      allow read: if isOrgProjectId(projectId);
+      allow create, update, delete: if isAdmin();
+
+      match /DonorRatings/{donorId} {
+        allow read: if isOrgProjectId(projectId);
+        allow create: if isOrgProjectId(projectId);
+        allow update, delete: if isAdmin();
+      }
+
+      match /{subCollection}/{document=**} {
+        allow read: if isOrgProjectId(projectId);
+        allow write: if isAdmin();
+      }
+    }
+
+    match /groups/{groupId} {
+      allow read: if isAdmin() || isSignedIn();
+      allow write: if isAdmin();
+    }
+
+    match /members/{groupId}/members/{userId} {
+      allow read: if isAdmin() || (isSignedIn() && request.auth.uid == userId);
+      allow write: if isAdmin();
+    }
+
+    match /MyGroups/{userId}/MyGroups/{groupId} {
+      allow read: if isAdmin() || (isSignedIn() && request.auth.uid == userId);
+      allow write: if isAdmin();
+    }
+
+    match /donors/{donorId} {
+      allow get: if isAdmin() || resource.data.get('status', 'active') == 'active';
+      allow list: if isAdmin();
+      allow write: if isAdmin();
+    }
+
+    match /portal_access/{username} {
+      allow get: if true;
+      allow write: if isAdmin();
+    }
+
+    match /portal_tokens/{token} {
+      allow get: if true;
+      allow write: if isAdmin();
+    }
+
+    match /notifications/{notificationId} {
+      allow read: if isAdmin() || (isSignedIn() && resource.data.userId == request.auth.uid);
+      allow create: if isAdmin();
+      allow update: if isAdmin() || (isSignedIn() && resource.data.userId == request.auth.uid);
+      allow delete: if isAdmin();
+    }
+
+    match /settings/{docId} {
+      allow read: if isAdmin();
+      allow write: if isAdmin();
+    }
   }
 }

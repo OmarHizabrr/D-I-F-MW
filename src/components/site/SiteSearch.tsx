@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { Search, X } from "lucide-react";
 import { useSiteContent } from "@/context/SiteContentContext";
+import { useMergedPublicProjects } from "@/hooks/useMergedPublicProjects";
 import { useLocale } from "@/context/LocaleContext";
 import { Dialog } from "@/components/ui/Dialog";
 import { pickLocalized, type LocaleCode } from "@/types/cms";
@@ -23,8 +24,9 @@ const labels = { ar, en, ny };
 export function SiteSearchButton({ className }: { className?: string }) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
-  const { projects, news, successStories, faq, programs, events, downloads, sectionTitles, text } =
+  const { news, successStories, faq, programs, events, downloads, sectionTitles, text } =
     useSiteContent();
+  const { projects } = useMergedPublicProjects();
   const { locale: loc } = useLocale();
   const L = labels[loc as LocaleCode] ?? ar;
 
@@ -37,11 +39,11 @@ export function SiteSearchButton({ className }: { className?: string }) {
 
     const items: SearchResult[] = [];
 
-    for (const p of projects.filter((x) => x.enabled)) {
-      if (pick(p.name).includes(q) || pick(p.country).includes(q)) {
+    for (const p of projects) {
+      if (p.name.toLowerCase().includes(q) || p.country.toLowerCase().includes(q)) {
         items.push({
-          id: `p-${p.id}`,
-          title: pickLocalized(p.name, loc as LocaleCode),
+          id: `p-${p.source}-${p.id}`,
+          title: p.name,
           href: `/projects/${p.id}`,
           type: L.nav.projects,
         });

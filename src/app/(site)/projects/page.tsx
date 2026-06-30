@@ -3,6 +3,7 @@
 import { useMemo, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { useSiteContent } from "@/context/SiteContentContext";
+import { useMergedPublicProjects } from "@/hooks/useMergedPublicProjects";
 import { SitePageHeader } from "@/components/site/SitePageHeader";
 import { ProjectCard } from "@/components/site/ProjectCard";
 import { SitePageSkeleton } from "@/components/admin/AdminPageSkeleton";
@@ -20,7 +21,8 @@ const statusFilterKeys: Array<"all" | ProjectStatus> = [
 ];
 
 function ProjectsContent() {
-  const { projects, programs, sectionTitles, text, loading } = useSiteContent();
+  const { programs, sectionTitles, text } = useSiteContent();
+  const { projects, loading } = useMergedPublicProjects();
   const { locale, t } = useLocale();
   const searchParams = useSearchParams();
   const programFilter = searchParams.get("program") ?? "all";
@@ -32,7 +34,7 @@ function ProjectsContent() {
   );
 
   const items = useMemo(() => {
-    let list = projects.filter((p) => p.enabled).sort((a, b) => a.order - b.order);
+    let list = [...projects];
     if (programFilter !== "all") {
       list = list.filter((p) => p.programId === programFilter);
     }
@@ -118,7 +120,7 @@ function ProjectsContent() {
           ) : (
             <div className="grid gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">
               {items.map((project) => (
-                <ProjectCard key={project.id} project={project} />
+                <ProjectCard key={`${project.source}-${project.id}`} project={project} />
               ))}
             </div>
           )}

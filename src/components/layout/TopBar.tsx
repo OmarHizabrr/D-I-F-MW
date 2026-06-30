@@ -92,7 +92,7 @@ export function TopBar() {
               </button>
             ) : (
               <Link
-                href="/admin/login"
+                href="/portal"
                 className="inline-flex h-8 shrink-0 items-center justify-center rounded-xl border border-white/30 bg-white/10 px-2 text-[10px] font-semibold text-white transition-colors hover:bg-white/20 sm:h-9 sm:px-3 sm:text-xs"
               >
                 <span className="hidden sm:inline">{text(topbar.donorPortalLabel)}</span>

@@ -23,7 +23,8 @@ import {
   type QueryDocumentSnapshot,
 } from "firebase/firestore";
 import { getFirebaseApp } from "@/lib/firebase/client";
-import { COLLECTIONS, SITE_ROOT } from "@/lib/firebase/database-structure";
+import { COLLECTIONS, SITE_ROOT, PM_COLLECTIONS, PM_SUBCOLLECTIONS } from "@/lib/firebase/database-structure";
+import { PROJECT_SUBCOLLECTIONS } from "@/types/project-management";
 
 function getDb() {
   return getFirestore(getFirebaseApp());
@@ -365,6 +366,140 @@ class FirestoreApi {
 
   getBootstrapDoc() {
     return this.getSubDocument(COLLECTIONS.users, SITE_ROOT, "meta", "bootstrap");
+  }
+
+  // — نظام إدارة المشاريع —
+
+  /** مشاريع تشغيلية: projects/{projectId} (ليس projects/global/projects) */
+  getOrgProjectsCollection() {
+    return collection(getDb(), COLLECTIONS.projects);
+  }
+
+  getOrgProjectDoc(projectId: string) {
+    return doc(getDb(), COLLECTIONS.projects, projectId);
+  }
+
+  getOrgProjectSubCollection(projectId: string, subName: string) {
+    return collection(getDb(), COLLECTIONS.projects, projectId, subName);
+  }
+
+  getOrgProjectSubDoc(projectId: string, subName: string, docId: string) {
+    return doc(getDb(), COLLECTIONS.projects, projectId, subName, docId);
+  }
+
+  getOrgProjectPhotosPhaseCollection(projectId: string, phase: string) {
+    return collection(
+      getDb(),
+      COLLECTIONS.projects,
+      projectId,
+      PROJECT_SUBCOLLECTIONS.photos,
+      phase
+    );
+  }
+
+  getOrgProjectPhotosPhaseDoc(projectId: string, phase: string, photoId: string) {
+    return doc(
+      getDb(),
+      COLLECTIONS.projects,
+      projectId,
+      PROJECT_SUBCOLLECTIONS.photos,
+      phase,
+      photoId
+    );
+  }
+
+  getGroupsCollection() {
+    return collection(getDb(), PM_COLLECTIONS.groups);
+  }
+
+  getGroupDoc(groupId: string) {
+    return doc(getDb(), PM_COLLECTIONS.groups, groupId);
+  }
+
+  getGroupMembersCollection(groupId: string) {
+    return collection(
+      getDb(),
+      PM_COLLECTIONS.members,
+      groupId,
+      PM_SUBCOLLECTIONS.groupMembers
+    );
+  }
+
+  getGroupMemberDoc(groupId: string, userId: string) {
+    return doc(
+      getDb(),
+      PM_COLLECTIONS.members,
+      groupId,
+      PM_SUBCOLLECTIONS.groupMembers,
+      userId
+    );
+  }
+
+  getMyGroupsCollection(userId: string) {
+    return collection(
+      getDb(),
+      PM_COLLECTIONS.myGroups,
+      userId,
+      PM_SUBCOLLECTIONS.userMyGroups
+    );
+  }
+
+  getMyGroupDoc(userId: string, groupId: string) {
+    return doc(
+      getDb(),
+      PM_COLLECTIONS.myGroups,
+      userId,
+      PM_SUBCOLLECTIONS.userMyGroups,
+      groupId
+    );
+  }
+
+  getDonorsCollection() {
+    return collection(getDb(), PM_COLLECTIONS.donors);
+  }
+
+  getDonorDoc(donorId: string) {
+    return doc(getDb(), PM_COLLECTIONS.donors, donorId);
+  }
+
+  getNotificationsCollection() {
+    return collection(getDb(), PM_COLLECTIONS.notifications);
+  }
+
+  getNotificationDoc(notificationId: string) {
+    return doc(getDb(), PM_COLLECTIONS.notifications, notificationId);
+  }
+
+  getSystemSettingsDoc() {
+    return doc(getDb(), PM_COLLECTIONS.settings, "global");
+  }
+
+  getPortalAccessDoc(username: string) {
+    return doc(getDb(), PM_COLLECTIONS.portalAccess, username.toLowerCase());
+  }
+
+  getPortalTokenDoc(token: string) {
+    return doc(getDb(), PM_COLLECTIONS.portalTokens, token);
+  }
+
+  getProjectFinancialDoc(projectId: string) {
+    return doc(
+      getDb(),
+      COLLECTIONS.projects,
+      projectId,
+      PROJECT_SUBCOLLECTIONS.progress,
+      "financial"
+    );
+  }
+
+  getDonorRatingDoc(projectId: string, donorId: string) {
+    return doc(
+      getDb(),
+      COLLECTIONS.projects,
+      projectId,
+      PROJECT_SUBCOLLECTIONS.donorRatings,
+      donorId
+    );
   }
 
   async setData({ docRef, data, merge = true, userData = {} }: SetDataOptions) {

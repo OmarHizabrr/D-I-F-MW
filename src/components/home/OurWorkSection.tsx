@@ -1,6 +1,7 @@
 "use client";
 
 import { useSiteContent } from "@/context/SiteContentContext";
+import { useMergedPublicProjects } from "@/hooks/useMergedPublicProjects";
 import { SectionHeader } from "@/components/ui/SectionHeader";
 import { Reveal } from "@/components/ui/Reveal";
 import { ProjectCard } from "@/components/site/ProjectCard";
@@ -8,10 +9,11 @@ import { ProjectCard } from "@/components/site/ProjectCard";
 const HOME_LIMIT = 4;
 
 export function OurWorkSection() {
-  const { projects, sectionTitles, text } = useSiteContent();
+  const { sectionTitles, text } = useSiteContent();
+  const { projects } = useMergedPublicProjects();
+
   const items = projects
-    .filter((p) => p.enabled && (p.featured || p.status === "completed"))
-    .sort((a, b) => Number(b.featured) - Number(a.featured) || a.order - b.order)
+    .filter((p) => p.featured || p.status === "completed")
     .slice(0, HOME_LIMIT);
 
   if (!items.length) return null;
@@ -29,7 +31,7 @@ export function OurWorkSection() {
         </Reveal>
         <div className="grid gap-4 sm:gap-6 md:grid-cols-2 xl:grid-cols-4">
           {items.map((item, i) => (
-            <Reveal key={item.id} delay={i * 60}>
+            <Reveal key={`${item.source}-${item.id}`} delay={i * 60}>
               <ProjectCard project={item} />
             </Reveal>
           ))}

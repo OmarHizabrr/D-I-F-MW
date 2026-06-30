@@ -1,17 +1,18 @@
 "use client";
 
 import { useSiteContent } from "@/context/SiteContentContext";
+import { useMergedPublicProjects } from "@/hooks/useMergedPublicProjects";
 import { SitePageHeader } from "@/components/site/SitePageHeader";
 import { ProjectCard } from "@/components/site/ProjectCard";
 import { SitePageSkeleton } from "@/components/admin/AdminPageSkeleton";
 
 export default function OurWorkPage() {
-  const { projects, sectionTitles, text, loading } = useSiteContent();
-  const items = projects
-    .filter((p) => p.enabled && (p.featured || p.status === "completed"))
-    .sort((a, b) => Number(b.featured) - Number(a.featured) || a.order - b.order);
+  const { sectionTitles, text, loading: cmsLoading } = useSiteContent();
+  const { projects, loading: mergedLoading } = useMergedPublicProjects();
 
-  if (loading) {
+  const items = projects.filter((p) => p.featured || p.status === "completed");
+
+  if (cmsLoading || mergedLoading) {
     return (
       <div className="section-padding">
         <SitePageSkeleton />
@@ -33,7 +34,7 @@ export default function OurWorkPage() {
           ) : (
             <div className="grid gap-4 sm:gap-6 md:grid-cols-2 xl:grid-cols-3">
               {items.map((item) => (
-                <ProjectCard key={item.id} project={item} />
+                <ProjectCard key={`${item.source}-${item.id}`} project={item} />
               ))}
             </div>
           )}

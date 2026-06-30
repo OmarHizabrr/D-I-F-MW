@@ -34,9 +34,11 @@ import {
   Briefcase,
   Megaphone,
   Calculator,
+  Settings,
+  Bell,
   type LucideIcon,
 } from "lucide-react";
-import { HOME_SECTIONS } from "@/lib/firebase/database-structure";
+import { HOME_SECTIONS, MANAGEMENT_SECTIONS } from "@/lib/firebase/database-structure";
 import { cn } from "@/lib/utils";
 
 const sectionIcons: Record<string, LucideIcon> = {
@@ -69,6 +71,15 @@ const sectionIcons: Record<string, LucideIcon> = {
   team: Users,
   contactMessages: Inbox,
   footer: PanelBottom,
+};
+
+const managementIcons: Record<string, LucideIcon> = {
+  mgmtDashboard: LayoutDashboard,
+  mgmtProjects: FolderKanban,
+  mgmtGroups: Users,
+  mgmtDonors: Heart,
+  mgmtNotifications: Bell,
+  mgmtSettings: Settings,
 };
 
 const adminLinks = [
@@ -163,6 +174,32 @@ export function AdminSidebar({ open, onClose, onLinkClick, className }: AdminSid
                 >
                   <Icon className="h-4 w-4 shrink-0 opacity-80" />
                   <span className="truncate">{link.label}</span>
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
+
+        <p className="mb-2 mt-6 px-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+          إدارة المشاريع
+        </p>
+        <ul className="space-y-0.5">
+          {MANAGEMENT_SECTIONS.map((section) => {
+            const Icon = managementIcons[section.id] || FolderKanban;
+            return (
+              <li key={section.id}>
+                <Link
+                  href={section.href}
+                  onClick={onLinkClick}
+                  className={cn(
+                    "flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors",
+                    isActive(section.href)
+                      ? "bg-brand-green/10 text-brand-green-dark dark:text-brand-green"
+                      : "text-foreground/80 hover:bg-brand-green/5 hover:text-brand-green-dark dark:hover:text-brand-green"
+                  )}
+                >
+                  <Icon className="h-4 w-4 shrink-0 opacity-80" />
+                  <span className="truncate">{section.label}</span>
                 </Link>
               </li>
             );

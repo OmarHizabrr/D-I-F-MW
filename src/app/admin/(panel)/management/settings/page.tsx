@@ -1,0 +1,89 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { useAuth } from "@/context/AuthContext";
+import { getSystemSettings, saveSystemSettings } from "@/services/settingsService";
+import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
+import { Input } from "@/components/ui/Input";
+import { Button } from "@/components/ui/Button";
+import { Spinner } from "@/components/ui/Spinner";
+import { Card } from "@/components/ui/Card";
+import type { SystemSettings } from "@/types/project-management";
+
+export default function ManagementSettingsPage() {
+  const { user } = useAuth();
+  const [settings, setSettings] = useState<SystemSettings | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    getSystemSettings().then((s) => {
+      setSettings(s);
+      setLoading(false);
+    });
+  }, []);
+
+  async function handleSave() {
+    if (!settings || !user) return;
+    setSaving(true);
+    try {
+      await saveSystemSettings(settings, {
+        uid: user.uid,
+        displayName: user.email ?? undefined,
+      });
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  if (loading || !settings) {
+    return (
+      <div className="flex justify-center py-16">
+        <Spinner size="lg" />
+      </div>
+    );
+  }
+
+  return (
+    <div>
+      <AdminPageHeader
+        title="إعدادات النظام"
+        description="إعدادات عامة لمنصة إدارة المشاريع والمتبرعين"
+      />
+      <Card padding="lg" className="max-w-xl space-y-4">
+        <Input
+          label="اسم المؤسسة"
+          value={settings.organizationName}
+          onChange={(e) => setSettings({ ...settings, organizationName: e.target.value })}
+        />
+        <Input
+          label="العملة الافتراضية"
+          dir="ltr"
+          value={settings.defaultCurrency}
+          onChange={(e) => setSettings({ ...settings, defaultCurrency: e.target.value })}
+        />
+        <label className="flex items-center gap-2 text-sm">
+          <input
+            type="checkbox"
+            checked={settings.enableDonorPortal}
+            onChange={(e) => setSettings({ ...settings, enableDonorPortal: e.target.checked })}
+            className="h-4 w-4 rounded border-border text-brand-green"
+          />
+          تفعيل بوابة المتبرعين
+        </label>
+        <label className="flex items-center gap-2 text-sm">
+          <input
+            type="checkbox"
+            checked={settings.enableNotifications}
+            onChange={(e) => setSettings({ ...settings, enableNotifications: e.target.checked })}
+            className="h-4 w-4 rounded border-border text-brand-green"
+          />
+          تفعيل الإشعارات
+        </label>
+        <Button loading={saving} onClick={handleSave}>
+          حفظ الإعدادات
+        </Button>
+      </Card>
+    </div>
+  );
+}
