@@ -27,7 +27,6 @@ import {
 } from "@/services/memberService";
 import { listDonors } from "@/services/donorService";
 import { getProjectFinancial, saveProjectFinancial } from "@/services/financialService";
-import { syncProjectDonorsToGroup } from "@/services/projectOrchestrationService";
 import FirestoreApi from "@/services/firestoreApi";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { AdminFlowGuide } from "@/components/admin/AdminFlowGuide";
@@ -194,18 +193,6 @@ export default function ProjectDetailPage() {
     setSaving(true);
     try {
       await updateOrgProject(projectId, project, userMeta);
-      await syncProjectDonorsToGroup(
-        {
-          id: projectId,
-          groupId: group.id,
-          projectName: project.projectName,
-          projectNumber: project.projectNumber,
-          donorId: project.donorId,
-          additionalDonorIds: project.additionalDonorIds,
-        },
-        group.groupName,
-        userMeta
-      );
       await loadAll();
     } finally {
       setSaving(false);
@@ -430,9 +417,9 @@ export default function ProjectDetailPage() {
       <AdminFlowGuide
         title="متابعة المتبرع لهذا المشروع"
         steps={[
-          "عيّن متبرعاً رئيسياً و/أو متبرعين إضافيين من تبويب «نظرة عامة»",
-          "المتبرع يسجّل عبر Google في /portal — يُربط تلقائياً إذا طابق بريده",
-          "عند الربط يُضاف للفريق بدور Donor ويرى المشروع في بوابته",
+          "عيّن متبرعاً رئيسياً و/أو متبرعين إضافيين من هذا التبويب",
+          "المتبرع الرئيسي يدخل /portal برقم المشروع",
+          "المتبرعون الإضافيون يدخلون باسم المستخدم والرمز",
           "فريق العمل الداخلي يُدار من تبويب «الأعضاء»",
         ]}
       />
@@ -486,16 +473,27 @@ export default function ProjectDetailPage() {
             ]}
           />
           <p className="text-xs text-muted-foreground">{FORM_HINTS.project.donorPrimary}</p>
-          {project.donorId && (() => {
-            const primary = donors.find((d) => d.id === project.donorId);
-            if (!primary) return null;
-            return (
-              <p className="text-xs text-muted-foreground">
-                {primary.email}
-                {primary.linkedUserId ? " · مرتبط بـ Google" : " · لم يسجّل عبر Google بعد"}
-              </p>
-            );
-          })()}
+          {project.donorId && (
+            <p className="rounded-lg bg-border-subtle/60 px-3 py-2 text-xs text-muted-foreground">
+              بيانات دخول المتبرع الرئيسي في البوابة: رقم المشروع{" "}
+              <span dir="ltr" className="font-medium text-foreground">
+                {project.projectNumber}
+              </span>
+              {(() => {
+                const d = donors.find((x) => x.id === project.donorId);
+                if (!d?.portalUsername) return null;
+                return (
+                  <>
+                    {" "}
+                    أو اسم المستخدم{" "}
+                    <span dir="ltr" className="font-medium text-foreground">
+                      @{d.portalUsername}
+                    </span>
+                  </>
+                );
+              })()}
+            </p>
+          )}
 
           <div className="rounded-xl border border-border-subtle p-4 space-y-3">
             <p className="text-sm font-medium">متبرعون إضافيون للمتابعة</p>
@@ -532,9 +530,6 @@ export default function ProjectDetailPage() {
                       className="inline-flex items-center gap-2 rounded-full bg-brand-green/10 px-3 py-1 text-sm"
                     >
                       {d?.fullName ?? id}
-                      {d?.linkedUserId && (
-                        <span className="text-xs text-brand-green-dark">Google</span>
-                      )}
                       <button
                         type="button"
                         className="text-muted-foreground hover:text-destructive"

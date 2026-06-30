@@ -5,6 +5,7 @@ import { useAuth } from "@/context/AuthContext";
 import { getSystemSettings, saveSystemSettings } from "@/services/settingsService";
 import { invalidateSystemSettingsCache } from "@/hooks/useSystemSettings";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
+import { AdminFlowGuide } from "@/components/admin/AdminFlowGuide";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import { Spinner } from "@/components/ui/Spinner";
@@ -50,9 +51,19 @@ export default function ManagementSettingsPage() {
   return (
     <div>
       <AdminPageHeader
-        title="إعدادات النظام"
-        description="إعدادات عامة لمنصة إدارة المشاريع والمتبرعين"
+        title="إعدادات البوابة"
+        description="تفعيل بوابة المتبرعين والإعدادات العامة للمشاريع"
       />
+
+      <AdminFlowGuide
+        title="إعدادات بوابة المتبرعين"
+        steps={[
+          "فعّل «بوابة المتبرعين» ليتمكن المتبرعون من الدخول إلى /portal",
+          "أنشئ المتبرعين من قسم المتبرعون واربطهم بالمشاريع",
+          "أرسل لكل متبرع بيانات الدخول (رابط، اسم مستخدم، رمز)",
+        ]}
+      />
+
       <Card padding="lg" className="max-w-xl space-y-4">
         <Input
           label="اسم المؤسسة"

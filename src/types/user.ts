@@ -1,4 +1,4 @@
-export type UserRole = "admin" | "superadmin" | "member" | "donor";
+export type UserRole = "admin" | "superadmin" | "member";
 
 export type UserDepartment =
   | "management"
@@ -34,10 +34,6 @@ export function isAdminRole(role?: UserRole | string): boolean {
 
 export function isSuperAdminRole(role?: UserRole | string): boolean {
   return role === "superadmin";
-}
-
-export function isDonorRole(role?: UserRole | string): boolean {
-  return role === "donor";
 }
 
 export function getInitials(name: string): string {

@@ -193,14 +193,90 @@ export default function AdminDashboardPage() {
     <div>
       <AdminPageHeader
         title="لوحة التحكم"
-        description="إدارة محتوى الموقع — تهيئة، تعديل، إضافة، وحذف"
+        description="إدارة الموقع والمشاريع والطلبات الواردة"
         actions={
           <div className="flex flex-wrap gap-2">
             <AdminPreviewLink href="/projects" label="المشاريع" size="sm" />
-            <AdminPreviewLink href="/transparency" label="الشفافية" size="sm" />
+            <AdminPreviewLink href="/portal" label="بوابة المتبرعين" size="sm" />
           </div>
         }
       />
+
+      <p className="mb-3 text-sm font-semibold text-muted-foreground">المشاريع والمتبرعون</p>
+      <div className="mb-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <Link href="/admin/management">
+          <Card
+            hover={false}
+            padding="md"
+            className="h-full transition-colors hover:border-brand-green/30 hover:bg-brand-green/5"
+          >
+            <CardContent className="flex items-center gap-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-brand-green/10 text-brand-green">
+                <FolderKanban className="h-5 w-5" />
+              </div>
+              <div>
+                <CardTitle className="text-sm font-medium">نظرة عامة</CardTitle>
+                <p className="text-xs text-muted-foreground">المشاريع التشغيلية والمتبرعون</p>
+              </div>
+              <ArrowLeft className="ms-auto h-4 w-4 text-muted-foreground" />
+            </CardContent>
+          </Card>
+        </Link>
+        <Link href="/admin/management/projects">
+          <Card
+            hover={false}
+            padding="md"
+            className="h-full transition-colors hover:border-brand-green/30 hover:bg-brand-green/5"
+          >
+            <CardContent className="flex items-center gap-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-brand-green/10 text-brand-green">
+                <Activity className="h-5 w-5" />
+              </div>
+              <div>
+                <CardTitle className="text-sm font-medium">المشاريع</CardTitle>
+                <p className="text-xs text-muted-foreground">إنشاء ومتابعة المشاريع</p>
+              </div>
+              <ArrowLeft className="ms-auto h-4 w-4 text-muted-foreground" />
+            </CardContent>
+          </Card>
+        </Link>
+        <Link href="/admin/management/donors">
+          <Card
+            hover={false}
+            padding="md"
+            className="h-full transition-colors hover:border-brand-green/30 hover:bg-brand-green/5"
+          >
+            <CardContent className="flex items-center gap-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-brand-green/10 text-brand-green">
+                <Heart className="h-5 w-5" />
+              </div>
+              <div>
+                <CardTitle className="text-sm font-medium">المتبرعون</CardTitle>
+                <p className="text-xs text-muted-foreground">البوابة والروابط</p>
+              </div>
+              <ArrowLeft className="ms-auto h-4 w-4 text-muted-foreground" />
+            </CardContent>
+          </Card>
+        </Link>
+        <Link href="/admin/management/settings">
+          <Card
+            hover={false}
+            padding="md"
+            className="h-full transition-colors hover:border-brand-green/30 hover:bg-brand-green/5"
+          >
+            <CardContent className="flex items-center gap-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-brand-brown/10 text-brand-brown">
+                <HandHeart className="h-5 w-5" />
+              </div>
+              <div>
+                <CardTitle className="text-sm font-medium">إعدادات البوابة</CardTitle>
+                <p className="text-xs text-muted-foreground">تفعيل دخول المتبرعين</p>
+              </div>
+              <ArrowLeft className="ms-auto h-4 w-4 text-muted-foreground" />
+            </CardContent>
+          </Card>
+        </Link>
+      </div>
 
       <AdminSeedPanel />
 

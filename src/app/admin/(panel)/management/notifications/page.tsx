@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { listAllNotifications, markNotificationRead } from "@/services/notificationService";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { Card } from "@/components/ui/Card";
@@ -12,14 +12,23 @@ export default function ManagementNotificationsPage() {
   const [items, setItems] = useState<AppNotification[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const loadItems = useCallback(async () => {
+  const loadItems = async () => {
     setItems(await listAllNotifications());
     setLoading(false);
-  }, []);
+  };
 
   useEffect(() => {
-    loadItems();
-  }, [loadItems]);
+    let cancelled = false;
+    void (async () => {
+      const notifications = await listAllNotifications();
+      if (cancelled) return;
+      setItems(notifications);
+      setLoading(false);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   async function handleMarkRead(id: string) {
     await markNotificationRead(id);

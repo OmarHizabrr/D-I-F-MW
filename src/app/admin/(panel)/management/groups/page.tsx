@@ -36,7 +36,7 @@ export default function ManagementGroupsPage() {
     <div>
       <AdminPageHeader
         title="المجموعات"
-        description="فِرق العمل الداخلية لكل مشروع — تُنشأ تلقائياً عند إنشاء مشروع. أعضاء الفريق والمشرفون يُضافون من تبويب «الأعضاء» في المشروع، والمتبرعون يتابعون من /portal"
+        description="فِرق العمل لكل مشروع — تُنشأ تلقائياً. أضف الأعضاء من تبويب «الأعضاء» داخل المشروع"
       />
       <AdminItemList
         items={items}

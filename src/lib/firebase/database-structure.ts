@@ -99,10 +99,18 @@ export const HOME_SECTIONS = [
 
 /** أقسام إدارة المشاريع والمتبرعين */
 export const MANAGEMENT_SECTIONS = [
-  { id: "mgmtDashboard", label: "لوحة المشاريع", href: "/admin/management", publicHref: "/projects" },
-  { id: "mgmtProjects", label: "المشاريع التشغيلية", href: "/admin/management/projects", publicHref: "/projects" },
-  { id: "mgmtGroups", label: "المجموعات", href: "/admin/management/groups" },
+  { id: "mgmtDashboard", label: "نظرة عامة", href: "/admin/management", publicHref: "/projects" },
+  { id: "mgmtProjects", label: "المشاريع", href: "/admin/management/projects", publicHref: "/projects" },
   { id: "mgmtDonors", label: "المتبرعون", href: "/admin/management/donors", publicHref: "/portal" },
   { id: "mgmtNotifications", label: "الإشعارات", href: "/admin/management/notifications" },
-  { id: "mgmtSettings", label: "إعدادات النظام", href: "/admin/management/settings" },
+  { id: "mgmtSettings", label: "إعدادات البوابة", href: "/admin/management/settings", publicHref: "/portal" },
+  { id: "mgmtGroups", label: "فرق العمل", href: "/admin/management/groups" },
+] as const;
+
+/** روابط سريعة لصندوق الوارد في الشريط الجانبي */
+export const ADMIN_INBOX_LINKS = [
+  { id: "donation", label: "طلبات التبرع", href: "/admin/donation?tab=intents", publicHref: "/ways-to-give" },
+  { id: "contactMessages", label: "رسائل التواصل", href: "/admin/contact-messages", publicHref: "/contact" },
+  { id: "volunteerApplications", label: "طلبات التطوع", href: "/admin/volunteer-applications", publicHref: "/volunteer" },
+  { id: "newsletter", label: "مشتركو النشرة", href: "/admin/newsletter?tab=subscribers" },
 ] as const;
