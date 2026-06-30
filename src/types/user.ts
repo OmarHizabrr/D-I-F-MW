@@ -32,6 +32,10 @@ export function isAdminRole(role?: UserRole | string): boolean {
   return role === "admin" || role === "superadmin";
 }
 
+export function isSuperAdminRole(role?: UserRole | string): boolean {
+  return role === "superadmin";
+}
+
 export function getInitials(name: string): string {
   const trimmed = name.trim();
   if (!trimmed) return "?";

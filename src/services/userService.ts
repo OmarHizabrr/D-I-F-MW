@@ -22,6 +22,9 @@ function toAppUser(uid: string, data: Record<string, unknown> | null): AppUser |
     active: data.active !== false,
     profileComplete: Boolean(data.profileComplete),
     banned: Boolean(data.banned),
+    jobTitle: data.jobTitle as AppUser["jobTitle"],
+    department: data.department as AppUser["department"],
+    status: data.status as AppUser["status"],
     createdAt: data.createdAt as string | undefined,
     updatedAt: data.updatedAt as string | undefined,
   };
