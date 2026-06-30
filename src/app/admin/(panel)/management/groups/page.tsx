@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { listGroups } from "@/services/groupService";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { AdminItemList } from "@/components/admin/AdminItemList";
@@ -11,14 +11,18 @@ export default function ManagementGroupsPage() {
   const [items, setItems] = useState<ProjectGroup[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const loadItems = useCallback(async () => {
-    setItems(await listGroups());
-    setLoading(false);
-  }, []);
-
   useEffect(() => {
-    loadItems();
-  }, [loadItems]);
+    let cancelled = false;
+    void (async () => {
+      const groups = await listGroups();
+      if (cancelled) return;
+      setItems(groups);
+      setLoading(false);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   if (loading) {
     return (
@@ -32,7 +36,7 @@ export default function ManagementGroupsPage() {
     <div>
       <AdminPageHeader
         title="المجموعات"
-        description="مجموعات فرق العمل المرتبطة بالمشاريع — members/{groupId}/members/{userId}"
+        description="فِرق العمل الداخلية لكل مشروع — تُنشأ تلقائياً عند إنشاء مشروع. أعضاء الفريق والمشرفون يُضافون من تبويب «الأعضاء» في المشروع، والمتبرعون يتابعون من /portal"
       />
       <AdminItemList
         items={items}

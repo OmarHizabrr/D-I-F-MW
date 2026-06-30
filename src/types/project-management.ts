@@ -143,6 +143,8 @@ export type OrgProject = {
   description: string;
   groupId: string;
   donorId: string;
+  /** متبرعون إضافيون يتابعون المشروع في بوابة /portal */
+  additionalDonorIds?: string[];
   country: string;
   city: string;
   address: string;

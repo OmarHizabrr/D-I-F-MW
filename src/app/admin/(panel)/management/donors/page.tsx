@@ -13,10 +13,13 @@ import {
   getDonorQrPortalUrl,
   generatePortalPin,
 } from "@/services/donorService";
+import { syncDonorToAllProjects } from "@/services/projectOrchestrationService";
 import { getQrCodeImageUrl } from "@/services/portalAccessService";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { AdminFormDialog } from "@/components/admin/AdminFormDialog";
+import { AdminFlowGuide } from "@/components/admin/AdminFlowGuide";
 import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
+import { FORM_PLACEHOLDERS, FORM_HINTS } from "@/lib/admin/form-placeholders";
 import { AdminItemList } from "@/components/admin/AdminItemList";
 import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
@@ -81,8 +84,14 @@ export default function ManagementDonorsPage() {
       const meta = { uid: user.uid, displayName: user.email ?? undefined };
       if ("id" in editing && editing.id) {
         await updateDonor(editing.id, editing, meta);
+        if (editing.linkedUserId) {
+          await syncDonorToAllProjects(editing.id, meta);
+        }
       } else {
-        await createDonor(editing as ReturnType<typeof newDonor>, meta);
+        const donorId = await createDonor(editing as ReturnType<typeof newDonor>, meta);
+        if (editing.linkedUserId) {
+          await syncDonorToAllProjects(donorId, meta);
+        }
       }
       setEditing(null);
       await loadItems();
@@ -126,6 +135,16 @@ export default function ManagementDonorsPage() {
         }
       />
 
+      <AdminFlowGuide
+        title="مسار متابعة المتبرع للمشاريع"
+        steps={[
+          "أنشئ المتبرع هنا (فرد / جمعية / مؤسسة / جهة) وسجّل بريده الإلكتروني بدقة",
+          "اربطه كمتبرع رئيسي أو إضافي من تفاصيل المشروع التشغيلي",
+          "المتبرع يدخل /portal ويسجّل عبر Google — يُربط تلقائياً ويُضاف لفريق المشروع",
+          "بديل: الدخول برقم المشروع أو اسم المستخدم والرمز (لمن لا يستخدم Google)",
+        ]}
+      />
+
       <AdminFormDialog
         open={!!editing}
         onClose={() => setEditing(null)}
@@ -137,6 +156,7 @@ export default function ManagementDonorsPage() {
           <>
             <Input
               label="الاسم / اسم الجهة"
+              placeholder={FORM_PLACEHOLDERS.donor.fullName}
               value={editing.fullName}
               onChange={(e) => setEditing({ ...editing, fullName: e.target.value })}
             />
@@ -151,29 +171,35 @@ export default function ManagementDonorsPage() {
             <Input
               label="البريد الإلكتروني"
               dir="ltr"
+              placeholder={FORM_PLACEHOLDERS.donor.email}
+              hint={FORM_HINTS.donor.emailMatch}
               value={editing.email}
               onChange={(e) => setEditing({ ...editing, email: e.target.value })}
             />
             <Input
               label="الهاتف"
               dir="ltr"
+              placeholder={FORM_PLACEHOLDERS.donor.phone}
               value={editing.phone}
               onChange={(e) => setEditing({ ...editing, phone: e.target.value })}
             />
             <Input
               label="المؤسسة (اختياري)"
+              placeholder={FORM_PLACEHOLDERS.donor.organization}
               value={editing.organization ?? ""}
               onChange={(e) => setEditing({ ...editing, organization: e.target.value })}
             />
             <Input
               label="الدولة"
+              placeholder={FORM_PLACEHOLDERS.donor.country}
               value={editing.country ?? ""}
               onChange={(e) => setEditing({ ...editing, country: e.target.value })}
             />
             <Select
-              label="حساب مستخدم مرتبط (لـ MyGroups)"
+              label="حساب مستخدم مرتبط (فريق المشروع)"
               value={editing.linkedUserId ?? ""}
               onChange={(linkedUserId) => setEditing({ ...editing, linkedUserId })}
+              placeholder="اختر مستخدماً للربط بـ MyGroups"
               options={[
                 { value: "", label: "— بدون ربط —" },
                 ...allUsers.map((u) => ({
@@ -182,17 +208,20 @@ export default function ManagementDonorsPage() {
                 })),
               ]}
             />
+            <p className="text-xs text-muted-foreground">{FORM_HINTS.donor.linkedUser}</p>
             <Input
               label="اسم مستخدم البوابة"
               dir="ltr"
+              placeholder={FORM_PLACEHOLDERS.donor.portalUsername}
               value={editing.portalUsername ?? ""}
               onChange={(e) => setEditing({ ...editing, portalUsername: e.target.value })}
-              hint="للدخول عبر /portal"
+              hint={FORM_HINTS.donor.portalUsername}
             />
             <div className="flex items-end gap-2">
               <Input
                 label="الرمز السري"
                 dir="ltr"
+                placeholder={FORM_PLACEHOLDERS.donor.portalPin}
                 value={editing.portalPin ?? ""}
                 onChange={(e) => setEditing({ ...editing, portalPin: e.target.value })}
                 className="flex-1"
@@ -261,6 +290,11 @@ export default function ManagementDonorsPage() {
         renderSubtitle={(item) => (
           <span className="flex flex-wrap items-center gap-3">
             <span>{item.email}</span>
+            {item.linkedUserId && (
+              <span className="rounded-full bg-brand-green/10 px-2 py-0.5 text-xs text-brand-green-dark">
+                مرتبط بـ Google
+              </span>
+            )}
             {item.portalEnabled && (
               <>
                 <button

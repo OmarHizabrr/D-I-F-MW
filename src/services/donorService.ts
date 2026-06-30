@@ -1,5 +1,6 @@
 import { getDocs, query, where } from "firebase/firestore";
 import FirestoreApi, { type UserMeta } from "@/services/firestoreApi";
+import { normalizeDonorEmail } from "@/lib/donor-email";
 import { syncPortalAccess } from "@/services/portalAccessService";
 import type { Donor } from "@/types/project-management";
 
@@ -32,6 +33,7 @@ export async function createDonor(
     docRef: api.getDonorDoc(id),
     data: {
       ...data,
+      email: normalizeDonorEmail(data.email),
       id,
       qrCodeToken,
       secureLinkToken,
@@ -70,9 +72,14 @@ export async function updateDonor(
   user: UserMeta
 ): Promise<void> {
   const { id: _id, ...rest } = data;
+  const patch = {
+    ...rest,
+    ...(rest.email !== undefined ? { email: normalizeDonorEmail(rest.email) } : {}),
+    updatedAt: new Date().toISOString(),
+  };
   await api.updateData({
     docRef: api.getDonorDoc(donorId),
-    data: { ...rest, updatedAt: new Date().toISOString() },
+    data: patch,
     userData: user,
   });
   if (rest.fullName !== undefined || rest.portalUsername !== undefined || rest.portalPin !== undefined || rest.portalEnabled !== undefined) {

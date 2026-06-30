@@ -39,6 +39,7 @@ type PasswordTarget = { user: AppUser; label: string } | null;
 const roleOptions: { value: UserRole; label: string }[] = [
   { value: "superadmin", label: "مدير عام" },
   { value: "admin", label: "مدير" },
+  { value: "donor", label: "متبرع" },
   { value: "member", label: "عضو" },
 ];
 

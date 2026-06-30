@@ -204,7 +204,9 @@ service cloud.firestore {
     }
 
     match /donors/{donorId} {
-      allow get: if isAdmin() || resource.data.get('status', 'active') == 'active';
+      allow get: if isAdmin() ||
+        resource.data.get('status', 'active') == 'active' ||
+        (isSignedIn() && resource.data.get('linkedUserId', '') == request.auth.uid);
       allow list: if isAdmin();
       allow write: if isAdmin();
     }

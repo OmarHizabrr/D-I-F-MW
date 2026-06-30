@@ -1,9 +1,14 @@
 import type { UserMeta } from "@/services/firestoreApi";
-import { createOrgProject, updateOrgProject } from "@/services/projectManagementService";
-import { createGroup } from "@/services/groupService";
+import {
+  createOrgProject,
+  listOrgProjects,
+  updateOrgProject,
+} from "@/services/projectManagementService";
+import { createGroup, getGroupByProjectId } from "@/services/groupService";
 import { addGroupMember, getGroupMember } from "@/services/memberService";
 import { getDonor } from "@/services/donorService";
 import { sendNotification } from "@/services/notificationService";
+import { projectBelongsToDonor } from "@/lib/donor-project-utils";
 import type { OrgProject } from "@/types/project-management";
 
 export type CreateProjectInput = Omit<
@@ -72,6 +77,20 @@ export async function createProjectWithGroup(
     );
   }
 
+  for (const donorId of input.additionalDonorIds ?? []) {
+    await assignDonorToProject(
+      projectId,
+      groupId,
+      donorId,
+      {
+        projectName: input.projectName,
+        projectNumber: input.projectNumber,
+        groupName: `فريق ${input.projectName}`,
+      },
+      user
+    );
+  }
+
   return { projectId, groupId };
 }
 
@@ -110,4 +129,70 @@ export async function assignDonorToProject(
     projectId,
     groupId,
   });
+}
+
+/** مزامنة المتبرع المرتبط بـ Google مع كل مشاريعه في MyGroups */
+export async function syncDonorToAllProjects(
+  donorId: string,
+  actor: UserMeta
+): Promise<void> {
+  const donor = await getDonor(donorId);
+  if (!donor?.linkedUserId) return;
+
+  const projects = await listOrgProjects();
+  const groupNames = new Map<string, string>();
+
+  for (const project of projects) {
+    if (!projectBelongsToDonor(project, donorId) || !project.groupId) continue;
+
+    let groupName = groupNames.get(project.groupId);
+    if (!groupName) {
+      const group = await getGroupByProjectId(project.id);
+      groupName = group?.groupName ?? `فريق ${project.projectName}`;
+      groupNames.set(project.groupId, groupName);
+    }
+
+    await assignDonorToProject(
+      project.id,
+      project.groupId,
+      donorId,
+      {
+        projectName: project.projectName,
+        projectNumber: project.projectNumber,
+        groupName,
+      },
+      actor
+    );
+  }
+}
+
+/** ربط كل متبرعي المشروع (رئيسي + إضافيون) بفريق العمل */
+export async function syncProjectDonorsToGroup(
+  project: Pick<
+    OrgProject,
+    "id" | "groupId" | "projectName" | "projectNumber" | "donorId" | "additionalDonorIds"
+  >,
+  groupName: string,
+  actor: UserMeta
+): Promise<void> {
+  if (!project.groupId) return;
+
+  const donorIds = [
+    ...(project.donorId ? [project.donorId] : []),
+    ...(project.additionalDonorIds ?? []),
+  ];
+
+  for (const donorId of donorIds) {
+    await assignDonorToProject(
+      project.id,
+      project.groupId,
+      donorId,
+      {
+        projectName: project.projectName,
+        projectNumber: project.projectNumber,
+        groupName,
+      },
+      actor
+    );
+  }
 }

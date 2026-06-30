@@ -27,9 +27,11 @@ import {
 } from "@/services/memberService";
 import { listDonors } from "@/services/donorService";
 import { getProjectFinancial, saveProjectFinancial } from "@/services/financialService";
-import { assignDonorToProject } from "@/services/projectOrchestrationService";
+import { syncProjectDonorsToGroup } from "@/services/projectOrchestrationService";
 import FirestoreApi from "@/services/firestoreApi";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
+import { AdminFlowGuide } from "@/components/admin/AdminFlowGuide";
+import { FORM_PLACEHOLDERS, FORM_HINTS } from "@/lib/admin/form-placeholders";
 import { AdminFormDialog } from "@/components/admin/AdminFormDialog";
 import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
 import { FileUploadField } from "@/components/admin/FileUploadField";
@@ -125,7 +127,7 @@ export default function ProjectDetailPage() {
     spendRatio: 0,
     currency: "USD",
   });
-  const [prevDonorId, setPrevDonorId] = useState("");
+  const [pickAdditionalDonor, setPickAdditionalDonor] = useState("");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [addMemberOpen, setAddMemberOpen] = useState(false);
@@ -144,7 +146,6 @@ export default function ProjectDetailPage() {
       return;
     }
     setProject(p);
-    setPrevDonorId(p.donorId ?? "");
     const g = await getGroupByProjectId(projectId);
     setGroup(g);
     if (g) {
@@ -178,7 +179,14 @@ export default function ProjectDetailPage() {
   }, [projectId, router]);
 
   useEffect(() => {
-    loadAll();
+    let cancelled = false;
+    void (async () => {
+      await loadAll();
+      if (cancelled) return;
+    })();
+    return () => {
+      cancelled = true;
+    };
   }, [loadAll]);
 
   async function handleSaveOverview() {
@@ -186,20 +194,18 @@ export default function ProjectDetailPage() {
     setSaving(true);
     try {
       await updateOrgProject(projectId, project, userMeta);
-      if (project.donorId && project.donorId !== prevDonorId) {
-        await assignDonorToProject(
-          projectId,
-          group.id,
-          project.donorId,
-          {
-            projectName: project.projectName,
-            projectNumber: project.projectNumber,
-            groupName: group.groupName,
-          },
-          userMeta
-        );
-        setPrevDonorId(project.donorId);
-      }
+      await syncProjectDonorsToGroup(
+        {
+          id: projectId,
+          groupId: group.id,
+          projectName: project.projectName,
+          projectNumber: project.projectNumber,
+          donorId: project.donorId,
+          additionalDonorIds: project.additionalDonorIds,
+        },
+        group.groupName,
+        userMeta
+      );
       await loadAll();
     } finally {
       setSaving(false);
@@ -421,6 +427,16 @@ export default function ProjectDetailPage() {
         previewHref={project.publishedOnSite ? `/projects/${project.id}` : null}
       />
 
+      <AdminFlowGuide
+        title="متابعة المتبرع لهذا المشروع"
+        steps={[
+          "عيّن متبرعاً رئيسياً و/أو متبرعين إضافيين من تبويب «نظرة عامة»",
+          "المتبرع يسجّل عبر Google في /portal — يُربط تلقائياً إذا طابق بريده",
+          "عند الربط يُضاف للفريق بدور Donor ويرى المشروع في بوابته",
+          "فريق العمل الداخلي يُدار من تبويب «الأعضاء»",
+        ]}
+      />
+
       <div className="mb-6 flex flex-wrap gap-2 border-b border-border-subtle pb-4">
         {TABS.map((t) => (
           <button
@@ -442,6 +458,7 @@ export default function ProjectDetailPage() {
         <Card padding="lg" className="space-y-4">
           <Input
             label="اسم المشروع"
+            placeholder={FORM_PLACEHOLDERS.project.name}
             value={project.projectName}
             onChange={(e) => setProject({ ...project, projectName: e.target.value })}
           />
@@ -459,14 +476,86 @@ export default function ProjectDetailPage() {
             onChange={(progress) => setProject({ ...project, progress })}
           />
           <Select
-            label="المتبرع"
+            label="المتبرع الرئيسي"
             value={project.donorId}
             onChange={(donorId) => setProject({ ...project, donorId })}
+            placeholder="المتبرع الذي يتابع المشروع في البوابة"
             options={[
               { value: "", label: "— بدون متبرع —" },
               ...donors.map((d) => ({ value: d.id, label: d.fullName })),
             ]}
           />
+          <p className="text-xs text-muted-foreground">{FORM_HINTS.project.donorPrimary}</p>
+          {project.donorId && (() => {
+            const primary = donors.find((d) => d.id === project.donorId);
+            if (!primary) return null;
+            return (
+              <p className="text-xs text-muted-foreground">
+                {primary.email}
+                {primary.linkedUserId ? " · مرتبط بـ Google" : " · لم يسجّل عبر Google بعد"}
+              </p>
+            );
+          })()}
+
+          <div className="rounded-xl border border-border-subtle p-4 space-y-3">
+            <p className="text-sm font-medium">متبرعون إضافيون للمتابعة</p>
+            <p className="text-xs text-muted-foreground">{FORM_HINTS.project.additionalDonors}</p>
+            <Select
+              label="إضافة متبرع"
+              value={pickAdditionalDonor}
+              onChange={(donorId) => {
+                if (!donorId) return;
+                const current = project.additionalDonorIds ?? [];
+                if (donorId === project.donorId || current.includes(donorId)) return;
+                setProject({
+                  ...project,
+                  additionalDonorIds: [...current, donorId],
+                });
+                setPickAdditionalDonor("");
+              }}
+              placeholder="اختر متبرعاً شريكاً"
+              options={donors
+                .filter(
+                  (d) =>
+                    d.id !== project.donorId &&
+                    !(project.additionalDonorIds ?? []).includes(d.id)
+                )
+                .map((d) => ({ value: d.id, label: d.fullName }))}
+            />
+            {(project.additionalDonorIds ?? []).length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                {(project.additionalDonorIds ?? []).map((id) => {
+                  const d = donors.find((x) => x.id === id);
+                  return (
+                    <span
+                      key={id}
+                      className="inline-flex items-center gap-2 rounded-full bg-brand-green/10 px-3 py-1 text-sm"
+                    >
+                      {d?.fullName ?? id}
+                      {d?.linkedUserId && (
+                        <span className="text-xs text-brand-green-dark">Google</span>
+                      )}
+                      <button
+                        type="button"
+                        className="text-muted-foreground hover:text-destructive"
+                        onClick={() =>
+                          setProject({
+                            ...project,
+                            additionalDonorIds: (project.additionalDonorIds ?? []).filter(
+                              (x) => x !== id
+                            ),
+                          })
+                        }
+                      >
+                        ×
+                      </button>
+                    </span>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
           <Select
             label="البرنامج (تصفية الموقع)"
             value={project.programId ?? ""}
@@ -489,6 +578,7 @@ export default function ProjectDetailPage() {
           <Input
             label="ترتيب العرض"
             type="number"
+            placeholder={FORM_PLACEHOLDERS.project.order}
             value={project.order ?? 0}
             onChange={(e) => setProject({ ...project, order: Number(e.target.value) })}
           />
@@ -527,6 +617,8 @@ export default function ProjectDetailPage() {
 
       {tab === "members" && group && (
         <div>
+          <p className="mb-4 text-sm text-muted-foreground">{FORM_HINTS.project.membersTab}</p>
+          <p className="mb-4 text-sm text-muted-foreground">{FORM_HINTS.project.membersTab}</p>
           <div className="mb-4 flex justify-end">
             <Button onClick={() => setAddMemberOpen(true)}>
               <Plus className="h-4 w-4" />
@@ -607,6 +699,7 @@ export default function ProjectDetailPage() {
                     )}
                     <Input
                       label="عنوان الصورة"
+                      placeholder={FORM_PLACEHOLDERS.project.photoTitle}
                       value={photo.title}
                       onChange={(e) => patchPhoto(phase, photo.id, { title: e.target.value })}
                     />
@@ -635,6 +728,7 @@ export default function ProjectDetailPage() {
               </div>
               <Input
                 label="عنوان الصور الجديدة"
+            placeholder={FORM_PLACEHOLDERS.project.photoTitle}
                 value={newPhotoTitle}
                 onChange={(e) => setNewPhotoTitle(e.target.value)}
                 className="mb-2"
@@ -670,6 +764,7 @@ export default function ProjectDetailPage() {
         <div>
           <Input
             label="عنوان الفيديو الجديد"
+            placeholder={FORM_PLACEHOLDERS.project.videoTitle}
             value={newVideoTitle}
             onChange={(e) => setNewVideoTitle(e.target.value)}
             className="mb-3"
@@ -701,11 +796,13 @@ export default function ProjectDetailPage() {
               <Card key={v.id} padding="md" className="space-y-3">
                 <Input
                   label="عنوان الفيديو"
+                  placeholder={FORM_PLACEHOLDERS.project.videoTitle}
                   value={v.title}
                   onChange={(e) => patchVideo(v.id, { title: e.target.value })}
                 />
                 <Input
                   label="رابط الفيديو (ملف أو YouTube)"
+                  placeholder={FORM_PLACEHOLDERS.project.videoUrl}
                   dir="ltr"
                   value={v.video}
                   onChange={(e) => patchVideo(v.id, { video: e.target.value })}
@@ -770,6 +867,7 @@ export default function ProjectDetailPage() {
               <Card key={entry.id} padding="md" className="space-y-3">
                 <Input
                   label="اسم المرحلة"
+                  placeholder={FORM_PLACEHOLDERS.project.timelinePhase}
                   value={entry.phase}
                   onChange={(e) => patchTimelineEntry(entry.id, { phase: e.target.value })}
                 />
@@ -844,6 +942,7 @@ export default function ProjectDetailPage() {
           />
           <Input
             label="العنوان"
+            placeholder={FORM_PLACEHOLDERS.project.locationAddress}
             value={location.address}
             onChange={(e) => setLocation({ ...location, address: e.target.value })}
           />

@@ -10,8 +10,12 @@ export interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
 }
 
 export const Input = forwardRef<HTMLInputElement, InputProps>(
-  ({ className, label, error, hint, id, ...props }, ref) => {
+  ({ className, label, error, hint, id, placeholder, type, ...props }, ref) => {
     const inputId = id || label?.replace(/\s/g, "-").toLowerCase();
+    const skipAutoPlaceholder =
+      type === "password" || type === "date" || type === "number" || type === "email";
+    const resolvedPlaceholder =
+      placeholder ?? (!skipAutoPlaceholder && label ? `مثال: ${label}` : undefined);
 
     return (
       <div className="flex w-full flex-col gap-1.5">
@@ -34,7 +38,9 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
             error && "border-destructive focus:border-destructive focus:ring-destructive/20",
             className
           )}
+          type={type}
           {...props}
+          placeholder={resolvedPlaceholder}
         />
         {error && <p className="text-xs text-destructive">{error}</p>}
         {hint && !error && <p className="text-xs text-muted-foreground">{hint}</p>}

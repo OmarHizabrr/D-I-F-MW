@@ -6,6 +6,12 @@ import { cn } from "@/lib/utils";
 import type { LocalizedString, LocaleCode } from "@/types/cms";
 import { emptyLocalized } from "@/types/cms";
 
+const LOCALE_PLACEHOLDERS: Record<LocaleCode, string> = {
+  ar: "مثال: عنوان بالعربية",
+  en: "Example: title in English",
+  ny: "Chitsanzo: mutu mu Chichewa",
+};
+
 const LOCALES: { code: LocaleCode; label: string }[] = [
   { code: "ar", label: "عربي" },
   { code: "en", label: "EN" },
@@ -29,6 +35,7 @@ export function LocalizedInput({
 }: LocalizedInputProps) {
   const [activeLocale, setActiveLocale] = useState<LocaleCode>("ar");
   const current = value ?? emptyLocalized();
+  const resolvedPlaceholder = placeholder ?? LOCALE_PLACEHOLDERS[activeLocale];
 
   function handleChange(locale: LocaleCode, text: string) {
     onChange({ ...current, [locale]: text });
@@ -60,7 +67,7 @@ export function LocalizedInput({
         <textarea
           value={current[activeLocale]}
           onChange={(e) => handleChange(activeLocale, e.target.value)}
-          placeholder={placeholder}
+          placeholder={resolvedPlaceholder}
           rows={4}
           className={cn(
             "w-full rounded-2xl border border-border bg-input-bg px-4 py-3 text-sm text-foreground",
@@ -72,7 +79,7 @@ export function LocalizedInput({
         <Input
           value={current[activeLocale]}
           onChange={(e) => handleChange(activeLocale, e.target.value)}
-          placeholder={placeholder}
+          placeholder={resolvedPlaceholder}
         />
       )}
     </div>

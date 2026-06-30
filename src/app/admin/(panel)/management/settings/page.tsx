@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import { Spinner } from "@/components/ui/Spinner";
 import { Card } from "@/components/ui/Card";
+import { FORM_PLACEHOLDERS } from "@/lib/admin/form-placeholders";
 import type { SystemSettings } from "@/types/project-management";
 
 export default function ManagementSettingsPage() {
@@ -55,12 +56,14 @@ export default function ManagementSettingsPage() {
       <Card padding="lg" className="max-w-xl space-y-4">
         <Input
           label="اسم المؤسسة"
+          placeholder={FORM_PLACEHOLDERS.settings.organizationName}
           value={settings.organizationName}
           onChange={(e) => setSettings({ ...settings, organizationName: e.target.value })}
         />
         <Input
           label="العملة الافتراضية"
           dir="ltr"
+          placeholder={FORM_PLACEHOLDERS.settings.defaultCurrency}
           value={settings.defaultCurrency}
           onChange={(e) => setSettings({ ...settings, defaultCurrency: e.target.value })}
         />

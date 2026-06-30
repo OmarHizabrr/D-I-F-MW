@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Plus } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
@@ -9,7 +9,9 @@ import { createProjectWithGroup } from "@/services/projectOrchestrationService";
 import { listDonors } from "@/services/donorService";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { AdminFormDialog } from "@/components/admin/AdminFormDialog";
+import { AdminFlowGuide } from "@/components/admin/AdminFlowGuide";
 import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
+import { FORM_PLACEHOLDERS, FORM_HINTS } from "@/lib/admin/form-placeholders";
 import { AdminItemList } from "@/components/admin/AdminItemList";
 import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
@@ -42,6 +44,7 @@ function newProject(): Omit<OrgProject, "id" | "createdAt" | "updatedAt" | "crea
     publishedOnSite: false,
     featuredOnHome: false,
     showDonorPublic: false,
+    additionalDonorIds: [],
     order: 0,
   };
 }
@@ -57,16 +60,19 @@ export default function ManagementProjectsPage() {
   const [deleteTarget, setDeleteTarget] = useState<OrgProject | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
-  const loadItems = useCallback(async () => {
-    const [projects, donorList] = await Promise.all([listOrgProjects(), listDonors()]);
-    setItems(projects);
-    setDonors(donorList);
-    setLoading(false);
-  }, []);
-
   useEffect(() => {
-    loadItems();
-  }, [loadItems]);
+    let cancelled = false;
+    void (async () => {
+      const [projects, donorList] = await Promise.all([listOrgProjects(), listDonors()]);
+      if (cancelled) return;
+      setItems(projects);
+      setDonors(donorList);
+      setLoading(false);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   async function handleSave() {
     if (!editing || !user) return;
@@ -77,7 +83,9 @@ export default function ManagementProjectsPage() {
         displayName: user.email ?? undefined,
       });
       setEditing(null);
-      await loadItems();
+      const [projects, donorList] = await Promise.all([listOrgProjects(), listDonors()]);
+      setItems(projects);
+      setDonors(donorList);
     } finally {
       setSaving(false);
     }
@@ -89,7 +97,7 @@ export default function ManagementProjectsPage() {
     try {
       await deleteOrgProject(deleteTarget.id);
       setDeleteTarget(null);
-      await loadItems();
+      setItems(await listOrgProjects());
     } finally {
       setDeletingId(null);
     }
@@ -116,6 +124,17 @@ export default function ManagementProjectsPage() {
         }
       />
 
+      <AdminFlowGuide
+        title="أين يتابع المتبرع مشاريعه؟"
+        steps={[
+          "إنشاء متبرع من «إدارة المتبرعون» مع بريده الإلكتروني الصحيح",
+          "ربط متبرع رئيسي بالمشروع هنا أو من تفاصيل المشروع",
+          "المتبرع يدخل /portal عبر Google — يُربط تلقائياً ويرى مشاريعه",
+          "فريق العمل والمشرفون يُضافون من تبويب «الأعضاء» داخل المشروع",
+          "الزوار يرون المشروع المنشور على /projects عند تفعيل «نشر على الموقع»",
+        ]}
+      />
+
       <AdminFormDialog
         open={!!editing}
         onClose={() => setEditing(null)}
@@ -127,40 +146,49 @@ export default function ManagementProjectsPage() {
           <>
             <Input
               label="رقم المشروع"
+              placeholder={FORM_PLACEHOLDERS.project.number}
+              dir="ltr"
               value={editing.projectNumber}
               onChange={(e) => setEditing({ ...editing, projectNumber: e.target.value })}
             />
             <Input
               label="اسم المشروع"
+              placeholder={FORM_PLACEHOLDERS.project.name}
               value={editing.projectName}
               onChange={(e) => setEditing({ ...editing, projectName: e.target.value })}
             />
             <Input
               label="نوع المشروع"
+              placeholder={FORM_PLACEHOLDERS.project.type}
               value={editing.projectType}
               onChange={(e) => setEditing({ ...editing, projectType: e.target.value })}
             />
             <Select
-              label="المتبرع"
+              label="المتبرع الرئيسي"
               value={editing.donorId}
               onChange={(donorId) => setEditing({ ...editing, donorId })}
+              placeholder="اختر المتبرع الداعم الرئيسي"
               options={[
                 { value: "", label: "— بدون متبرع —" },
                 ...donors.map((d) => ({ value: d.id, label: d.fullName })),
               ]}
             />
+            <p className="text-xs text-muted-foreground">{FORM_HINTS.project.donorPrimary}</p>
             <Input
               label="الدولة"
+              placeholder={FORM_PLACEHOLDERS.project.country}
               value={editing.country}
               onChange={(e) => setEditing({ ...editing, country: e.target.value })}
             />
             <Input
               label="المدينة"
+              placeholder={FORM_PLACEHOLDERS.project.city}
               value={editing.city}
               onChange={(e) => setEditing({ ...editing, city: e.target.value })}
             />
             <Input
               label="العنوان"
+              placeholder={FORM_PLACEHOLDERS.project.address}
               value={editing.address}
               onChange={(e) => setEditing({ ...editing, address: e.target.value })}
             />
@@ -193,6 +221,7 @@ export default function ManagementProjectsPage() {
             />
             <Input
               label="الوصف"
+              placeholder={FORM_PLACEHOLDERS.project.description}
               value={editing.description}
               onChange={(e) => setEditing({ ...editing, description: e.target.value })}
             />
