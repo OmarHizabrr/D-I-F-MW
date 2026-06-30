@@ -73,7 +73,7 @@ const TABS = [
   { id: "overview", label: "نظرة عامة" },
   { id: "members", label: "الأعضاء" },
   { id: "photos", label: "الصور" },
-  { id: "videos", label: "الفيديو" },
+  { id: "videos", label: "الفيديوهات" },
   { id: "updates", label: "التحديثات" },
   { id: "timeline", label: "الجدول الزمني" },
   { id: "location", label: "الموقع" },
@@ -132,6 +132,8 @@ export default function ProjectDetailPage() {
   const [newMemberUserId, setNewMemberUserId] = useState("");
   const [newMemberRole, setNewMemberRole] = useState<ProjectRole>("Engineer");
   const [deleteMemberTarget, setDeleteMemberTarget] = useState<GroupMember | null>(null);
+  const [newVideoTitle, setNewVideoTitle] = useState("فيديو جديد");
+  const [newPhotoTitle, setNewPhotoTitle] = useState("صورة جديدة");
 
   const userMeta = user ? { uid: user.uid, displayName: user.email ?? undefined } : null;
 
@@ -276,13 +278,14 @@ export default function ProjectDetailPage() {
   async function handleAddTimeline() {
     if (!userMeta) return;
     const phase = prompt("اسم المرحلة:") ?? "";
+    if (!phase.trim()) return;
     await saveProjectSubItem(
       projectId,
       PROJECT_SUBCOLLECTIONS.timeline,
       {
         phase,
-        startDate: new Date().toISOString().slice(0, 10),
-        endDate: "",
+        startDate: project?.startDate || new Date().toISOString().slice(0, 10),
+        endDate: project?.expectedEndDate || "",
         status: "pending",
         progress: 0,
       },
@@ -290,6 +293,88 @@ export default function ProjectDetailPage() {
       "timeline"
     );
     await loadAll();
+  }
+
+  function patchTimelineEntry(id: string, patch: Partial<ProjectTimelineEntry>) {
+    setTimeline((prev) => prev.map((t) => (t.id === id ? { ...t, ...patch } : t)));
+  }
+
+  async function handleSaveTimelineEntry(entry: ProjectTimelineEntry) {
+    if (!userMeta) return;
+    setSaving(true);
+    try {
+      await saveProjectSubItem(
+        projectId,
+        PROJECT_SUBCOLLECTIONS.timeline,
+        entry,
+        userMeta,
+        "timeline"
+      );
+      await loadAll();
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function handleDeleteTimelineEntry(entryId: string) {
+    if (!userMeta || !confirm("حذف هذه المرحلة؟")) return;
+    setSaving(true);
+    try {
+      await deleteProjectSubItem(projectId, PROJECT_SUBCOLLECTIONS.timeline, entryId);
+      await loadAll();
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  function patchPhoto(phase: PhotoPhase, id: string, patch: Partial<ProjectPhoto>) {
+    setPhotos((prev) => ({
+      ...prev,
+      [phase]: prev[phase].map((p) => (p.id === id ? { ...p, ...patch } : p)),
+    }));
+  }
+
+  async function handleSavePhoto(phase: PhotoPhase, photo: ProjectPhoto) {
+    if (!userMeta) return;
+    setSaving(true);
+    try {
+      await saveProjectPhoto(projectId, phase, photo, userMeta);
+      await loadAll();
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  function patchVideo(id: string, patch: Partial<ProjectVideo>) {
+    setVideos((prev) => prev.map((v) => (v.id === id ? { ...v, ...patch } : v)));
+  }
+
+  async function handleSaveVideo(video: ProjectVideo) {
+    if (!userMeta) return;
+    setSaving(true);
+    try {
+      await saveProjectSubItem(
+        projectId,
+        PROJECT_SUBCOLLECTIONS.videos,
+        video,
+        userMeta,
+        "video"
+      );
+      await loadAll();
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function handleDeleteVideo(videoId: string) {
+    if (!userMeta || !confirm("حذف هذا الفيديو؟")) return;
+    setSaving(true);
+    try {
+      await deleteProjectSubItem(projectId, PROJECT_SUBCOLLECTIONS.videos, videoId);
+      await loadAll();
+    } finally {
+      setSaving(false);
+    }
   }
 
   async function handleSaveLocation() {
@@ -326,22 +411,14 @@ export default function ProjectDetailPage() {
         title={project.projectName}
         description={`${project.projectNumber} · ${PROJECT_STATUS_LABELS[project.status]}`}
         actions={
-          <div className="flex flex-wrap gap-2">
-            {project.publishedOnSite && (
-              <Link href={`/projects/${project.id}`} target="_blank">
-                <Button variant="outline" size="sm">
-                  عرض على الموقع
-                </Button>
-              </Link>
-            )}
-            <Link href="/admin/management/projects">
-              <Button variant="outline">
-                <ArrowRight className="h-4 w-4" />
-                العودة
-              </Button>
-            </Link>
-          </div>
+          <Link href="/admin/management/projects">
+            <Button variant="outline">
+              <ArrowRight className="h-4 w-4" />
+              العودة
+            </Button>
+          </Link>
         }
+        previewHref={project.publishedOnSite ? `/projects/${project.id}` : null}
       />
 
       <div className="mb-6 flex flex-wrap gap-2 border-b border-border-subtle pb-4">
@@ -431,7 +508,7 @@ export default function ProjectDetailPage() {
               onChange={(e) => setProject({ ...project, featuredOnHome: e.target.checked })}
               className="h-4 w-4 rounded border-border text-brand-green"
             />
-            إبراز في الصفحة الرئيسية
+            إبراز في صفحة أعمالنا
           </label>
           <label className="flex items-center gap-2 text-sm">
             <input
@@ -440,7 +517,7 @@ export default function ProjectDetailPage() {
               onChange={(e) => setProject({ ...project, showDonorPublic: e.target.checked })}
               className="h-4 w-4 rounded border-border text-brand-green"
             />
-            إظهار اسم المتبرع على الموقع
+            إظهار المتبرع والدولة على الموقع (مع أيقونة حسب النوع: فرد / جمعية / مؤسسة / جهة)
           </label>
           <Button loading={saving} onClick={handleSaveOverview}>
             حفظ التغييرات
@@ -528,31 +605,56 @@ export default function ProjectDetailPage() {
                       // eslint-disable-next-line @next/next/no-img-element
                       <img src={photo.image} alt={photo.title} className="mb-2 h-32 w-full rounded-lg object-cover" />
                     )}
-                    <p className="text-sm font-medium">{photo.title}</p>
-                    <Button
-                      variant="destructive"
-                      size="sm"
-                      className="mt-2"
-                      onClick={async () => {
-                        await deleteProjectPhoto(projectId, phase, photo.id);
-                        await loadAll();
-                      }}
-                    >
-                      حذف
-                    </Button>
+                    <Input
+                      label="عنوان الصورة"
+                      value={photo.title}
+                      onChange={(e) => patchPhoto(phase, photo.id, { title: e.target.value })}
+                    />
+                    <div className="mt-2 flex gap-2">
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        loading={saving}
+                        onClick={() => handleSavePhoto(phase, photo)}
+                      >
+                        حفظ
+                      </Button>
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        onClick={async () => {
+                          await deleteProjectPhoto(projectId, phase, photo.id);
+                          await loadAll();
+                        }}
+                      >
+                        حذف
+                      </Button>
+                    </div>
                   </Card>
                 ))}
               </div>
+              <Input
+                label="عنوان الصور الجديدة"
+                value={newPhotoTitle}
+                onChange={(e) => setNewPhotoTitle(e.target.value)}
+                className="mb-2"
+              />
               <FileUploadField
-                label={`رفع صورة — ${phase}`}
+                label={`رفع صور — ${phase} (يمكن اختيار أكثر من صورة)`}
                 value=""
                 folder={`projects/${projectId}/photos/${phase}`}
+                multiple
                 onChange={async (url) => {
                   if (!url || !userMeta) return;
                   await saveProjectPhoto(
                     projectId,
                     phase,
-                    { title: "صورة جديدة", image: url, description: "", uploadedBy: userMeta.uid! },
+                    {
+                      title: newPhotoTitle.trim() || "صورة جديدة",
+                      image: url,
+                      description: "",
+                      uploadedBy: userMeta.uid!,
+                    },
                     userMeta
                   );
                   await loadAll();
@@ -566,30 +668,69 @@ export default function ProjectDetailPage() {
 
       {tab === "videos" && (
         <div>
+          <Input
+            label="عنوان الفيديو الجديد"
+            value={newVideoTitle}
+            onChange={(e) => setNewVideoTitle(e.target.value)}
+            className="mb-3"
+          />
           <FileUploadField
-            label="رفع فيديو"
+            label="رفع فيديو (يمكن اختيار أكثر من فيديو أو رابط YouTube لاحقاً)"
             value=""
             folder={`projects/${projectId}/videos`}
+            multiple
+            accept="video/*,video/mp4,video/webm,.mp4,.webm"
             onChange={async (url) => {
               if (!url || !userMeta) return;
               await saveProjectSubItem(
                 projectId,
                 PROJECT_SUBCOLLECTIONS.videos,
-                { title: "فيديو جديد", video: url, uploadedBy: userMeta.uid },
+                {
+                  title: newVideoTitle.trim() || "فيديو جديد",
+                  video: url,
+                  uploadedBy: userMeta.uid,
+                },
                 userMeta,
                 "video"
               );
               await loadAll();
             }}
-            accept="video/*"
           />
-          <div className="mt-4 space-y-2">
+          <div className="mt-4 space-y-3">
             {videos.map((v) => (
-              <Card key={v.id} padding="md">
-                <p className="font-medium">{v.title}</p>
-                <a href={v.video} target="_blank" rel="noreferrer" className="text-sm text-brand-green">
-                  عرض الفيديو
-                </a>
+              <Card key={v.id} padding="md" className="space-y-3">
+                <Input
+                  label="عنوان الفيديو"
+                  value={v.title}
+                  onChange={(e) => patchVideo(v.id, { title: e.target.value })}
+                />
+                <Input
+                  label="رابط الفيديو (ملف أو YouTube)"
+                  dir="ltr"
+                  value={v.video}
+                  onChange={(e) => patchVideo(v.id, { video: e.target.value })}
+                />
+                <div className="flex flex-wrap gap-2">
+                  <Button size="sm" loading={saving} onClick={() => handleSaveVideo(v)}>
+                    حفظ
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="destructive"
+                    loading={saving}
+                    onClick={() => handleDeleteVideo(v.id)}
+                  >
+                    حذف
+                  </Button>
+                  <a
+                    href={v.video}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center text-sm text-brand-green"
+                  >
+                    معاينة
+                  </a>
+                </div>
               </Card>
             ))}
           </div>
@@ -616,19 +757,80 @@ export default function ProjectDetailPage() {
 
       {tab === "timeline" && (
         <div>
+          <p className="mb-4 text-sm text-muted-foreground">
+            يعرض على الموقع: تاريخ البداية، المدة المتوقعة، المرحلة الحالية، وتاريخ التسليم —
+            بالإضافة إلى المراحل التفصيلية أدناه.
+          </p>
           <Button className="mb-4" onClick={handleAddTimeline}>
             <Plus className="h-4 w-4" />
             مرحلة جديدة
           </Button>
-          <div className="space-y-3">
-            {timeline.map((t) => (
-              <Card key={t.id} padding="md">
-                <p className="font-semibold">{t.phase}</p>
-                <p className="text-sm text-muted-foreground">
-                  {t.startDate} → {t.endDate || "—"} · {t.progress}%
-                </p>
+          <div className="space-y-4">
+            {timeline.map((entry) => (
+              <Card key={entry.id} padding="md" className="space-y-3">
+                <Input
+                  label="اسم المرحلة"
+                  value={entry.phase}
+                  onChange={(e) => patchTimelineEntry(entry.id, { phase: e.target.value })}
+                />
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <Input
+                    label="تاريخ البداية"
+                    type="date"
+                    dir="ltr"
+                    value={entry.startDate}
+                    onChange={(e) => patchTimelineEntry(entry.id, { startDate: e.target.value })}
+                  />
+                  <Input
+                    label="تاريخ النهاية"
+                    type="date"
+                    dir="ltr"
+                    value={entry.endDate}
+                    onChange={(e) => patchTimelineEntry(entry.id, { endDate: e.target.value })}
+                  />
+                </div>
+                <Select
+                  label="الحالة"
+                  value={entry.status}
+                  onChange={(status) =>
+                    patchTimelineEntry(entry.id, {
+                      status: status as ProjectTimelineEntry["status"],
+                    })
+                  }
+                  options={[
+                    { value: "pending", label: "قادمة" },
+                    { value: "in_progress", label: "جارية" },
+                    { value: "completed", label: "مكتملة" },
+                    { value: "delayed", label: "متأخرة" },
+                  ]}
+                />
+                <RangeSlider
+                  label="نسبة التقدم"
+                  value={entry.progress}
+                  onChange={(progress) => patchTimelineEntry(entry.id, { progress })}
+                />
+                <div className="flex flex-wrap gap-2">
+                  <Button size="sm" loading={saving} onClick={() => handleSaveTimelineEntry(entry)}>
+                    حفظ المرحلة
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="destructive"
+                    loading={saving}
+                    onClick={() => handleDeleteTimelineEntry(entry.id)}
+                  >
+                    حذف
+                  </Button>
+                </div>
               </Card>
             ))}
+            {timeline.length === 0 && (
+              <Card padding="lg">
+                <p className="text-center text-sm text-muted-foreground">
+                  لا توجد مراحل بعد — أضف مراحل لعرض الجدول الزمني على الموقع
+                </p>
+              </Card>
+            )}
           </div>
         </div>
       )}

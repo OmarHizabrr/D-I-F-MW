@@ -14,6 +14,7 @@ export interface FileUploadFieldProps {
   folder: string;
   accept?: string;
   hint?: string;
+  multiple?: boolean;
 }
 
 export function FileUploadField({
@@ -23,6 +24,7 @@ export function FileUploadField({
   folder,
   accept = "image/*",
   hint,
+  multiple = false,
 }: FileUploadFieldProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
@@ -42,8 +44,27 @@ export function FileUploadField({
   }
 
   function handleInputChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (file) void handleFileSelect(file);
+    const files = e.target.files;
+    if (!files?.length) return;
+    if (multiple) {
+      void (async () => {
+        setUploading(true);
+        setError(null);
+        try {
+          for (const file of Array.from(files)) {
+            const url = await uploadFile(file, folder);
+            onChange(url);
+          }
+        } catch {
+          setError("فشل رفع أحد الملفات. حاول مرة أخرى.");
+        } finally {
+          setUploading(false);
+        }
+      })();
+    } else {
+      const file = files[0];
+      if (file) void handleFileSelect(file);
+    }
     e.target.value = "";
   }
 
@@ -57,6 +78,7 @@ export function FileUploadField({
         ref={inputRef}
         type="file"
         accept={accept}
+        multiple={multiple}
         className="hidden"
         onChange={handleInputChange}
       />

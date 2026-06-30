@@ -22,7 +22,7 @@ import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
 import { Button } from "@/components/ui/Button";
 import { Spinner } from "@/components/ui/Spinner";
-import type { Donor } from "@/types/project-management";
+import type { Donor, DonorKind } from "@/types/project-management";
 import type { AppUser } from "@/types/user";
 
 const api = FirestoreApi.Api;
@@ -34,12 +34,20 @@ function newDonor(): Omit<Donor, "id" | "createdAt" | "updatedAt" | "qrCodeToken
     phone: "",
     organization: "",
     country: "",
+    donorKind: "individual",
     status: "active",
     portalEnabled: true,
     portalUsername: "",
     portalPin: generatePortalPin(),
   };
 }
+
+const donorKindOptions: { value: DonorKind; label: string }[] = [
+  { value: "individual", label: "فرد" },
+  { value: "association", label: "جمعية" },
+  { value: "organization", label: "مؤسسة" },
+  { value: "entity", label: "جهة" },
+];
 
 export default function ManagementDonorsPage() {
   const { user } = useAuth();
@@ -128,9 +136,17 @@ export default function ManagementDonorsPage() {
         {editing && (
           <>
             <Input
-              label="الاسم الكامل"
+              label="الاسم / اسم الجهة"
               value={editing.fullName}
               onChange={(e) => setEditing({ ...editing, fullName: e.target.value })}
+            />
+            <Select
+              label="نوع المتبرع"
+              value={editing.donorKind ?? "individual"}
+              onChange={(donorKind) =>
+                setEditing({ ...editing, donorKind: donorKind as DonorKind })
+              }
+              options={donorKindOptions}
             />
             <Input
               label="البريد الإلكتروني"
@@ -145,9 +161,14 @@ export default function ManagementDonorsPage() {
               onChange={(e) => setEditing({ ...editing, phone: e.target.value })}
             />
             <Input
-              label="المؤسسة"
+              label="المؤسسة (اختياري)"
               value={editing.organization ?? ""}
               onChange={(e) => setEditing({ ...editing, organization: e.target.value })}
+            />
+            <Input
+              label="الدولة"
+              value={editing.country ?? ""}
+              onChange={(e) => setEditing({ ...editing, country: e.target.value })}
             />
             <Select
               label="حساب مستخدم مرتبط (لـ MyGroups)"

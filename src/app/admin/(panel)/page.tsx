@@ -24,6 +24,7 @@ import {
 import FirestoreApi from "@/services/firestoreApi";
 import { COLLECTIONS, SITE_ROOT } from "@/lib/firebase/database-structure";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
+import { AdminPreviewLink } from "@/components/admin/AdminPreviewLink";
 import { AdminSeedPanel } from "@/components/admin/AdminSeedPanel";
 import { Card, CardContent, CardTitle } from "@/components/ui/Card";
 import { Spinner } from "@/components/ui/Spinner";
@@ -193,6 +194,12 @@ export default function AdminDashboardPage() {
       <AdminPageHeader
         title="لوحة التحكم"
         description="إدارة محتوى الموقع — تهيئة، تعديل، إضافة، وحذف"
+        actions={
+          <div className="flex flex-wrap gap-2">
+            <AdminPreviewLink href="/projects" label="المشاريع" size="sm" />
+            <AdminPreviewLink href="/transparency" label="الشفافية" size="sm" />
+          </div>
+        }
       />
 
       <AdminSeedPanel />

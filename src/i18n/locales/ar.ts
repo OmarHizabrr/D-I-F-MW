@@ -66,6 +66,11 @@ const ar = {
     whyTitle: "لماذا تثق بنا",
     downloadReport: "تحميل التقرير",
     viewLicenses: "عرض التراخيص",
+    orgFinancialTitle: "مالية المشاريع المنشورة",
+    publishedProjects: "مشاريع منشورة",
+    totalDonations: "إجمالي التبرعات",
+    totalExpenses: "إجمالي المصروفات",
+    remaining: "المتبقي",
   },
 
   waysToGive: {
@@ -288,6 +293,20 @@ const ar = {
     supportedBy: "الجهة الداعمة",
     allProjects: "جميع المشاريع",
     noProjects: "لا توجد مشاريع مطابقة للتصفية الحالية",
+  },
+
+  projectDetail: {
+    timelineTitle: "الجدول الزمني",
+    startDate: "تاريخ البداية",
+    expectedDuration: "المدة المتوقعة",
+    currentPhase: "المرحلة الحالية",
+    expectedDelivery: "التاريخ المتوقع للتسليم",
+    country: "الدولة",
+    photoGallery: "معرض الصور",
+    videosTitle: "الفيديوهات",
+    photoBefore: "قبل التنفيذ",
+    photoDuring: "أثناء التنفيذ",
+    photoAfter: "بعد الإنجاز",
   },
 
   pages: {

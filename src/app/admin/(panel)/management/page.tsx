@@ -8,6 +8,7 @@ import { listGroups } from "@/services/groupService";
 import { listDonors } from "@/services/donorService";
 import { listAllNotifications } from "@/services/notificationService";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
+import { AdminPreviewLink } from "@/components/admin/AdminPreviewLink";
 import { Spinner } from "@/components/ui/Spinner";
 import { MANAGEMENT_SECTIONS } from "@/lib/firebase/database-structure";
 
@@ -81,17 +82,34 @@ export default function ManagementDashboardPage() {
       </div>
 
       <h2 className="mb-4 text-lg font-semibold">أقسام النظام</h2>
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        {MANAGEMENT_SECTIONS.filter((s) => s.id !== "mgmtDashboard").map((section) => (
-          <Link
-            key={section.id}
-            href={section.href}
-            className="flex items-center gap-3 rounded-xl border border-border-subtle bg-surface px-4 py-3 text-sm font-medium transition-colors hover:bg-brand-green/5"
-          >
-            <ArrowLeft className="h-4 w-4 text-brand-green" />
-            {section.label}
-          </Link>
-        ))}
+      <div className="mb-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        {MANAGEMENT_SECTIONS.filter((s) => s.id !== "mgmtDashboard").map((section) => {
+          const publicHref = "publicHref" in section ? section.publicHref : undefined;
+          return (
+            <div
+              key={section.id}
+              className="flex items-center justify-between gap-2 rounded-xl border border-border-subtle bg-surface px-4 py-3"
+            >
+              <Link
+                href={section.href}
+                className="flex flex-1 items-center gap-3 text-sm font-medium transition-colors hover:text-brand-green"
+              >
+                <ArrowLeft className="h-4 w-4 text-brand-green" />
+                {section.label}
+              </Link>
+              {publicHref && (
+                <AdminPreviewLink href={publicHref} size="sm" label="معاينة" />
+              )}
+            </div>
+          );
+        })}
+      </div>
+
+      <h2 className="mb-4 text-lg font-semibold">عرض على الموقع</h2>
+      <div className="flex flex-wrap gap-3">
+        <AdminPreviewLink href="/projects" label="صفحة المشاريع" />
+        <AdminPreviewLink href="/transparency" label="الشفافية" />
+        <AdminPreviewLink href="/portal" label="بوابة المتبرعين" />
       </div>
     </div>
   );

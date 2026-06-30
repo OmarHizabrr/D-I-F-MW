@@ -1,5 +1,13 @@
 import FirestoreApi, { type UserMeta } from "@/services/firestoreApi";
-import type { ProjectFinancialSummary } from "@/types/project-management";
+import {
+  listPublishedOrgProjects,
+  listProjectSubItems,
+} from "@/services/projectManagementService";
+import {
+  PROJECT_SUBCOLLECTIONS,
+  type ProjectFinancialSummary,
+  type ProjectReport,
+} from "@/types/project-management";
 
 const api = FirestoreApi.Api;
 
@@ -46,4 +54,58 @@ export async function saveProjectFinancial(
     data: summary,
     userData: user,
   });
+}
+
+export type PublishedFinancialRollup = {
+  projectCount: number;
+  donationAmount: number;
+  expenses: number;
+  remaining: number;
+  currency: string;
+};
+
+export async function getPublishedProjectsFinancialRollup(): Promise<PublishedFinancialRollup> {
+  const projects = await listPublishedOrgProjects();
+  let donationAmount = 0;
+  let expenses = 0;
+  let currency = "USD";
+
+  for (const project of projects) {
+    const fin = await getProjectFinancial(project.id);
+    donationAmount += fin.donationAmount;
+    expenses += fin.expenses;
+    if (fin.currency) currency = fin.currency;
+  }
+
+  return {
+    projectCount: projects.length,
+    donationAmount,
+    expenses,
+    remaining: donationAmount - expenses,
+    currency,
+  };
+}
+
+export type PublicProjectReport = ProjectReport & {
+  projectId: string;
+  projectName: string;
+};
+
+export async function listPublicProjectReports(): Promise<PublicProjectReport[]> {
+  const projects = await listPublishedOrgProjects();
+  const reports: PublicProjectReport[] = [];
+
+  for (const project of projects) {
+    const items = await listProjectSubItems<ProjectReport>(
+      project.id,
+      PROJECT_SUBCOLLECTIONS.reports
+    );
+    for (const item of items) {
+      if (item.file) {
+        reports.push({ ...item, projectId: project.id, projectName: project.projectName });
+      }
+    }
+  }
+
+  return reports.sort((a, b) => (b.uploadedAt ?? "").localeCompare(a.uploadedAt ?? ""));
 }

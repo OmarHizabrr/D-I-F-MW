@@ -12,11 +12,13 @@ import {
   type NavLabels,
 } from "@/lib/nav-utils";
 import { DonateButton } from "@/components/donation/DonateButton";
+import { useSystemSettings } from "@/hooks/useSystemSettings";
 import type { LocaleCode } from "@/types/cms";
 
 export function Footer() {
-  const { locale } = useLocale();
+  const { locale, t } = useLocale();
   const { footer, topbar, navItems, programs, sectionTitles, text } = useSiteContent();
+  const { portalEnabled } = useSystemSettings();
 
   const navLabels: NavLabels = {
     aboutOverview: sectionTitles.navAboutOverview,
@@ -74,7 +76,17 @@ export function Footer() {
               </div>
             </Link>
             <p className="mb-4 text-sm leading-relaxed text-white/80">{text(footer.description)}</p>
-            <DonateButton variant="primary" size="sm" />
+            <div className="flex flex-wrap gap-2">
+              <DonateButton variant="primary" size="sm" />
+              {portalEnabled && (
+                <Link
+                  href="/portal"
+                  className="inline-flex h-9 items-center justify-center rounded-xl border border-white/30 bg-white/10 px-3 text-sm font-semibold text-white transition-colors hover:bg-white/20"
+                >
+                  {t.topBar.donorPortal}
+                </Link>
+              )}
+            </div>
           </div>
 
           <div className="xl:col-span-5">

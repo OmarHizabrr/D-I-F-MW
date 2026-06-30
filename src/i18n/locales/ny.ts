@@ -66,6 +66,11 @@ const ny = {
     whyTitle: "Chifukwa chiyani mutidalirize",
     downloadReport: "Tsitsani lipoti",
     viewLicenses: "Onani zizindikiro",
+    orgFinancialTitle: "Ndalama za mapulojekiti opatulika",
+    publishedProjects: "Mapulojekiti opatulika",
+    totalDonations: "Zopereka zonse",
+    totalExpenses: "Ndalama zogwiritsidwa ntchito",
+    remaining: "Zotsala",
   },
 
   waysToGive: {
@@ -285,6 +290,20 @@ const ny = {
     supportedBy: "Wothandizira",
     allProjects: "Mapulojekiti onse",
     noProjects: "Palibe mapulojekiti omwe akugwirizana ndi zosankha",
+  },
+
+  projectDetail: {
+    timelineTitle: "Nthawi ya pulojekiti",
+    startDate: "Tsiku loyambira",
+    expectedDuration: "Nthawi yomwe ikuyembekezeredwa",
+    currentPhase: "Gawo lapano",
+    expectedDelivery: "Tsiku lomwe likuyembekezeredwa",
+    country: "Dziko",
+    photoGallery: "Zithunzi",
+    videosTitle: "Mavidiyo",
+    photoBefore: "Asanayambe",
+    photoDuring: "Akuchita",
+    photoAfter: "Zatha",
   },
 
   pages: {

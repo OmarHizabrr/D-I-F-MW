@@ -66,6 +66,11 @@ const en = {
     whyTitle: "Why trust us",
     downloadReport: "Download report",
     viewLicenses: "View licenses",
+    orgFinancialTitle: "Published projects finances",
+    publishedProjects: "Published projects",
+    totalDonations: "Total donations",
+    totalExpenses: "Total expenses",
+    remaining: "Remaining",
   },
 
   waysToGive: {
@@ -285,6 +290,20 @@ const en = {
     supportedBy: "Supported by",
     allProjects: "All projects",
     noProjects: "No projects match the current filters",
+  },
+
+  projectDetail: {
+    timelineTitle: "Project timeline",
+    startDate: "Start date",
+    expectedDuration: "Expected duration",
+    currentPhase: "Current phase",
+    expectedDelivery: "Expected delivery",
+    country: "Country",
+    photoGallery: "Photo gallery",
+    videosTitle: "Videos",
+    photoBefore: "Before",
+    photoDuring: "During",
+    photoAfter: "After",
   },
 
   pages: {

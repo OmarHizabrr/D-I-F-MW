@@ -5,6 +5,7 @@ import { Phone, Mail, Share2, MessageCircle, Play, Camera } from "lucide-react";
 import { useLocale } from "@/context/LocaleContext";
 import { useSiteContent } from "@/context/SiteContentContext";
 import { useDonation } from "@/context/DonationContext";
+import { useSystemSettings } from "@/hooks/useSystemSettings";
 import { localeList } from "@/i18n";
 import { ThemeToggle } from "./ThemeToggle";
 
@@ -19,6 +20,7 @@ export function TopBar() {
   const { locale, setLocale } = useLocale();
   const { topbar, donation, text } = useSiteContent();
   const { openDonation } = useDonation();
+  const { portalEnabled } = useSystemSettings();
 
   const socialLinks = topbar.socialLinks
     .filter((s) => s.enabled)
@@ -81,16 +83,18 @@ export function TopBar() {
 
             <ThemeToggle variant="topbar" />
 
-            {donation.enabled ? (
+            {donation.enabled && (
               <button
                 type="button"
                 onClick={() => openDonation()}
                 className="inline-flex h-8 shrink-0 items-center justify-center rounded-xl border border-white/30 bg-brand-brown px-2 text-[10px] font-semibold text-white transition-colors hover:bg-brand-brown-light sm:h-9 sm:px-3 sm:text-xs"
               >
-                <span className="hidden sm:inline">{text(topbar.donorPortalLabel)}</span>
+                <span className="hidden sm:inline">{text(donation.navButtonLabel)}</span>
                 <span className="sm:hidden">{text(donation.navButtonLabel)}</span>
               </button>
-            ) : (
+            )}
+
+            {portalEnabled && (
               <Link
                 href="/portal"
                 className="inline-flex h-8 shrink-0 items-center justify-center rounded-xl border border-white/30 bg-white/10 px-2 text-[10px] font-semibold text-white transition-colors hover:bg-white/20 sm:h-9 sm:px-3 sm:text-xs"

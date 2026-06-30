@@ -253,6 +253,7 @@ export default function AdminProjectsPage() {
             {!item.enabled && " · معطّل"}
           </>
         )}
+        getPreviewHref={(item) => (item.enabled ? `/projects/${item.id}` : null)}
       />
     </div>
   );

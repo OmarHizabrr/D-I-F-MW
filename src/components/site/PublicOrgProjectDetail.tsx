@@ -15,6 +15,11 @@ import { getProjectFinancial } from "@/services/financialService";
 import { getDonor } from "@/services/donorService";
 import { useSiteContent } from "@/context/SiteContentContext";
 import { useDonation } from "@/context/DonationContext";
+import { useSystemSettings } from "@/hooks/useSystemSettings";
+import { DonorSupporterCard } from "@/components/site/DonorSupporterCard";
+import { ProjectPhotoGallery } from "@/components/site/ProjectPhotoGallery";
+import { ProjectVideosGallery } from "@/components/site/ProjectVideosGallery";
+import { ProjectTimelineOverview } from "@/components/site/ProjectTimelineOverview";
 import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
@@ -33,11 +38,13 @@ import {
   type ProjectPhoto,
   type ProjectVideo,
   type ProjectTimelineEntry,
+  type ProjectReport,
   type PhotoPhase,
+  type Donor,
 } from "@/types/project-management";
 import type { LocaleCode } from "@/types/cms";
 import { useLocale } from "@/context/LocaleContext";
-import { ExternalLink } from "lucide-react";
+import { ExternalLink, MapPin } from "lucide-react";
 
 const MapView = dynamic(
   () => import("@/components/map/MapView").then((m) => m.MapView),
@@ -52,9 +59,10 @@ export function PublicOrgProjectDetail({ projectId }: PublicOrgProjectDetailProp
   const { sectionTitles, donation, text } = useSiteContent();
   const { locale, t } = useLocale();
   const { openDonation } = useDonation();
+  const { portalEnabled } = useSystemSettings();
 
   const [project, setProject] = useState<OrgProject | null>(null);
-  const [donorName, setDonorName] = useState<string | null>(null);
+  const [donor, setDonor] = useState<Donor | null>(null);
   const [updates, setUpdates] = useState<ProjectUpdate[]>([]);
   const [photos, setPhotos] = useState<Record<PhotoPhase, ProjectPhoto[]>>({
     Before: [],
@@ -63,6 +71,7 @@ export function PublicOrgProjectDetail({ projectId }: PublicOrgProjectDetailProp
   });
   const [videos, setVideos] = useState<ProjectVideo[]>([]);
   const [timeline, setTimeline] = useState<ProjectTimelineEntry[]>([]);
+  const [reports, setReports] = useState<ProjectReport[]>([]);
   const [location, setLocation] = useState<{
     latitude: number;
     longitude: number;
@@ -88,16 +97,17 @@ export function PublicOrgProjectDetail({ projectId }: PublicOrgProjectDetailProp
       setProject(p);
       if (p.showDonorPublic && p.donorId) {
         const d = await getDonor(p.donorId);
-        setDonorName(d?.fullName ?? null);
+        setDonor(d);
       }
       const photoData = await Promise.all(
         PHOTO_PHASES.map(async (phase) => [phase, await listProjectPhotos(projectId, phase)] as const)
       );
       setPhotos(Object.fromEntries(photoData) as Record<PhotoPhase, ProjectPhoto[]>);
-      const [upd, vids, tl, loc, ben, fin] = await Promise.all([
+      const [upd, vids, tl, reps, loc, ben, fin] = await Promise.all([
         listProjectSubItems<ProjectUpdate>(projectId, PROJECT_SUBCOLLECTIONS.updates),
         listProjectSubItems<ProjectVideo>(projectId, PROJECT_SUBCOLLECTIONS.videos),
         listProjectSubItems<ProjectTimelineEntry>(projectId, PROJECT_SUBCOLLECTIONS.timeline),
+        listProjectSubItems<ProjectReport>(projectId, PROJECT_SUBCOLLECTIONS.reports),
         getProjectLocation(projectId),
         getProjectBeneficiaries(projectId),
         getProjectFinancial(projectId),
@@ -105,6 +115,7 @@ export function PublicOrgProjectDetail({ projectId }: PublicOrgProjectDetailProp
       setUpdates(upd.sort((a, b) => (b.createdAt ?? "").localeCompare(a.createdAt ?? "")));
       setVideos(vids);
       setTimeline(tl);
+      setReports(reps.filter((r) => r.file));
       setLocation(loc);
       setBeneficiaryCount(ben?.count ?? 0);
       if (fin.donationAmount > 0) {
@@ -135,11 +146,10 @@ export function PublicOrgProjectDetail({ projectId }: PublicOrgProjectDetailProp
   const statusLabel =
     PROJECT_STATUS_LABELS[publicStatus][locale as LocaleCode] ?? publicStatus;
 
-  const phaseLabels: Record<PhotoPhase, string> = {
-    Before: "قبل التنفيذ",
-    During: "أثناء التنفيذ",
-    After: "بعد الإنجاز",
-  };
+  const showTimeline =
+    Boolean(project.startDate || project.expectedEndDate || timeline.length > 0);
+  const showCountry =
+    Boolean(project.country) && (!project.showDonorPublic || !donor);
 
   return (
     <article className="section-padding bg-background">
@@ -168,20 +178,18 @@ export function PublicOrgProjectDetail({ projectId }: PublicOrgProjectDetailProp
             </div>
           )}
 
-          {timeline.length > 0 && (
-            <section>
-              <h2 className="mb-4 text-lg font-bold">الجدول الزمني</h2>
-              <div className="space-y-3">
-                {timeline.map((entry) => (
-                  <Card key={entry.id} padding="md">
-                    <p className="font-semibold">{entry.phase}</p>
-                    <p className="text-sm text-muted-foreground">
-                      {entry.startDate} → {entry.endDate || "—"} · {entry.progress}%
-                    </p>
-                  </Card>
-                ))}
-              </div>
-            </section>
+          {showTimeline && (
+            <ProjectTimelineOverview
+              project={project}
+              timeline={timeline}
+              title={t.projectDetail.timelineTitle}
+              labels={{
+                startDate: t.projectDetail.startDate,
+                expectedDuration: t.projectDetail.expectedDuration,
+                currentPhase: t.projectDetail.currentPhase,
+                expectedDelivery: t.projectDetail.expectedDelivery,
+              }}
+            />
           )}
 
           {updates.length > 0 && (
@@ -199,46 +207,28 @@ export function PublicOrgProjectDetail({ projectId }: PublicOrgProjectDetailProp
             </section>
           )}
 
-          {PHOTO_PHASES.map((phase) => {
-            const items = photos[phase];
-            if (items.length === 0) return null;
-            return (
-              <section key={phase}>
-                <h2 className="mb-4 text-lg font-bold">{phaseLabels[phase]}</h2>
-                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                  {items.map((photo) => (
-                    <Card key={photo.id} padding="sm">
-                      {photo.image && (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img
-                          src={photo.image}
-                          alt={photo.title}
-                          className="h-36 w-full rounded-xl object-cover"
-                        />
-                      )}
-                      {photo.title && (
-                        <p className="mt-2 text-sm font-medium">{photo.title}</p>
-                      )}
-                    </Card>
-                  ))}
-                </div>
-              </section>
-            );
-          })}
+          <ProjectPhotoGallery photos={photos} title={t.projectDetail.photoGallery} />
 
-          {videos.length > 0 && (
+          <ProjectVideosGallery videos={videos} title={t.projectDetail.videosTitle} />
+
+          {reports.length > 0 && (
             <section>
-              <h2 className="mb-4 text-lg font-bold">الفيديوهات</h2>
-              <div className="space-y-2">
-                {videos.map((v) => (
-                  <Card key={v.id} padding="md">
+              <h2 className="mb-4 text-lg font-bold">{t.transparency.reportsTitle}</h2>
+              <div className="space-y-3">
+                {reports.map((report) => (
+                  <Card key={report.id} padding="md">
+                    <p className="font-semibold">{report.title}</p>
+                    {report.description && (
+                      <p className="mt-1 text-sm text-muted-foreground">{report.description}</p>
+                    )}
                     <a
-                      href={v.video}
+                      href={report.file}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="font-medium text-brand-green hover:underline"
+                      className="mt-2 inline-flex items-center gap-1 text-sm font-semibold text-brand-green hover:underline"
                     >
-                      {v.title}
+                      <ExternalLink className="h-4 w-4" />
+                      {t.transparency.downloadReport}
                     </a>
                   </Card>
                 ))}
@@ -248,6 +238,33 @@ export function PublicOrgProjectDetail({ projectId }: PublicOrgProjectDetailProp
         </div>
 
         <aside className="space-y-4">
+          {donor && project.showDonorPublic && (
+            <DonorSupporterCard
+              donor={donor}
+              country={donor.country || project.country}
+              city={project.city}
+              supportedByLabel={t.common.supportedBy}
+              countryLabel={t.projectDetail.country}
+            />
+          )}
+
+          {showCountry && (
+            <Card padding="md">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand-green/10 text-brand-green">
+                  <MapPin className="h-5 w-5" />
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">{t.projectDetail.country}</p>
+                  <p className="font-semibold">
+                    {project.country}
+                    {project.city ? ` · ${project.city}` : ""}
+                  </p>
+                </div>
+              </div>
+            </Card>
+          )}
+
           <Card padding="md">
             <div className="mb-3 flex flex-wrap gap-2">
               <Badge variant={PROJECT_STATUS_VARIANT[publicStatus]}>{statusLabel}</Badge>
@@ -274,12 +291,6 @@ export function PublicOrgProjectDetail({ projectId }: PublicOrgProjectDetailProp
                   {project.expectedEndDate ? ` → ${project.expectedEndDate}` : ""}
                 </dd>
               </div>
-              {donorName && (
-                <div>
-                  <dt className="text-muted-foreground">{t.common.supportedBy}</dt>
-                  <dd className="mt-1 font-medium">{donorName}</dd>
-                </div>
-              )}
               {beneficiaryCount > 0 && (
                 <div>
                   <dt className="text-muted-foreground">{t.stats.beneficiaries}</dt>
@@ -300,12 +311,14 @@ export function PublicOrgProjectDetail({ projectId }: PublicOrgProjectDetailProp
                 {text(donation.navButtonLabel)}
               </Button>
             )}
-            <Link
-              href="/portal"
-              className="mt-2 block text-center text-sm text-brand-green hover:underline"
-            >
-              {t.topBar.donorPortal}
-            </Link>
+            {portalEnabled && (
+              <Link
+                href="/portal"
+                className="mt-2 block text-center text-sm text-brand-green hover:underline"
+              >
+                {t.topBar.donorPortal}
+              </Link>
+            )}
           </Card>
 
           {financial && (

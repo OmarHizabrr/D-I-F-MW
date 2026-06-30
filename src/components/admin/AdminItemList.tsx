@@ -1,7 +1,8 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { Pencil, Trash2 } from "lucide-react";
+import Link from "next/link";
+import { Pencil, Trash2, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 
@@ -13,6 +14,7 @@ type AdminItemListProps<T extends { id: string }> = {
   onDelete: (item: T) => void;
   renderTitle: (item: T) => ReactNode;
   renderSubtitle?: (item: T) => ReactNode;
+  getPreviewHref?: (item: T) => string | null | undefined;
 };
 
 export function AdminItemList<T extends { id: string }>({
@@ -23,6 +25,7 @@ export function AdminItemList<T extends { id: string }>({
   onDelete,
   renderTitle,
   renderSubtitle,
+  getPreviewHref,
 }: AdminItemListProps<T>) {
   if (items.length === 0) {
     return (
@@ -44,6 +47,13 @@ export function AdminItemList<T extends { id: string }>({
               )}
             </div>
             <div className="flex shrink-0 gap-1.5 sm:gap-2">
+              {getPreviewHref?.(item) && (
+                <Link href={getPreviewHref(item)!} target="_blank" rel="noopener noreferrer">
+                  <Button variant="secondary" size="icon" aria-label="عرض في الموقع">
+                    <ExternalLink className="h-4 w-4" />
+                  </Button>
+                </Link>
+              )}
               <Button
                 variant="secondary"
                 size="icon"

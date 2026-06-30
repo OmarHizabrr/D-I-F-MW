@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { getSystemSettings, saveSystemSettings } from "@/services/settingsService";
+import { invalidateSystemSettingsCache } from "@/hooks/useSystemSettings";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
@@ -31,6 +32,7 @@ export default function ManagementSettingsPage() {
         uid: user.uid,
         displayName: user.email ?? undefined,
       });
+      invalidateSystemSettingsCache();
     } finally {
       setSaving(false);
     }

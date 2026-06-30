@@ -218,6 +218,9 @@ export default function ManagementProjectsPage() {
         renderSubtitle={(item) =>
           `${item.projectNumber} · ${PROJECT_STATUS_LABELS[item.status]} · ${item.progress}%${item.publishedOnSite ? " · منشور" : ""}`
         }
+        getPreviewHref={(item) =>
+          item.publishedOnSite ? `/projects/${item.id}` : null
+        }
       />
     </div>
   );

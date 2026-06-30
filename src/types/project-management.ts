@@ -205,6 +205,9 @@ export type MyGroupEntry = {
   lastActivity?: string;
 };
 
+/** نوع المتبرع — فرد، جمعية، مؤسسة، جهة */
+export type DonorKind = "individual" | "association" | "organization" | "entity";
+
 /** متبرع — donors/{donorId} */
 export type Donor = {
   id: string;
@@ -214,6 +217,7 @@ export type Donor = {
   image?: string;
   organization?: string;
   country?: string;
+  donorKind?: DonorKind;
   status: "active" | "inactive";
   portalUsername?: string;
   portalPin?: string;
