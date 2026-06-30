@@ -16,16 +16,16 @@ import type { LocaleCode, NavItem } from "@/types/cms";
 function DesktopNavItem({
   item,
   label,
-  children,
+  navChildren,
   onNavigate,
 }: {
   item: NavItem;
   label: string;
-  children: ReturnType<typeof resolveNavChildren>;
+  navChildren: ReturnType<typeof resolveNavChildren>;
   onNavigate?: () => void;
 }) {
   const { locale } = useLocale();
-  const hasChildren = children.length > 0;
+  const hasChildren = navChildren.length > 0;
 
   if (!hasChildren) {
     return (
@@ -51,7 +51,7 @@ function DesktopNavItem({
       </Link>
       <div className="invisible absolute start-0 top-full z-50 min-w-[14rem] max-w-[min(20rem,calc(100vw-2rem))] pt-1 opacity-0 transition-all group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100">
         <div className="max-h-[min(70vh,24rem)] overflow-y-auto overflow-x-hidden rounded-2xl border border-border-subtle bg-nav-bg py-1 shadow-lg">
-          {children.map((child) => (
+          {navChildren.map((child) => (
             <Link
               key={child.id}
               href={child.href}
@@ -70,17 +70,17 @@ function DesktopNavItem({
 function MobileNavItem({
   item,
   label,
-  children,
+  navChildren,
   onNavigate,
 }: {
   item: NavItem;
   label: string;
-  children: ReturnType<typeof resolveNavChildren>;
+  navChildren: ReturnType<typeof resolveNavChildren>;
   onNavigate: () => void;
 }) {
   const { locale } = useLocale();
   const [open, setOpen] = useState(false);
-  const hasChildren = children.length > 0;
+  const hasChildren = navChildren.length > 0;
 
   if (!hasChildren) {
     return (
@@ -106,7 +106,7 @@ function MobileNavItem({
       </button>
       {open && (
         <div className="ms-3 flex flex-col border-s border-border-subtle ps-2">
-          {children.map((child) => (
+          {navChildren.map((child) => (
             <Link
               key={child.id}
               href={child.href}
@@ -190,7 +190,7 @@ export function Navigation() {
               key={item.id}
               item={item}
               label={text(item.label)}
-              children={resolveNavChildren(item, programs, navLabels)}
+              navChildren={resolveNavChildren(item, programs, navLabels)}
             />
           ))}
           <DonateButton variant="nav" size="sm" className="ms-1" />
@@ -241,7 +241,7 @@ export function Navigation() {
                   key={item.id}
                   item={item}
                   label={text(item.label)}
-                  children={resolveNavChildren(item, programs, navLabels)}
+                  navChildren={resolveNavChildren(item, programs, navLabels)}
                   onNavigate={closeMobile}
                 />
               ))}
