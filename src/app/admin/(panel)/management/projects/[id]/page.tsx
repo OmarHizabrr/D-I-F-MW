@@ -33,6 +33,8 @@ import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { AdminFlowGuide } from "@/components/admin/AdminFlowGuide";
 import { FORM_PLACEHOLDERS, FORM_HINTS } from "@/lib/admin/form-placeholders";
 import { AdminFormDialog } from "@/components/admin/AdminFormDialog";
+import { AdminProjectAttachmentsTab } from "@/components/admin/project/AdminProjectAttachmentsTab";
+import { AdminProjectUpdatesTab } from "@/components/admin/project/AdminProjectUpdatesTab";
 import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
 import { FileUploadField } from "@/components/admin/FileUploadField";
 import { LocationPicker } from "@/components/admin/LocationPicker";
@@ -48,7 +50,6 @@ import {
   PROJECT_STATUS_LABELS,
   PROJECT_ROLES,
   ROLE_LABELS,
-  REPORT_TYPE_LABELS,
   type OrgProject,
   type ProjectGroup,
   type GroupMember,
@@ -60,7 +61,6 @@ import {
   type ProjectContract,
   type ProjectInvoice,
   type PhotoPhase,
-  type ReportType,
   type ProjectRole,
   type ProjectStatus,
   type Donor,
@@ -79,9 +79,7 @@ const TABS = [
   { id: "updates", label: "التحديثات" },
   { id: "timeline", label: "الجدول الزمني" },
   { id: "location", label: "الموقع" },
-  { id: "reports", label: "التقارير" },
-  { id: "contracts", label: "العقود" },
-  { id: "invoices", label: "الفواتير" },
+  { id: "attachments", label: "المرفقات" },
   { id: "financial", label: "المالي" },
   { id: "beneficiaries", label: "المستفيدون" },
 ] as const;
@@ -265,21 +263,6 @@ export default function ProjectDetailPage() {
     }
   }
 
-  async function handleAddUpdate() {
-    if (!userMeta) return;
-    const title = prompt("عنوان التحديث:");
-    if (!title) return;
-    const description = prompt("وصف التحديث:") ?? "";
-    await saveProjectSubItem(
-      projectId,
-      PROJECT_SUBCOLLECTIONS.updates,
-      { title, description, createdBy: userMeta.uid, images: [], videos: [] },
-      userMeta,
-      "update"
-    );
-    await loadAll();
-  }
-
   async function handleAddTimeline() {
     if (!userMeta) return;
     const phase = prompt("اسم المرحلة:") ?? "";
@@ -461,6 +444,32 @@ export default function ProjectDetailPage() {
             value={project.projectName}
             onChange={(e) => setProject({ ...project, projectName: e.target.value })}
           />
+          <div className="flex flex-col gap-1.5">
+            <label className="text-sm font-medium">وصف المشروع</label>
+            <textarea
+              value={project.description}
+              onChange={(e) => setProject({ ...project, description: e.target.value })}
+              placeholder="نبذة عن المشروع تظهر على الموقع وبوابة المتبرع"
+              rows={4}
+              className="w-full rounded-2xl border border-border bg-input-bg px-4 py-3 text-sm focus:border-brand-green focus:outline-none focus:ring-2 focus:ring-brand-green/20"
+            />
+          </div>
+          <div className="grid gap-3 sm:grid-cols-2">
+            <Input
+              label="تاريخ البداية"
+              type="date"
+              dir="ltr"
+              value={project.startDate}
+              onChange={(e) => setProject({ ...project, startDate: e.target.value })}
+            />
+            <Input
+              label="تاريخ التسليم المتوقع"
+              type="date"
+              dir="ltr"
+              value={project.expectedEndDate}
+              onChange={(e) => setProject({ ...project, expectedEndDate: e.target.value })}
+            />
+          </div>
           <Select
             label="الحالة"
             value={project.status}
@@ -856,28 +865,44 @@ export default function ProjectDetailPage() {
       )}
 
       {tab === "updates" && (
-        <div>
-          <Button className="mb-4" onClick={handleAddUpdate}>
-            <Plus className="h-4 w-4" />
-            تحديث جديد
-          </Button>
-          <div className="space-y-3">
-            {updates.map((u) => (
-              <Card key={u.id} padding="md">
-                <p className="font-semibold">{u.title}</p>
-                <p className="text-sm text-muted-foreground">{u.description}</p>
-                <p className="mt-1 text-xs text-muted-foreground">{u.createdAt?.slice(0, 10)}</p>
-              </Card>
-            ))}
-          </div>
-        </div>
+        <AdminProjectUpdatesTab
+          projectId={projectId}
+          updates={updates}
+          userMeta={userMeta}
+          onReload={loadAll}
+        />
       )}
 
       {tab === "timeline" && (
         <div>
+          <Card padding="md" className="mb-6 space-y-3">
+            <p className="text-sm font-medium">تواريخ المشروع الرئيسية</p>
+            <p className="text-xs text-muted-foreground">
+              تُعرض في خط الزمن على الموقع: تاريخ البداية، المدة المتوقعة، المرحلة الحالية،
+              وتاريخ التسليم.
+            </p>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <Input
+                label="تاريخ البداية"
+                type="date"
+                dir="ltr"
+                value={project.startDate}
+                onChange={(e) => setProject({ ...project, startDate: e.target.value })}
+              />
+              <Input
+                label="تاريخ التسليم المتوقع"
+                type="date"
+                dir="ltr"
+                value={project.expectedEndDate}
+                onChange={(e) => setProject({ ...project, expectedEndDate: e.target.value })}
+              />
+            </div>
+            <Button size="sm" loading={saving} onClick={handleSaveOverview}>
+              حفظ التواريخ
+            </Button>
+          </Card>
           <p className="mb-4 text-sm text-muted-foreground">
-            يعرض على الموقع: تاريخ البداية، المدة المتوقعة، المرحلة الحالية، وتاريخ التسليم —
-            بالإضافة إلى المراحل التفصيلية أدناه.
+            أضف مراحل تفصيلية لتوثيق سير العمل — كل مرحلة لها تواريخ وحالة ونسبة إنجاز.
           </p>
           <Button className="mb-4" onClick={handleAddTimeline}>
             <Plus className="h-4 w-4" />
@@ -973,110 +998,15 @@ export default function ProjectDetailPage() {
         </Card>
       )}
 
-      {tab === "reports" && (
-        <div>
-          <FileUploadField
-            label="رفع تقرير PDF"
-            value=""
-            folder={`projects/${projectId}/reports`}
-            onChange={async (url) => {
-              if (!url || !userMeta) return;
-              await saveProjectSubItem(
-                projectId,
-                PROJECT_SUBCOLLECTIONS.reports,
-                {
-                  title: "تقرير",
-                  reportType: "interim" as ReportType,
-                  file: url,
-                  uploadedBy: userMeta.uid,
-                },
-                userMeta,
-                "report"
-              );
-              await loadAll();
-            }}
-            accept=".pdf"
-          />
-          <div className="mt-4 space-y-2">
-            {reports.map((r) => (
-              <Card key={r.id} padding="md">
-                <p className="font-medium">{r.title}</p>
-                <p className="text-sm text-muted-foreground">
-                  {REPORT_TYPE_LABELS[r.reportType]}
-                </p>
-              </Card>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {tab === "contracts" && (
-        <div>
-          <FileUploadField
-            label="رفع عقد"
-            value=""
-            folder={`projects/${projectId}/contracts`}
-            onChange={async (url) => {
-              if (!url || !userMeta) return;
-              await saveProjectSubItem(
-                projectId,
-                PROJECT_SUBCOLLECTIONS.contracts,
-                {
-                  contractNumber: `C-${Date.now()}`,
-                  file: url,
-                  signedAt: new Date().toISOString().slice(0, 10),
-                  uploadedBy: userMeta.uid,
-                },
-                userMeta,
-                "contract"
-              );
-              await loadAll();
-            }}
-            accept=".pdf"
-          />
-          <div className="mt-4 space-y-2">
-            {contracts.map((c) => (
-              <Card key={c.id} padding="md">
-                <p className="font-medium">{c.contractNumber}</p>
-              </Card>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {tab === "invoices" && (
-        <div>
-          <FileUploadField
-            label="رفع فاتورة"
-            value=""
-            folder={`projects/${projectId}/invoices`}
-            onChange={async (url) => {
-              if (!url || !userMeta) return;
-              await saveProjectSubItem(
-                projectId,
-                PROJECT_SUBCOLLECTIONS.invoices,
-                {
-                  invoiceNumber: `INV-${Date.now()}`,
-                  amount: 0,
-                  supplier: "",
-                  file: url,
-                  date: new Date().toISOString().slice(0, 10),
-                },
-                userMeta,
-                "invoice"
-              );
-              await loadAll();
-            }}
-            accept=".pdf"
-          />
-          <div className="mt-4 space-y-2">
-            {invoices.map((inv) => (
-              <Card key={inv.id} padding="md">
-                <p className="font-medium">{inv.invoiceNumber}</p>
-              </Card>
-            ))}
-          </div>
-        </div>
+      {tab === "attachments" && (
+        <AdminProjectAttachmentsTab
+          projectId={projectId}
+          reports={reports}
+          contracts={contracts}
+          invoices={invoices}
+          userMeta={userMeta}
+          onReload={loadAll}
+        />
       )}
 
       {tab === "financial" && (

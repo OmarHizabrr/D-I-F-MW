@@ -20,6 +20,9 @@ import { DonorSupporterCard } from "@/components/site/DonorSupporterCard";
 import { ProjectPhotoGallery } from "@/components/site/ProjectPhotoGallery";
 import { ProjectVideosGallery } from "@/components/site/ProjectVideosGallery";
 import { ProjectTimelineOverview } from "@/components/site/ProjectTimelineOverview";
+import { ProjectUpdatesFeed } from "@/components/site/ProjectUpdatesFeed";
+import { ProjectAttachmentsSection } from "@/components/site/ProjectAttachmentsSection";
+import { buildProjectAttachments } from "@/lib/project-attachments";
 import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
@@ -39,6 +42,8 @@ import {
   type ProjectVideo,
   type ProjectTimelineEntry,
   type ProjectReport,
+  type ProjectContract,
+  type ProjectInvoice,
   type PhotoPhase,
   type Donor,
 } from "@/types/project-management";
@@ -72,6 +77,8 @@ export function PublicOrgProjectDetail({ projectId }: PublicOrgProjectDetailProp
   const [videos, setVideos] = useState<ProjectVideo[]>([]);
   const [timeline, setTimeline] = useState<ProjectTimelineEntry[]>([]);
   const [reports, setReports] = useState<ProjectReport[]>([]);
+  const [contracts, setContracts] = useState<ProjectContract[]>([]);
+  const [invoices, setInvoices] = useState<ProjectInvoice[]>([]);
   const [location, setLocation] = useState<{
     latitude: number;
     longitude: number;
@@ -103,11 +110,13 @@ export function PublicOrgProjectDetail({ projectId }: PublicOrgProjectDetailProp
         PHOTO_PHASES.map(async (phase) => [phase, await listProjectPhotos(projectId, phase)] as const)
       );
       setPhotos(Object.fromEntries(photoData) as Record<PhotoPhase, ProjectPhoto[]>);
-      const [upd, vids, tl, reps, loc, ben, fin] = await Promise.all([
+      const [upd, vids, tl, reps, conts, invs, loc, ben, fin] = await Promise.all([
         listProjectSubItems<ProjectUpdate>(projectId, PROJECT_SUBCOLLECTIONS.updates),
         listProjectSubItems<ProjectVideo>(projectId, PROJECT_SUBCOLLECTIONS.videos),
         listProjectSubItems<ProjectTimelineEntry>(projectId, PROJECT_SUBCOLLECTIONS.timeline),
         listProjectSubItems<ProjectReport>(projectId, PROJECT_SUBCOLLECTIONS.reports),
+        listProjectSubItems<ProjectContract>(projectId, PROJECT_SUBCOLLECTIONS.contracts),
+        listProjectSubItems<ProjectInvoice>(projectId, PROJECT_SUBCOLLECTIONS.invoices),
         getProjectLocation(projectId),
         getProjectBeneficiaries(projectId),
         getProjectFinancial(projectId),
@@ -116,6 +125,8 @@ export function PublicOrgProjectDetail({ projectId }: PublicOrgProjectDetailProp
       setVideos(vids);
       setTimeline(tl);
       setReports(reps.filter((r) => r.file));
+      setContracts(conts.filter((c) => c.file));
+      setInvoices(invs.filter((i) => i.file));
       setLocation(loc);
       setBeneficiaryCount(ben?.count ?? 0);
       if (fin.donationAmount > 0) {
@@ -145,6 +156,8 @@ export function PublicOrgProjectDetail({ projectId }: PublicOrgProjectDetailProp
   const publicStatus = mapOrgStatusToPublicStatus(project.status);
   const statusLabel =
     PROJECT_STATUS_LABELS[publicStatus][locale as LocaleCode] ?? publicStatus;
+
+  const attachments = buildProjectAttachments(reports, contracts, invoices);
 
   const showTimeline =
     Boolean(project.startDate || project.expectedEndDate || timeline.length > 0);
@@ -192,49 +205,20 @@ export function PublicOrgProjectDetail({ projectId }: PublicOrgProjectDetailProp
             />
           )}
 
-          {updates.length > 0 && (
-            <section>
-              <h2 className="mb-4 text-lg font-bold">آخر التحديثات</h2>
-              <div className="space-y-3">
-                {updates.map((u) => (
-                  <Card key={u.id} padding="md">
-                    <p className="font-semibold">{u.title}</p>
-                    <p className="mt-1 text-sm text-muted-foreground">{u.description}</p>
-                    <p className="mt-2 text-xs text-muted-foreground">{u.createdAt?.slice(0, 10)}</p>
-                  </Card>
-                ))}
-              </div>
-            </section>
-          )}
+          <ProjectUpdatesFeed
+            updates={updates}
+            title="تحديثات المشروع"
+          />
 
           <ProjectPhotoGallery photos={photos} title={t.projectDetail.photoGallery} />
 
           <ProjectVideosGallery videos={videos} title={t.projectDetail.videosTitle} />
 
-          {reports.length > 0 && (
-            <section>
-              <h2 className="mb-4 text-lg font-bold">{t.transparency.reportsTitle}</h2>
-              <div className="space-y-3">
-                {reports.map((report) => (
-                  <Card key={report.id} padding="md">
-                    <p className="font-semibold">{report.title}</p>
-                    {report.description && (
-                      <p className="mt-1 text-sm text-muted-foreground">{report.description}</p>
-                    )}
-                    <a
-                      href={report.file}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="mt-2 inline-flex items-center gap-1 text-sm font-semibold text-brand-green hover:underline"
-                    >
-                      <ExternalLink className="h-4 w-4" />
-                      {t.transparency.downloadReport}
-                    </a>
-                  </Card>
-                ))}
-              </div>
-            </section>
-          )}
+          <ProjectAttachmentsSection
+            attachments={attachments}
+            title="الملفات المرفقة"
+            downloadLabel={t.transparency.downloadReport}
+          />
         </div>
 
         <aside className="space-y-4">

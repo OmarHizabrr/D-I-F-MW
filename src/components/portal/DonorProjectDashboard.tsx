@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { ExternalLink } from "lucide-react";
+import { ExternalLink, RefreshCw } from "lucide-react";
 import {
   getOrgProject,
   listProjectPhotos,
@@ -18,8 +18,17 @@ import { DonorSupporterCard } from "@/components/site/DonorSupporterCard";
 import { ProjectPhotoGallery } from "@/components/site/ProjectPhotoGallery";
 import { ProjectVideosGallery } from "@/components/site/ProjectVideosGallery";
 import { ProjectTimelineOverview } from "@/components/site/ProjectTimelineOverview";
+import { ProjectUpdatesFeed } from "@/components/site/ProjectUpdatesFeed";
+import { ProjectAttachmentsSection } from "@/components/site/ProjectAttachmentsSection";
+import { buildProjectAttachments } from "@/lib/project-attachments";
+import {
+  getProjectLastVisit,
+  markProjectVisited,
+  getLatestContentDate,
+} from "@/lib/portal/project-visit";
 import { useLocale } from "@/context/LocaleContext";
 import { Card } from "@/components/ui/Card";
+import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { RangeSlider } from "@/components/ui/RangeSlider";
@@ -38,6 +47,8 @@ import {
   type ProjectBeneficiaries,
   type ProjectFinancialSummary,
   type ProjectReport,
+  type ProjectContract,
+  type ProjectInvoice,
   type PhotoPhase,
 } from "@/types/project-management";
 
@@ -65,6 +76,8 @@ export function DonorProjectDashboard({
   const [videos, setVideos] = useState<ProjectVideo[]>([]);
   const [timeline, setTimeline] = useState<ProjectTimelineEntry[]>([]);
   const [reports, setReports] = useState<ProjectReport[]>([]);
+  const [contracts, setContracts] = useState<ProjectContract[]>([]);
+  const [invoices, setInvoices] = useState<ProjectInvoice[]>([]);
   const [location, setLocation] = useState<ProjectLocation | null>(null);
   const [beneficiaries, setBeneficiaries] = useState<ProjectBeneficiaries | null>(null);
   const [financial, setFinancial] = useState<ProjectFinancialSummary | null>(null);
@@ -73,37 +86,115 @@ export function DonorProjectDashboard({
   const [rating, setRating] = useState({ quality: 5, execution: 5, communication: 5 });
   const [suggestions, setSuggestions] = useState("");
   const [submittingRating, setSubmittingRating] = useState(false);
+  const [lastVisit, setLastVisit] = useState<string | null>(null);
 
   useEffect(() => {
-    async function load() {
+    let cancelled = false;
+    void (async () => {
+      const prevVisit = getProjectLastVisit(projectId);
+      const p = await getOrgProject(projectId);
+      if (cancelled) return;
+      setProject(p);
+      const photoData = await Promise.all(
+        PHOTO_PHASES.map(async (phase) => [phase, await listProjectPhotos(projectId, phase)] as const)
+      );
+      if (cancelled) return;
+      setPhotos(Object.fromEntries(photoData) as Record<PhotoPhase, ProjectPhoto[]>);
+      const [upd, vids, tl, reps, conts, invs, loc, ben, fin, existingRating] = await Promise.all([
+        listProjectSubItems<ProjectUpdate>(projectId, PROJECT_SUBCOLLECTIONS.updates),
+        listProjectSubItems<ProjectVideo>(projectId, PROJECT_SUBCOLLECTIONS.videos),
+        listProjectSubItems<ProjectTimelineEntry>(projectId, PROJECT_SUBCOLLECTIONS.timeline),
+        listProjectSubItems<ProjectReport>(projectId, PROJECT_SUBCOLLECTIONS.reports),
+        listProjectSubItems<ProjectContract>(projectId, PROJECT_SUBCOLLECTIONS.contracts),
+        listProjectSubItems<ProjectInvoice>(projectId, PROJECT_SUBCOLLECTIONS.invoices),
+        getProjectLocation(projectId),
+        getProjectBeneficiaries(projectId),
+        getProjectFinancial(projectId),
+        getDonorRating(projectId, donor.id),
+      ]);
+      if (cancelled) return;
+      setUpdates(upd.sort((a, b) => (b.createdAt ?? "").localeCompare(a.createdAt ?? "")));
+      setVideos(vids);
+      setTimeline(tl);
+      setReports(reps.filter((r) => r.file));
+      setContracts(conts.filter((c) => c.file));
+      setInvoices(invs.filter((i) => i.file));
+      setLocation(loc);
+      setBeneficiaries(ben);
+      setFinancial(fin);
+      setRated(!!existingRating);
+      setLastVisit(prevVisit);
+      markProjectVisited(projectId);
+      setLoading(false);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [projectId, donor.id]);
+
+  async function refreshProjectData() {
+    setLoading(true);
+    const prevVisit = getProjectLastVisit(projectId);
+    await (async () => {
       const p = await getOrgProject(projectId);
       setProject(p);
       const photoData = await Promise.all(
         PHOTO_PHASES.map(async (phase) => [phase, await listProjectPhotos(projectId, phase)] as const)
       );
       setPhotos(Object.fromEntries(photoData) as Record<PhotoPhase, ProjectPhoto[]>);
-      const [upd, vids, tl, reps, loc, ben, fin, existingRating] = await Promise.all([
+      const [upd, vids, tl, reps, conts, invs, loc, ben, fin] = await Promise.all([
         listProjectSubItems<ProjectUpdate>(projectId, PROJECT_SUBCOLLECTIONS.updates),
         listProjectSubItems<ProjectVideo>(projectId, PROJECT_SUBCOLLECTIONS.videos),
         listProjectSubItems<ProjectTimelineEntry>(projectId, PROJECT_SUBCOLLECTIONS.timeline),
         listProjectSubItems<ProjectReport>(projectId, PROJECT_SUBCOLLECTIONS.reports),
+        listProjectSubItems<ProjectContract>(projectId, PROJECT_SUBCOLLECTIONS.contracts),
+        listProjectSubItems<ProjectInvoice>(projectId, PROJECT_SUBCOLLECTIONS.invoices),
         getProjectLocation(projectId),
         getProjectBeneficiaries(projectId),
         getProjectFinancial(projectId),
-        getDonorRating(projectId, donor.id),
       ]);
       setUpdates(upd.sort((a, b) => (b.createdAt ?? "").localeCompare(a.createdAt ?? "")));
       setVideos(vids);
       setTimeline(tl);
       setReports(reps.filter((r) => r.file));
+      setContracts(conts.filter((c) => c.file));
+      setInvoices(invs.filter((i) => i.file));
       setLocation(loc);
       setBeneficiaries(ben);
       setFinancial(fin);
-      setRated(!!existingRating);
-      setLoading(false);
+      setLastVisit(prevVisit);
+      markProjectVisited(projectId);
+    })();
+    setLoading(false);
+  }
+
+  const attachments = useMemo(
+    () => buildProjectAttachments(reports, contracts, invoices),
+    [reports, contracts, invoices]
+  );
+
+  const isNew = (date?: string) => {
+    if (!date || !lastVisit) return false;
+    return date > lastVisit;
+  };
+
+  const newContentCount = useMemo(() => {
+    let count = 0;
+    for (const u of updates) if (isNew(u.createdAt)) count++;
+    for (const v of videos) if (isNew(v.uploadedAt)) count++;
+    for (const a of attachments) if (isNew(a.date)) count++;
+    for (const phase of PHOTO_PHASES) {
+      for (const p of photos[phase]) if (isNew(p.uploadedAt)) count++;
     }
-    load();
-  }, [projectId, donor.id]);
+    return count;
+  }, [updates, videos, attachments, photos, projectId, lastVisit]);
+
+  const latestActivity = getLatestContentDate([
+    ...updates.map((u) => u.createdAt),
+    ...videos.map((v) => v.uploadedAt),
+    ...attachments.map((a) => a.date),
+    project?.updatedAt,
+  ]);
 
   async function handleSubmitRating() {
     setSubmittingRating(true);
@@ -140,17 +231,43 @@ export function DonorProjectDashboard({
           <button type="button" onClick={onBack} className="text-sm font-semibold text-brand-green">
             ← العودة للمشاريع
           </button>
-          {onLogout && (
-            <Button variant="outline" size="sm" onClick={onLogout}>
-              تسجيل الخروج
+          <div className="flex gap-2">
+            <Button variant="outline" size="sm" onClick={() => void refreshProjectData()}>
+              <RefreshCw className="h-4 w-4" />
+              تحديث
             </Button>
+            {onLogout && (
+              <Button variant="outline" size="sm" onClick={onLogout}>
+                تسجيل الخروج
+              </Button>
+            )}
+          </div>
+        </div>
+
+        <div className="mb-6 flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <h1 className="mb-2 text-2xl font-bold">{project.projectName}</h1>
+            <p className="text-muted-foreground">
+              {project.projectNumber} · {project.projectType}
+            </p>
+            {latestActivity && (
+              <p className="mt-2 text-xs text-muted-foreground">
+                آخر نشاط: {latestActivity.slice(0, 10)}
+              </p>
+            )}
+          </div>
+          {newContentCount > 0 && (
+            <Badge variant="default">{newContentCount} جديد منذ زيارتك الأخيرة</Badge>
           )}
         </div>
 
-        <h1 className="mb-2 text-2xl font-bold">{project.projectName}</h1>
-        <p className="mb-6 text-muted-foreground">
-          {project.projectNumber} · {project.projectType}
-        </p>
+        {project.description && (
+          <Card padding="md" className="mb-6">
+            <p className="whitespace-pre-line text-sm leading-relaxed text-muted-foreground">
+              {project.description}
+            </p>
+          </Card>
+        )}
 
         <div className="mb-6 grid gap-4 lg:grid-cols-3">
           <div className="lg:col-span-2">
@@ -227,51 +344,28 @@ export function DonorProjectDashboard({
           </div>
         )}
 
-        <section className="mb-8">
-          <h2 className="mb-3 text-lg font-semibold">سجل التحديثات</h2>
-          <div className="space-y-3">
-            {updates.map((u) => (
-              <Card key={u.id} padding="md">
-                <p className="font-medium">{u.title}</p>
-                <p className="text-sm text-muted-foreground">{u.description}</p>
-                <p className="mt-1 text-xs text-muted-foreground">{u.createdAt?.slice(0, 10)}</p>
-              </Card>
-            ))}
-            {updates.length === 0 && (
-              <p className="text-sm text-muted-foreground">لا توجد تحديثات بعد</p>
-            )}
-          </div>
-        </section>
+        <div className="mb-8">
+          <ProjectUpdatesFeed
+            updates={updates}
+            title="سجل التحديثات"
+            emptyMessage="لا توجد تحديثات بعد — سيتم إشعارك عند إضافة محتوى جديد"
+            isNew={isNew}
+          />
+        </div>
 
         <div className="mb-8 space-y-8">
           <ProjectPhotoGallery photos={photos} title={t.projectDetail.photoGallery} />
           <ProjectVideosGallery videos={videos} title={t.projectDetail.videosTitle} />
         </div>
 
-        {reports.length > 0 && (
-          <section className="mb-8">
-            <h2 className="mb-3 text-lg font-semibold">{t.transparency.reportsTitle}</h2>
-            <div className="space-y-3">
-              {reports.map((report) => (
-                <Card key={report.id} padding="md">
-                  <p className="font-semibold">{report.title}</p>
-                  {report.description && (
-                    <p className="mt-1 text-sm text-muted-foreground">{report.description}</p>
-                  )}
-                  <a
-                    href={report.file}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="mt-2 inline-flex items-center gap-1 text-sm font-semibold text-brand-green hover:underline"
-                  >
-                    <ExternalLink className="h-4 w-4" />
-                    {t.transparency.downloadReport}
-                  </a>
-                </Card>
-              ))}
-            </div>
-          </section>
-        )}
+        <div className="mb-8">
+          <ProjectAttachmentsSection
+            attachments={attachments}
+            title="الملفات المرفقة"
+            downloadLabel={t.transparency.downloadReport}
+            isNew={isNew}
+          />
+        </div>
 
         {location && isValidLatLng(location.latitude, location.longitude) && (
           <section className="mb-8">
