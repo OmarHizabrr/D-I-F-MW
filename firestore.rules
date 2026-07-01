@@ -171,19 +171,25 @@ service cloud.firestore {
       return projectId != 'global';
     }
 
-    // مشاريع تشغيلية: projects/{projectId} — قراءة عامة للبوابة
+    function isPublishedOrgProject() {
+      return resource.data.get('publishedOnSite', false) == true &&
+        resource.data.get('isArchived', false) != true &&
+        resource.data.status in ['planning', 'in_progress', 'on_hold', 'completed'];
+    }
+
+    // مشاريع تشغيلية — قراءة عامة للمنشور فقط؛ التفاصيل الكاملة عبر بوابة المتبرع (API)
     match /projects/{projectId} {
-      allow read: if isOrgProjectId(projectId);
+      allow read: if isOrgProjectId(projectId) && (isAdmin() || isPublishedOrgProject());
       allow create, update, delete: if isAdmin();
 
       match /DonorRatings/{donorId} {
-        allow read: if isOrgProjectId(projectId);
-        allow create: if isOrgProjectId(projectId);
+        allow read: if isOrgProjectId(projectId) && (isAdmin() || isPublishedOrgProject());
+        allow create: if false;
         allow update, delete: if isAdmin();
       }
 
       match /{subCollection}/{document=**} {
-        allow read: if isOrgProjectId(projectId);
+        allow read: if isOrgProjectId(projectId) && (isAdmin() || isPublishedOrgProject());
         allow write: if isAdmin();
       }
     }
@@ -204,8 +210,7 @@ service cloud.firestore {
     }
 
     match /donors/{donorId} {
-      allow get: if isAdmin() || resource.data.get('status', 'active') == 'active';
-      allow list: if isAdmin();
+      allow get, list: if isAdmin();
       allow write: if isAdmin();
     }
 
@@ -215,8 +220,18 @@ service cloud.firestore {
     }
 
     match /portal_tokens/{token} {
-      allow get: if true;
+      allow get: if isAdmin();
       allow write: if isAdmin();
+    }
+
+    match /donor_public/{donorId} {
+      allow get: if resource.data.get('status', 'active') == 'active';
+      allow list: if false;
+      allow write: if isAdmin();
+    }
+
+    match /portal_sessions/{sessionId} {
+      allow read, write: if false;
     }
 
     match /notifications/{notificationId} {

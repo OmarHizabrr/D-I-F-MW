@@ -39,7 +39,7 @@ const contentStatCards: {
   label: string;
   icon: React.ComponentType<{ className?: string }>;
 }[] = [
-  { key: "projects", label: "المشاريع", icon: FolderKanban },
+  { key: "projects", label: "بطاقات الموقع", icon: FolderKanban },
   { key: "programs", label: "البرامج", icon: Layers },
   { key: "news", label: "الأخبار", icon: Newspaper },
   { key: "media", label: "الوسائط", icon: ImageIcon },
@@ -50,8 +50,8 @@ const contentStatCards: {
   { key: "faqItems", label: "الأسئلة الشائعة", icon: HelpCircle },
   { key: "downloads", label: "الموارد", icon: Download },
   { key: "volunteerOpportunities", label: "فرص التطوع", icon: HandHeart },
-  { key: "activeProjects", label: "مشاريع جارية", icon: Activity },
-  { key: "completedProjects", label: "مشاريع مكتملة", icon: FolderKanban },
+  { key: "activeProjects", label: "بطاقات جارية", icon: Activity },
+  { key: "completedProjects", label: "بطاقات مكتملة", icon: FolderKanban },
 ];
 
 const inboxLinks = [
@@ -244,7 +244,7 @@ export default function AdminDashboardPage() {
                 <Activity className="h-5 w-5" />
               </div>
               <div>
-                <CardTitle className="text-sm font-medium">المشاريع</CardTitle>
+                <CardTitle className="text-sm font-medium">المشاريع التشغيلية</CardTitle>
                 <p className="text-xs text-muted-foreground">
                   {orgStats.projects} تشغيلي · {orgStats.published} منشور
                 </p>
@@ -336,7 +336,7 @@ export default function AdminDashboardPage() {
             })}
           </div>
 
-          <p className="mb-3 text-sm font-semibold text-muted-foreground">محتوى الموقع</p>
+          <p className="mb-3 text-sm font-semibold text-muted-foreground">محتوى الموقع (CMS)</p>
           <div className="grid gap-3 sm:grid-cols-2 sm:gap-4 xl:grid-cols-4">
             {contentStatCards.map(({ key, label, icon: Icon }) => (
               <Card key={key} hover={false} padding="md">

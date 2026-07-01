@@ -7,6 +7,27 @@ import type { Donor } from "@/types/project-management";
 
 const api = FirestoreApi.Api;
 
+function donorPublicPayload(donor: Donor) {
+  return {
+    id: donor.id,
+    fullName: donor.fullName,
+    country: donor.country ?? "",
+    organization: donor.organization ?? "",
+    donorKind: donor.donorKind,
+    image: donor.image,
+    status: donor.status,
+  };
+}
+
+async function syncDonorPublicProfile(donor: Donor, user: UserMeta): Promise<void> {
+  await api.setData({
+    docRef: api.getDonorPublicDoc(donor.id),
+    data: donorPublicPayload(donor),
+    merge: true,
+    userData: user,
+  });
+}
+
 function generateToken(): string {
   return crypto.randomUUID().replace(/-/g, "").slice(0, 16);
 }
@@ -21,6 +42,13 @@ export async function listDonors(): Promise<Donor[]> {
 export async function getDonor(donorId: string): Promise<Donor | null> {
   const data = await api.getData(api.getDonorDoc(donorId));
   return data ? ({ id: donorId, ...data } as Donor) : null;
+}
+
+/** Safe donor fields for public site — no credentials. */
+export async function getPublicDonor(donorId: string): Promise<Donor | null> {
+  const data = await api.getData(api.getDonorPublicDoc(donorId));
+  if (!data || data.status !== "active") return null;
+  return { id: donorId, ...data, portalEnabled: false } as Donor;
 }
 
 export async function createDonor(
@@ -64,6 +92,8 @@ export async function createDonor(
     data.portalEnabled,
     user
   );
+  const created = await getDonor(id);
+  if (created) await syncDonorPublicProfile(created, user);
   return id;
 }
 
@@ -83,7 +113,12 @@ export async function updateDonor(
     data: patch,
     userData: user,
   });
-  if (rest.fullName !== undefined || rest.portalUsername !== undefined || rest.portalPin !== undefined || rest.portalEnabled !== undefined) {
+  if (
+    rest.fullName !== undefined ||
+    rest.portalUsername !== undefined ||
+    rest.portalPin !== undefined ||
+    rest.portalEnabled !== undefined
+  ) {
     const donor = await getDonor(donorId);
     if (donor) {
       const previousUsername = donor.portalUsername?.trim().toLowerCase();
@@ -101,6 +136,8 @@ export async function updateDonor(
       );
     }
   }
+  const updated = await getDonor(donorId);
+  if (updated) await syncDonorPublicProfile(updated, user);
 }
 
 export async function deleteDonor(donorId: string, user?: UserMeta): Promise<void> {
@@ -116,6 +153,7 @@ export async function deleteDonor(donorId: string, user?: UserMeta): Promise<voi
     if (donor.portalUsername) {
       await removePortalAccess(donor.portalUsername, meta);
     }
+    await api.deleteData(api.getDonorPublicDoc(donorId));
   }
   await api.deleteData(api.getDonorDoc(donorId));
 }

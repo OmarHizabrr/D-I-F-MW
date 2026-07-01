@@ -12,7 +12,7 @@ import {
   getOrgProject,
 } from "@/services/projectManagementService";
 import { getProjectFinancial } from "@/services/financialService";
-import { getDonor } from "@/services/donorService";
+import { getPublicDonor } from "@/services/donorService";
 import { useSiteContent } from "@/context/SiteContentContext";
 import { useDonation } from "@/context/DonationContext";
 import { useSystemSettings } from "@/hooks/useSystemSettings";
@@ -103,7 +103,7 @@ export function PublicOrgProjectDetail({ projectId }: PublicOrgProjectDetailProp
       }
       setProject(p);
       if (p.showDonorPublic && p.donorId) {
-        const d = await getDonor(p.donorId);
+        const d = await getPublicDonor(p.donorId);
         setDonor(d);
       }
       const photoData = await Promise.all(
@@ -208,6 +208,7 @@ export function PublicOrgProjectDetail({ projectId }: PublicOrgProjectDetailProp
           <ProjectUpdatesFeed
             updates={updates}
             title="تحديثات المشروع"
+            emptyMessage="لا توجد تحديثات بعد — سيتم نشر التحديثات هنا فور إضافتها"
           />
 
           <ProjectPhotoGallery photos={photos} title={t.projectDetail.photoGallery} />

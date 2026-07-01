@@ -462,6 +462,10 @@ class FirestoreApi {
     return doc(getDb(), PM_COLLECTIONS.donors, donorId);
   }
 
+  getDonorPublicDoc(donorId: string) {
+    return doc(getDb(), "donor_public", donorId);
+  }
+
   getNotificationsCollection() {
     return collection(getDb(), PM_COLLECTIONS.notifications);
   }

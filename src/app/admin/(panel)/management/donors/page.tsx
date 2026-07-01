@@ -22,6 +22,8 @@ import {
   formatDonorPortalCredentials,
   suggestPortalUsername,
 } from "@/lib/portal/donor-credentials";
+import { validateDonorForSave } from "@/lib/donor-validation";
+import { listOrgProjects } from "@/services/projectManagementService";
 import { AdminItemList } from "@/components/admin/AdminItemList";
 import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
@@ -61,6 +63,7 @@ export default function ManagementDonorsPage() {
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [showQr, setShowQr] = useState<Donor | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   const loadItems = useCallback(async () => {
     setItems(await listDonors());
@@ -82,6 +85,12 @@ export default function ManagementDonorsPage() {
 
   async function handleSave() {
     if (!editing || !user) return;
+    const validation = validateDonorForSave(editing);
+    if (!validation.ok) {
+      setSaveError(validation.message);
+      return;
+    }
+    setSaveError(null);
     setSaving(true);
     try {
       const meta = { uid: user.uid, displayName: user.email ?? undefined };
@@ -99,6 +108,22 @@ export default function ManagementDonorsPage() {
 
   async function handleDeleteConfirm() {
     if (!deleteTarget || !user) return;
+    const orgProjects = await listOrgProjects();
+    const linked = orgProjects.filter(
+      (p) =>
+        p.donorId === deleteTarget.id ||
+        (p.additionalDonorIds ?? []).includes(deleteTarget.id)
+    );
+    if (linked.length > 0) {
+      const names = linked.map((p) => p.projectName).join("، ");
+      if (
+        !confirm(
+          `هذا المتبرع مرتبط بـ ${linked.length} مشروع: ${names}\n\nحذفه قد يعطل متابعة البوابة. هل تريد المتابعة؟`
+        )
+      ) {
+        return;
+      }
+    }
     setDeletingId(deleteTarget.id);
     try {
       await deleteDonor(deleteTarget.id, { uid: user.uid, displayName: user.email ?? undefined });
@@ -151,7 +176,10 @@ export default function ManagementDonorsPage() {
 
       <AdminFormDialog
         open={!!editing}
-        onClose={() => setEditing(null)}
+        onClose={() => {
+          setEditing(null);
+          setSaveError(null);
+        }}
         title={editingIsDonor ? "تعديل متبرع" : "متبرع جديد"}
         onSave={handleSave}
         saving={saving}
@@ -240,6 +268,7 @@ export default function ManagementDonorsPage() {
               />
               تفعيل بوابة المتبرع
             </label>
+            {saveError && <p className="text-sm text-destructive">{saveError}</p>}
           </>
         )}
       </AdminFormDialog>

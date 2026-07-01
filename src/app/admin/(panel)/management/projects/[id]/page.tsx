@@ -188,7 +188,7 @@ export default function ProjectDetailPage() {
   }, [loadAll]);
 
   async function handleSaveOverview() {
-    if (!project || !userMeta || !group) return;
+    if (!project || !userMeta) return;
     setSaving(true);
     try {
       await updateOrgProject(projectId, project, userMeta);
@@ -470,6 +470,36 @@ export default function ProjectDetailPage() {
               onChange={(e) => setProject({ ...project, expectedEndDate: e.target.value })}
             />
           </div>
+          <div className="grid gap-3 sm:grid-cols-2">
+            <Input
+              label="رقم المشروع"
+              dir="ltr"
+              placeholder={FORM_PLACEHOLDERS.project.number}
+              value={project.projectNumber}
+              onChange={(e) => setProject({ ...project, projectNumber: e.target.value })}
+            />
+            <Input
+              label="نوع المشروع"
+              placeholder={FORM_PLACEHOLDERS.project.type}
+              value={project.projectType}
+              onChange={(e) => setProject({ ...project, projectType: e.target.value })}
+            />
+            <Input
+              label="الدولة"
+              value={project.country}
+              onChange={(e) => setProject({ ...project, country: e.target.value })}
+            />
+            <Input
+              label="المدينة"
+              value={project.city}
+              onChange={(e) => setProject({ ...project, city: e.target.value })}
+            />
+          </div>
+          <Input
+            label="العنوان"
+            value={project.address}
+            onChange={(e) => setProject({ ...project, address: e.target.value })}
+          />
           <Select
             label="الحالة"
             value={project.status}
@@ -602,7 +632,14 @@ export default function ProjectDetailPage() {
             <input
               type="checkbox"
               checked={project.publishedOnSite ?? false}
-              onChange={(e) => setProject({ ...project, publishedOnSite: e.target.checked })}
+              onChange={(e) => {
+                const publishedOnSite = e.target.checked;
+                setProject({
+                  ...project,
+                  publishedOnSite,
+                  featuredOnHome: publishedOnSite ? project.featuredOnHome : false,
+                });
+              }}
               className="h-4 w-4 rounded border-border text-brand-green"
             />
             نشر على الموقع العام
@@ -611,10 +648,14 @@ export default function ProjectDetailPage() {
             <input
               type="checkbox"
               checked={project.featuredOnHome ?? false}
+              disabled={!project.publishedOnSite}
               onChange={(e) => setProject({ ...project, featuredOnHome: e.target.checked })}
-              className="h-4 w-4 rounded border-border text-brand-green"
+              className="h-4 w-4 rounded border-border text-brand-green disabled:opacity-50"
             />
             إبراز في صفحة أعمالنا
+            {!project.publishedOnSite && (
+              <span className="text-xs text-muted-foreground">(يتطلب النشر على الموقع)</span>
+            )}
           </label>
           <label className="flex items-center gap-2 text-sm">
             <input
@@ -628,6 +669,14 @@ export default function ProjectDetailPage() {
           <Button loading={saving} onClick={handleSaveOverview}>
             حفظ التغييرات
           </Button>
+        </Card>
+      )}
+
+      {tab === "members" && !group && (
+        <Card padding="lg">
+          <p className="text-center text-sm text-muted-foreground">
+            لم يُعثر على فريق العمل لهذا المشروع. أنشئ المشروع من جديد أو تواصل مع الدعم الفني.
+          </p>
         </Card>
       )}
 

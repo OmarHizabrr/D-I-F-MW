@@ -52,7 +52,6 @@ export default function ManagementGroupsPage() {
         items={items}
         emptyMessage="لا توجد فرق بعد — تُنشأ تلقائياً مع كل مشروع جديد"
         onEdit={(item) => router.push(`/admin/management/projects/${item.projectId}`)}
-        onDelete={() => {}}
         renderTitle={(item) => item.groupName}
         renderSubtitle={(item) => (
           <span className="flex flex-wrap gap-2">

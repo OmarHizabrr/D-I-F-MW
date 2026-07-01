@@ -1,21 +1,16 @@
 "use client";
 
-import { useEffect, useState, Suspense, useCallback } from "react";
-import { useSearchParams } from "next/navigation";
-import {
-  findDonorByToken,
-  findDonorByQrToken,
-  findDonorByProjectNumber,
-  getDonor,
-} from "@/services/donorService";
-import { listOrgProjects } from "@/services/projectManagementService";
-import { filterDonorProjects } from "@/lib/donor-project-utils";
+import { useEffect, useState, Suspense, useCallback, useRef } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import { FORM_PLACEHOLDERS } from "@/lib/admin/form-placeholders";
+import { DONOR_PORTAL_DISABLED_MESSAGE, isDonorPortalActive } from "@/lib/portal/donor-access";
 import {
-  DONOR_PORTAL_DISABLED_MESSAGE,
-  isDonorPortalActive,
-} from "@/lib/portal/donor-access";
-import { loginDonorWithCredentials } from "@/lib/portal/portal-login-client";
+  loginDonorWithCredentials,
+  loginDonorWithToken,
+  loginDonorWithProjectNumber,
+  fetchDonorPortalProjects,
+  fetchDonorFromSession,
+} from "@/lib/portal/portal-login-client";
 import {
   clearDonorSession,
   getDonorSession,
@@ -34,12 +29,14 @@ type LoginMode = "project" | "username";
 
 function DonorPortalContent() {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const token = searchParams.get("token");
   const qr = searchParams.get("qr");
   const projectParam = searchParams.get("project");
   const { portalEnabled, loading: settingsLoading } = useSystemSettings();
 
   const [donor, setDonor] = useState<Donor | null>(null);
+  const [sessionToken, setSessionToken] = useState<string | null>(null);
   const [projects, setProjects] = useState<OrgProject[]>([]);
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -49,48 +46,55 @@ function DonorPortalContent() {
   const [pinInput, setPinInput] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const autoLoginAttempted = useRef(false);
 
-  const loadDonorProjects = useCallback(async (d: Donor, preferredProjectId?: string) => {
-    if (!isDonorPortalActive(d)) {
-      setError(DONOR_PORTAL_DISABLED_MESSAGE);
-      setDonor(null);
-      return;
-    }
-    setDonor(d);
-    saveDonorSession(d.id);
-    const all = await listOrgProjects();
-    const mine = filterDonorProjects(all, d.id);
-    setProjects(mine);
-    if (preferredProjectId && mine.some((p) => p.id === preferredProjectId)) {
-      setSelectedProjectId(preferredProjectId);
-    }
-  }, []);
+  const stripSensitiveQueryParams = useCallback(() => {
+    if (token || qr) router.replace("/portal");
+  }, [router, token, qr]);
+
+  const applyAuth = useCallback(
+    async (d: Donor, token: string, preferredProjectId?: string) => {
+      if (!isDonorPortalActive(d)) {
+        setError(DONOR_PORTAL_DISABLED_MESSAGE);
+        setDonor(null);
+        return;
+      }
+      setDonor(d);
+      setSessionToken(token);
+      saveDonorSession(d.id, token);
+      const mine = await fetchDonorPortalProjects(token);
+      setProjects(mine);
+      if (preferredProjectId && mine.some((p) => p.id === preferredProjectId)) {
+        setSelectedProjectId(preferredProjectId);
+      } else if (projectParam) {
+        const match = mine.find((p) => p.projectNumber === projectParam.trim());
+        if (match) setSelectedProjectId(match.id);
+      }
+    },
+    [projectParam]
+  );
 
   useEffect(() => {
     let cancelled = false;
     void (async () => {
-      if (token) {
-        const d = await findDonorByToken(token);
+      const linkToken = token || qr;
+      if (linkToken) {
+        const result = await loginDonorWithToken(linkToken);
         if (cancelled) return;
-        if (!d) setError("رابط غير صالح أو البوابة غير مفعّلة لهذا المتبرع");
-        else await loadDonorProjects(d);
-        setLoading(false);
-        return;
-      }
-      if (qr) {
-        const d = await findDonorByQrToken(qr);
-        if (cancelled) return;
-        if (!d) setError("رمز QR غير صالح أو البوابة غير مفعّلة");
-        else await loadDonorProjects(d);
+        if (!result.ok) setError(result.message);
+        else {
+          await applyAuth(result.data.donor, result.data.sessionToken);
+          stripSensitiveQueryParams();
+        }
         setLoading(false);
         return;
       }
 
       const session = getDonorSession();
-      if (session?.donorId) {
-        const d = await getDonor(session.donorId);
+      if (session?.sessionToken) {
+        const d = await fetchDonorFromSession(session.sessionToken);
         if (!cancelled && d && isDonorPortalActive(d)) {
-          await loadDonorProjects(d);
+          await applyAuth(d, session.sessionToken);
           setLoading(false);
           return;
         }
@@ -98,26 +102,47 @@ function DonorPortalContent() {
       }
 
       setLoading(false);
+
+      if (projectParam && !autoLoginAttempted.current) {
+        autoLoginAttempted.current = true;
+        setSubmitting(true);
+        const result = await loginDonorWithProjectNumber(projectParam.trim());
+        if (cancelled) return;
+        if (result.ok) {
+          await applyAuth(
+            result.data.donor,
+            result.data.sessionToken,
+            result.data.projectId
+          );
+        }
+        setSubmitting(false);
+      }
     })();
     return () => {
       cancelled = true;
     };
-  }, [token, qr, loadDonorProjects]);
+  }, [token, qr, projectParam, applyAuth, stripSensitiveQueryParams]);
 
-  async function handleProjectNumberLogin() {
+  async function handleProjectNumberLogin(e?: React.FormEvent) {
+    e?.preventDefault();
     setError(null);
     setSubmitting(true);
-    const result = await findDonorByProjectNumber(projectNumberInput.trim());
-    if (!result) {
-      setError("رقم المشروع غير موجود أو البوابة غير مفعّلة لهذا المتبرع");
+    const result = await loginDonorWithProjectNumber(projectNumberInput.trim());
+    if (!result.ok) {
+      setError(result.message);
       setSubmitting(false);
       return;
     }
-    await loadDonorProjects(result.donor, result.projectId);
+    await applyAuth(
+      result.data.donor,
+      result.data.sessionToken,
+      result.data.projectId
+    );
     setSubmitting(false);
   }
 
-  async function handleUsernameLogin() {
+  async function handleUsernameLogin(e?: React.FormEvent) {
+    e?.preventDefault();
     setError(null);
     setSubmitting(true);
     const result = await loginDonorWithCredentials(usernameInput, pinInput);
@@ -126,13 +151,14 @@ function DonorPortalContent() {
       setSubmitting(false);
       return;
     }
-    await loadDonorProjects(result.donor);
+    await applyAuth(result.data.donor, result.data.sessionToken);
     setSubmitting(false);
   }
 
   function handleLogout() {
     clearDonorSession();
     setDonor(null);
+    setSessionToken(null);
     setProjects([]);
     setSelectedProjectId(null);
     setError(null);
@@ -159,11 +185,12 @@ function DonorPortalContent() {
     );
   }
 
-  if (selectedProjectId && donor) {
+  if (selectedProjectId && donor && sessionToken) {
     return (
       <DonorProjectDashboard
         projectId={selectedProjectId}
         donor={donor}
+        sessionToken={sessionToken}
         onBack={() => setSelectedProjectId(null)}
         onLogout={handleLogout}
       />
@@ -177,14 +204,17 @@ function DonorPortalContent() {
         <div className="section-padding bg-background">
           <Card padding="lg" className="mx-auto w-full max-w-md space-y-4">
             <p className="text-center text-sm text-muted-foreground">
-              أدخل بيانات الدخول التي زوّدتك بها المؤسسة لمتابعة مشاريعك
+              أدخل بيانات الدخول التي زوّدتك بها المؤسسة لمتابعة مشاريعك بشكل مستمر
+            </p>
+            <p className="text-center text-xs text-muted-foreground">
+              تبقى جلستك نشطة في هذا المتصفح حتى تسجيل الخروج
             </p>
 
             <div className="flex gap-2">
               <button
                 type="button"
                 onClick={() => setLoginMode("project")}
-                className={`flex-1 rounded-lg px-3 py-2 text-sm font-medium ${
+                className={`min-h-11 flex-1 rounded-lg px-3 py-2.5 text-sm font-medium ${
                   loginMode === "project"
                     ? "bg-brand-green/10 text-brand-green-dark"
                     : "bg-border-subtle text-muted-foreground"
@@ -195,7 +225,7 @@ function DonorPortalContent() {
               <button
                 type="button"
                 onClick={() => setLoginMode("username")}
-                className={`flex-1 rounded-lg px-3 py-2 text-sm font-medium ${
+                className={`min-h-11 flex-1 rounded-lg px-3 py-2.5 text-sm font-medium ${
                   loginMode === "username"
                     ? "bg-brand-green/10 text-brand-green-dark"
                     : "bg-border-subtle text-muted-foreground"
@@ -206,26 +236,26 @@ function DonorPortalContent() {
             </div>
 
             {loginMode === "project" ? (
-              <>
+              <form onSubmit={handleProjectNumberLogin} className="space-y-4">
                 <p className="text-sm text-muted-foreground">
-                  للمتبرع الرئيسي — أدخل رقم المشروع
+                  <strong>للمتبرع الرئيسي فقط</strong> — أدخل رقم المشروع الذي زوّدتك به المؤسسة
                 </p>
                 <Input
                   label="رقم المشروع"
                   dir="ltr"
                   placeholder={FORM_PLACEHOLDERS.portal.projectNumber}
-                  hint="المتبرعون الإضافيون يدخلون باسم المستخدم والرمز"
+                  hint="المتبرعون الإضافيون: استخدم تبويب «اسم المستخدم»"
                   value={projectNumberInput}
                   onChange={(e) => setProjectNumberInput(e.target.value)}
                 />
-                <Button className="w-full" loading={submitting} onClick={handleProjectNumberLogin}>
+                <Button type="submit" className="w-full" loading={submitting}>
                   دخول
                 </Button>
-              </>
+              </form>
             ) : (
-              <>
+              <form onSubmit={handleUsernameLogin} className="space-y-4">
                 <p className="text-sm text-muted-foreground">
-                  أدخل اسم المستخدم والرمز السري
+                  للمتبرع الرئيسي والمتبرعين الإضافيين — اسم المستخدم والرمز السري
                 </p>
                 <Input
                   label="اسم المستخدم"
@@ -242,10 +272,10 @@ function DonorPortalContent() {
                   value={pinInput}
                   onChange={(e) => setPinInput(e.target.value)}
                 />
-                <Button className="w-full" loading={submitting} onClick={handleUsernameLogin}>
+                <Button type="submit" className="w-full" loading={submitting}>
                   دخول
                 </Button>
-              </>
+              </form>
             )}
 
             {error && <p className="text-sm text-red-600">{error}</p>}
@@ -259,7 +289,7 @@ function DonorPortalContent() {
     <>
       <SitePageHeader
         title={`مرحباً، ${donor.fullName}`}
-        subtitle="بوابة متابعة مشاريعك الخيرية"
+        subtitle="بوابة متابعة مشاريعك الخيرية — محدّثة باستمرار"
       />
       <div className="section-padding bg-background">
         <div className="container-dif mx-auto max-w-4xl">
@@ -287,7 +317,9 @@ function DonorPortalContent() {
           </div>
           {projects.length === 0 && (
             <Card padding="lg">
-              <p className="text-center text-muted-foreground">لا توجد مشاريع مرتبطة بحسابك</p>
+              <p className="text-center text-muted-foreground">
+                لا توجد مشاريع مرتبطة بحسابك حالياً — تواصل مع المؤسسة لربط مشروعك
+              </p>
             </Card>
           )}
         </div>

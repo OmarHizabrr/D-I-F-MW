@@ -11,7 +11,7 @@ type AdminItemListProps<T extends { id: string }> = {
   emptyMessage?: string;
   deletingId?: string | null;
   onEdit: (item: T) => void;
-  onDelete: (item: T) => void;
+  onDelete?: (item: T) => void;
   renderTitle: (item: T) => ReactNode;
   renderSubtitle?: (item: T) => ReactNode;
   getPreviewHref?: (item: T) => string | null | undefined;
@@ -62,15 +62,17 @@ export function AdminItemList<T extends { id: string }>({
               >
                 <Pencil className="h-4 w-4" />
               </Button>
-              <Button
-                variant="destructive"
-                size="icon"
-                loading={deletingId === item.id}
-                onClick={() => onDelete(item)}
-                aria-label="حذف"
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
+              {onDelete && (
+                <Button
+                  variant="destructive"
+                  size="icon"
+                  loading={deletingId === item.id}
+                  onClick={() => onDelete(item)}
+                  aria-label="حذف"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              )}
             </div>
           </div>
         </Card>

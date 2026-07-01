@@ -1,17 +1,10 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { ExternalLink, RefreshCw } from "lucide-react";
-import {
-  getOrgProject,
-  listProjectPhotos,
-  listProjectSubItems,
-  getProjectLocation,
-  getProjectBeneficiaries,
-} from "@/services/projectManagementService";
-import { getProjectFinancial } from "@/services/financialService";
-import { getDonorRating, saveDonorRating } from "@/services/ratingService";
+import { fetchDonorProjectDetail, submitDonorRating } from "@/lib/portal/portal-login-client";
 import { MapView } from "@/components/map/MapView";
 import { isValidLatLng, googleMapsUrl, formatCoordinates } from "@/lib/map/constants";
 import { DonorSupporterCard } from "@/components/site/DonorSupporterCard";
@@ -34,7 +27,6 @@ import { Input } from "@/components/ui/Input";
 import { RangeSlider } from "@/components/ui/RangeSlider";
 import { Spinner } from "@/components/ui/Spinner";
 import {
-  PROJECT_SUBCOLLECTIONS,
   PROJECT_STATUS_LABELS,
   PHOTO_PHASES,
   type OrgProject,
@@ -55,6 +47,7 @@ import {
 type DonorProjectDashboardProps = {
   projectId: string;
   donor: Donor;
+  sessionToken?: string;
   onBack: () => void;
   onLogout?: () => void;
 };
@@ -62,6 +55,7 @@ type DonorProjectDashboardProps = {
 export function DonorProjectDashboard({
   projectId,
   donor,
+  sessionToken,
   onBack,
   onLogout,
 }: DonorProjectDashboardProps) {
@@ -87,42 +81,41 @@ export function DonorProjectDashboard({
   const [suggestions, setSuggestions] = useState("");
   const [submittingRating, setSubmittingRating] = useState(false);
   const [lastVisit, setLastVisit] = useState<string | null>(null);
+  const [accessDenied, setAccessDenied] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
     void (async () => {
+      if (!sessionToken) {
+        setAccessDenied(true);
+        setLoading(false);
+        return;
+      }
       const prevVisit = getProjectLastVisit(projectId);
-      const p = await getOrgProject(projectId);
+      const data = await fetchDonorProjectDetail(sessionToken, projectId);
       if (cancelled) return;
-      setProject(p);
-      const photoData = await Promise.all(
-        PHOTO_PHASES.map(async (phase) => [phase, await listProjectPhotos(projectId, phase)] as const)
+      if (!data?.project) {
+        setAccessDenied(true);
+        setLoading(false);
+        return;
+      }
+      setProject(data.project);
+      setUpdates(
+        (data.updates ?? []).sort((a: ProjectUpdate, b: ProjectUpdate) =>
+          (b.createdAt ?? "").localeCompare(a.createdAt ?? "")
+        )
       );
-      if (cancelled) return;
-      setPhotos(Object.fromEntries(photoData) as Record<PhotoPhase, ProjectPhoto[]>);
-      const [upd, vids, tl, reps, conts, invs, loc, ben, fin, existingRating] = await Promise.all([
-        listProjectSubItems<ProjectUpdate>(projectId, PROJECT_SUBCOLLECTIONS.updates),
-        listProjectSubItems<ProjectVideo>(projectId, PROJECT_SUBCOLLECTIONS.videos),
-        listProjectSubItems<ProjectTimelineEntry>(projectId, PROJECT_SUBCOLLECTIONS.timeline),
-        listProjectSubItems<ProjectReport>(projectId, PROJECT_SUBCOLLECTIONS.reports),
-        listProjectSubItems<ProjectContract>(projectId, PROJECT_SUBCOLLECTIONS.contracts),
-        listProjectSubItems<ProjectInvoice>(projectId, PROJECT_SUBCOLLECTIONS.invoices),
-        getProjectLocation(projectId),
-        getProjectBeneficiaries(projectId),
-        getProjectFinancial(projectId),
-        getDonorRating(projectId, donor.id),
-      ]);
-      if (cancelled) return;
-      setUpdates(upd.sort((a, b) => (b.createdAt ?? "").localeCompare(a.createdAt ?? "")));
-      setVideos(vids);
-      setTimeline(tl);
-      setReports(reps.filter((r) => r.file));
-      setContracts(conts.filter((c) => c.file));
-      setInvoices(invs.filter((i) => i.file));
-      setLocation(loc);
-      setBeneficiaries(ben);
-      setFinancial(fin);
-      setRated(!!existingRating);
+      setPhotos(data.photos ?? { Before: [], During: [], After: [] });
+      setVideos(data.videos ?? []);
+      setTimeline(data.timeline ?? []);
+      setReports((data.reports ?? []).filter((r: ProjectReport) => r.file));
+      setContracts((data.contracts ?? []).filter((c: ProjectContract) => c.file));
+      setInvoices((data.invoices ?? []).filter((i: ProjectInvoice) => i.file));
+      setLocation(data.location);
+      setBeneficiaries(data.beneficiaries);
+      setFinancial(data.financial);
+      setRated(!!data.existingRating);
       setLastVisit(prevVisit);
       markProjectVisited(projectId);
       setLoading(false);
@@ -130,42 +123,34 @@ export function DonorProjectDashboard({
     return () => {
       cancelled = true;
     };
-  }, [projectId, donor.id]);
+  }, [projectId, sessionToken]);
 
   async function refreshProjectData() {
-    setLoading(true);
+    if (!sessionToken) return;
+    setRefreshing(true);
     const prevVisit = getProjectLastVisit(projectId);
-    await (async () => {
-      const p = await getOrgProject(projectId);
-      setProject(p);
-      const photoData = await Promise.all(
-        PHOTO_PHASES.map(async (phase) => [phase, await listProjectPhotos(projectId, phase)] as const)
+    const data = await fetchDonorProjectDetail(sessionToken, projectId);
+    if (data?.project) {
+      setProject(data.project);
+      setUpdates(
+        (data.updates ?? []).sort((a: ProjectUpdate, b: ProjectUpdate) =>
+          (b.createdAt ?? "").localeCompare(a.createdAt ?? "")
+        )
       );
-      setPhotos(Object.fromEntries(photoData) as Record<PhotoPhase, ProjectPhoto[]>);
-      const [upd, vids, tl, reps, conts, invs, loc, ben, fin] = await Promise.all([
-        listProjectSubItems<ProjectUpdate>(projectId, PROJECT_SUBCOLLECTIONS.updates),
-        listProjectSubItems<ProjectVideo>(projectId, PROJECT_SUBCOLLECTIONS.videos),
-        listProjectSubItems<ProjectTimelineEntry>(projectId, PROJECT_SUBCOLLECTIONS.timeline),
-        listProjectSubItems<ProjectReport>(projectId, PROJECT_SUBCOLLECTIONS.reports),
-        listProjectSubItems<ProjectContract>(projectId, PROJECT_SUBCOLLECTIONS.contracts),
-        listProjectSubItems<ProjectInvoice>(projectId, PROJECT_SUBCOLLECTIONS.invoices),
-        getProjectLocation(projectId),
-        getProjectBeneficiaries(projectId),
-        getProjectFinancial(projectId),
-      ]);
-      setUpdates(upd.sort((a, b) => (b.createdAt ?? "").localeCompare(a.createdAt ?? "")));
-      setVideos(vids);
-      setTimeline(tl);
-      setReports(reps.filter((r) => r.file));
-      setContracts(conts.filter((c) => c.file));
-      setInvoices(invs.filter((i) => i.file));
-      setLocation(loc);
-      setBeneficiaries(ben);
-      setFinancial(fin);
+      setPhotos(data.photos ?? { Before: [], During: [], After: [] });
+      setVideos(data.videos ?? []);
+      setTimeline(data.timeline ?? []);
+      setReports((data.reports ?? []).filter((r: ProjectReport) => r.file));
+      setContracts((data.contracts ?? []).filter((c: ProjectContract) => c.file));
+      setInvoices((data.invoices ?? []).filter((i: ProjectInvoice) => i.file));
+      setLocation(data.location);
+      setBeneficiaries(data.beneficiaries);
+      setFinancial(data.financial);
+      setRated(!!data.existingRating);
       setLastVisit(prevVisit);
       markProjectVisited(projectId);
-    })();
-    setLoading(false);
+    }
+    setRefreshing(false);
   }
 
   const attachments = useMemo(
@@ -197,26 +182,39 @@ export function DonorProjectDashboard({
   ]);
 
   async function handleSubmitRating() {
+    if (!sessionToken) return;
     setSubmittingRating(true);
     try {
-      await saveDonorRating({
+      const ok = await submitDonorRating(sessionToken, {
         projectId,
-        donorId: donor.id,
         qualityRating: rating.quality,
         executionRating: rating.execution,
         communicationRating: rating.communication,
         suggestions,
       });
-      setRated(true);
+      if (ok) setRated(true);
     } finally {
       setSubmittingRating(false);
     }
   }
 
-  if (loading || !project) {
+  if (loading) {
     return (
       <div className="flex justify-center py-16">
         <Spinner size="lg" />
+      </div>
+    );
+  }
+
+  if (accessDenied || !project) {
+    return (
+      <div className="section-padding">
+        <Card padding="lg" className="mx-auto max-w-md text-center">
+          <p className="text-muted-foreground">لا يمكنك الوصول إلى هذا المشروع</p>
+          <Button className="mt-4" onClick={onBack}>
+            العودة للمشاريع
+          </Button>
+        </Card>
       </div>
     );
   }
@@ -232,7 +230,7 @@ export function DonorProjectDashboard({
             ← العودة للمشاريع
           </button>
           <div className="flex gap-2">
-            <Button variant="outline" size="sm" onClick={() => void refreshProjectData()}>
+            <Button variant="outline" size="sm" loading={refreshing} onClick={() => void refreshProjectData()}>
               <RefreshCw className="h-4 w-4" />
               تحديث
             </Button>
@@ -267,6 +265,19 @@ export function DonorProjectDashboard({
               {project.description}
             </p>
           </Card>
+        )}
+
+        {project.coverImage && (
+          <div className="relative mb-6 aspect-[16/10] overflow-hidden rounded-3xl border border-border-subtle">
+            <Image
+              src={project.coverImage}
+              alt={project.projectName}
+              fill
+              className="object-cover"
+              unoptimized
+              priority
+            />
+          </div>
         )}
 
         <div className="mb-6 grid gap-4 lg:grid-cols-3">

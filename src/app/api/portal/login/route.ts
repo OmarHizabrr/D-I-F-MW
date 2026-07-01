@@ -1,4 +1,6 @@
 import { getAdminFirestore } from "@/lib/firebase/admin";
+import { sanitizeDonorForClient } from "@/lib/portal/donor-sanitize";
+import { createPortalSession } from "@/lib/portal/portal-session-server";
 import type { Donor } from "@/types/project-management";
 
 function donorFromSnap(id: string, data: Record<string, unknown>): Donor {
@@ -48,5 +50,8 @@ export async function POST(request: Request) {
     return Response.json({ error: "بوابة هذا المتبرع غير مفعّلة" }, { status: 403 });
   }
 
-  return Response.json({ donor });
+  return Response.json({
+    donor: sanitizeDonorForClient(donor),
+    sessionToken: await createPortalSession(donor.id),
+  });
 }

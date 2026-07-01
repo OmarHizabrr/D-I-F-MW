@@ -5,7 +5,7 @@ type VisitMap = Record<string, string>;
 function readVisits(): VisitMap {
   if (typeof window === "undefined") return {};
   try {
-    const raw = sessionStorage.getItem(STORAGE_KEY);
+    const raw = localStorage.getItem(STORAGE_KEY);
     return raw ? (JSON.parse(raw) as VisitMap) : {};
   } catch {
     return {};
@@ -14,7 +14,7 @@ function readVisits(): VisitMap {
 
 function writeVisits(map: VisitMap) {
   if (typeof window === "undefined") return;
-  sessionStorage.setItem(STORAGE_KEY, JSON.stringify(map));
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(map));
 }
 
 export function getProjectLastVisit(projectId: string): string | null {

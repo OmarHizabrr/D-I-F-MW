@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useSiteContent } from "@/context/SiteContentContext";
 import { listPublishedOrgProjects } from "@/services/projectManagementService";
-import { getDonor } from "@/services/donorService";
+import { getDonor, getPublicDonor } from "@/services/donorService";
 import { orgProjectToPublic, type PublicProject } from "@/lib/public-projects";
 import type { ProjectItem } from "@/types/cms";
 import type { LocalizedString } from "@/types/cms";
@@ -45,7 +45,7 @@ export function useMergedPublicProjects() {
         orgProjects.map(async (p) => {
           let donorName: string | undefined;
           if (p.showDonorPublic && p.donorId) {
-            const donor = await getDonor(p.donorId);
+            const donor = await getPublicDonor(p.donorId);
             donorName = donor?.fullName;
           }
           return orgProjectToPublic(p, donorName);

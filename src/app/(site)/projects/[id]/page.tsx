@@ -147,14 +147,16 @@ export default function ProjectDetailPage() {
                   </div>
                 )}
               </dl>
-              <Button
-                className="mt-4 w-full"
-                onClick={() =>
-                  openDonation({ projectId: project.id, projectName: project.name })
-                }
-              >
-                {text(donation.navButtonLabel)}
-              </Button>
+              {donation.enabled && (
+                <Button
+                  className="mt-4 w-full"
+                  onClick={() =>
+                    openDonation({ projectId: project.id, projectName: project.name })
+                  }
+                >
+                  {text(donation.navButtonLabel)}
+                </Button>
+              )}
             </Card>
 
             {mapPoint && (
