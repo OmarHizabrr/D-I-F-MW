@@ -7,6 +7,7 @@ import { useAuth } from "@/context/AuthContext";
 import { getDefaultFooter, getDefaultPrograms } from "@/data/default-content";
 import { buildFooterLinkGroups, footerUsesGroupedLinks, navHasDropdown } from "@/lib/nav-utils";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
+import { FooterPreview } from "@/components/layout/Footer";
 import { LocalizedInput } from "@/components/admin/LocalizedInput";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
@@ -254,6 +255,26 @@ export default function AdminFooterPage() {
               </div>
             )}
           </div>
+
+          <FooterPreview
+            description={pickAdminLabel(data.description)}
+            address={pickAdminLabel(data.address)}
+            workingHours={pickAdminLabel(data.workingHours)}
+            rights={pickAdminLabel(data.rights)}
+            showHome={data.showHomeLink !== false}
+            homeLabel={
+              navItems.find((n) => n.id === "home")?.label
+                ? pickAdminLabel(navItems.find((n) => n.id === "home")!.label)
+                : undefined
+            }
+            quickLinkGroups={groupedPreview.map((g) => ({
+              title: pickAdminLabel(g.title),
+              links: g.links.map((l) => ({
+                label: pickAdminLabel(l.label),
+                href: l.href,
+              })),
+            }))}
+          />
         </CardContent>
       </Card>
     </div>

@@ -1,20 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { Phone, Mail, Share2, MessageCircle, Play, Camera } from "lucide-react";
+import { Phone, Mail } from "lucide-react";
 import { useLocale } from "@/context/LocaleContext";
 import { useSiteContent } from "@/context/SiteContentContext";
 import { useDonation } from "@/context/DonationContext";
 import { useSystemSettings } from "@/hooks/useSystemSettings";
+import { getSocialPlatformIcon } from "@/lib/social-platform-icons";
 import { localeList } from "@/i18n";
 import { ThemeToggle } from "./ThemeToggle";
-
-const iconMap: Record<string, typeof Share2> = {
-  facebook: Share2,
-  twitter: MessageCircle,
-  youtube: Play,
-  instagram: Camera,
-};
 
 export function TopBar() {
   const { locale, setLocale } = useLocale();
@@ -51,7 +45,7 @@ export function TopBar() {
         <div className="mt-2 flex min-w-0 items-center justify-between gap-2">
           <div className="hidden items-center gap-0.5 sm:flex">
             {socialLinks.map((link) => {
-              const Icon = iconMap[link.platform] || Share2;
+              const Icon = getSocialPlatformIcon(link.platform);
               return (
                 <a
                   key={link.id}

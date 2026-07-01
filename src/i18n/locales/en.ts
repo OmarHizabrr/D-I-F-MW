@@ -259,6 +259,10 @@ const en = {
     workingHours: "Working Hours",
     hours: "Sat - Thu: 8:00 AM - 4:00 PM",
     rights: "All rights reserved © Development and Investment Foundation",
+    followUs: "Follow Us",
+    orgNameAr: "مؤسسة التطوير والتنمية",
+    orgNameEn: "D.I.F",
+    orgTagline: "Development & Investment Foundation",
   },
 
   theme: {
