@@ -1,5 +1,14 @@
 import type { LocaleCode, LocalizedString, NavChild, NavItem, ProgramItem } from "@/types/cms";
 import { pickLocalized } from "@/types/cms";
+import { normalizeSiteHref } from "@/lib/site-href";
+
+export function normalizeNavHref(href: string): string {
+  return normalizeSiteHref(href);
+}
+
+function normalizeNavChildren(children: NavChild[]): NavChild[] {
+  return children.map((child) => ({ ...child, href: normalizeSiteHref(child.href) }));
+}
 
 export type NavLabels = {
   aboutOverview: LocalizedString;
@@ -50,25 +59,23 @@ export function resolveNavChildren(
   programs: ProgramItem[],
   labels: NavLabels
 ): NavChild[] {
-  if (item.children?.length) {
-    if (item.id === "impact" || item.id === "projects") {
-      return injectProgramLinks(item.children, programs);
-    }
-    return item.children;
-  }
+  let children: NavChild[];
 
-  if (item.id === "about") {
-    return [
+  if (item.children?.length) {
+    children =
+      item.id === "impact" || item.id === "projects"
+        ? injectProgramLinks(item.children, programs)
+        : item.children;
+  } else if (item.id === "about") {
+    children = [
       { id: "about-overview", label: labels.aboutOverview, href: "/about" },
       { id: "about-team", label: labels.team, href: "/about/team" },
       { id: "about-faq", label: labels.faq, href: "/faq" },
       { id: "about-transparency", label: labels.transparency, href: "/transparency" },
       { id: "about-privacy", label: labels.privacy, href: "/privacy" },
     ];
-  }
-
-  if (item.id === "impact") {
-    return injectProgramLinks(
+  } else if (item.id === "impact") {
+    children = injectProgramLinks(
       [
         { id: "impact-our-work", label: labels.ourWork, href: "/our-work" },
         { id: "impact-all-projects", label: labels.allProjects, href: "/projects" },
@@ -77,41 +84,35 @@ export function resolveNavChildren(
       ],
       programs
     );
-  }
-
-  if (item.id === "projects") {
-    return injectProgramLinks(
+  } else if (item.id === "projects") {
+    children = injectProgramLinks(
       [{ id: "projects-all", label: labels.allProjects, href: "/projects" }],
       programs
     );
-  }
-
-  if (item.id === "newsEvents") {
-    return [
+  } else if (item.id === "newsEvents") {
+    children = [
       { id: "news-events-news", label: labels.news, href: "/news" },
       { id: "news-events-events", label: labels.events, href: "/events" },
       { id: "news-events-media", label: labels.media, href: "/media" },
     ];
-  }
-
-  if (item.id === "joinUs") {
-    return [
+  } else if (item.id === "joinUs") {
+    children = [
       { id: "join-volunteer", label: labels.volunteer, href: "/volunteer" },
       { id: "join-ways", label: labels.waysToGive, href: "/ways-to-give" },
       { id: "join-zakat", label: labels.zakatCalculator, href: "/zakat-calculator" },
       { id: "join-contact", label: labels.contact, href: "/contact" },
       { id: "join-share-story", label: labels.shareStory, href: "/share-testimonial" },
     ];
-  }
-
-  if (item.id === "resources") {
-    return [
+  } else if (item.id === "resources") {
+    children = [
       { id: "resources-page", label: labels.resources, href: "/resources" },
       { id: "resources-transparency", label: labels.transparency, href: "/transparency" },
     ];
+  } else {
+    children = [];
   }
 
-  return [];
+  return normalizeNavChildren(children);
 }
 
 export function navChildLabel(child: NavChild, locale: LocaleCode): string {
@@ -149,7 +150,7 @@ export function buildFooterLinkGroups(
       links:
         children.length > 0
           ? children
-          : [{ id: `${item.id}-link`, label: item.label, href: item.href }],
+          : [{ id: `${item.id}-link`, label: item.label, href: normalizeSiteHref(item.href) }],
     });
   }
 

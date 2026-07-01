@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import Link from "next/link";
+import { SiteLink } from "@/components/site/SiteLink";
 import { ArrowLeft } from "lucide-react";
 
 export function SectionHeader({
@@ -29,7 +29,7 @@ export function SectionHeader({
       )}
       <div className="mx-auto mt-4 h-1 w-16 rounded-full bg-brand-green" />
       {viewAllHref && (
-        <Link
+        <SiteLink
           href={viewAllHref}
           className={cn(
             "mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-brand-green transition-colors hover:text-brand-green-dark dark:hover:text-brand-green-light",
@@ -38,7 +38,7 @@ export function SectionHeader({
         >
           {viewAllLabel}
           <ArrowLeft className="h-4 w-4" />
-        </Link>
+        </SiteLink>
       )}
     </div>
   );

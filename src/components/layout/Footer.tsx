@@ -2,7 +2,6 @@
 
 import type { ReactNode } from "react";
 import Image from "next/image";
-import Link from "next/link";
 import { Phone, Mail, MapPin, Clock, ArrowUpRight } from "lucide-react";
 import { useSiteContent } from "@/context/SiteContentContext";
 import { useLocale } from "@/context/LocaleContext";
@@ -11,10 +10,12 @@ import {
   capFooterGroupLinks,
   footerUsesGroupedLinks,
   navChildLabel,
+  normalizeNavHref,
   type NavLabels,
 } from "@/lib/nav-utils";
 import { getSocialPlatformIcon } from "@/lib/social-platform-icons";
 import { DonateButton } from "@/components/donation/DonateButton";
+import { SiteLink } from "@/components/site/SiteLink";
 import { useSystemSettings } from "@/hooks/useSystemSettings";
 import type { LocaleCode } from "@/types/cms";
 
@@ -28,12 +29,12 @@ function FooterColumnTitle({ children }: { children: ReactNode }) {
 
 function FooterLink({ href, children }: { href: string; children: ReactNode }) {
   return (
-    <Link
+    <SiteLink
       href={href}
       className="text-[13px] leading-snug text-white/70 transition-colors hover:text-white"
     >
       {children}
-    </Link>
+    </SiteLink>
   );
 }
 
@@ -87,7 +88,7 @@ export function Footer() {
         <div className="grid gap-12 lg:grid-cols-12 lg:gap-10 xl:gap-12">
           {/* العلامة والرسالة */}
           <div className="lg:col-span-4 xl:col-span-4">
-            <Link
+            <SiteLink
               href="/"
               className="mb-6 inline-flex items-center gap-3.5 transition-opacity hover:opacity-90"
             >
@@ -102,7 +103,7 @@ export function Footer() {
                 <p className="text-lg font-bold leading-tight tracking-tight">{orgTitle}</p>
                 <p className="mt-0.5 text-xs font-medium text-white/55">{t.footer.orgTagline}</p>
               </div>
-            </Link>
+            </SiteLink>
 
             <p className="mb-6 max-w-sm text-sm leading-relaxed text-white/75">
               {text(footer.description)}
@@ -111,13 +112,13 @@ export function Footer() {
             <div className="mb-6 flex flex-wrap gap-2.5">
               <DonateButton variant="primary" size="sm" />
               {portalEnabled && (
-                <Link
+                <SiteLink
                   href="/portal"
                   className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl border border-white/20 bg-white/5 px-4 text-sm font-semibold text-white backdrop-blur-sm transition-colors hover:border-white/35 hover:bg-white/10"
                 >
                   {t.topBar.donorPortal}
                   <ArrowUpRight className="h-3.5 w-3.5 opacity-70" />
-                </Link>
+                </SiteLink>
               )}
             </div>
 
@@ -152,7 +153,7 @@ export function Footer() {
               <div className="grid grid-cols-2 gap-x-6 gap-y-10 sm:grid-cols-3 lg:grid-cols-3 xl:grid-cols-5">
                 {linkGroups.map((group) => {
                   const parent = navItems.find((n) => n.id === group.id);
-                  const parentHref = parent?.href ?? "/";
+                  const parentHref = normalizeNavHref(parent?.href ?? "/");
                   const links = capFooterGroupLinks(group.links, parentHref, viewAllLabel);
 
                   return (
@@ -177,7 +178,7 @@ export function Footer() {
                 <ul className="grid grid-cols-2 gap-x-6 gap-y-2.5 sm:grid-cols-3">
                   {flatLinks.map((item) => (
                     <li key={item.id}>
-                      <FooterLink href={item.href}>{text(item.label)}</FooterLink>
+                      <FooterLink href={normalizeNavHref(item.href)}>{text(item.label)}</FooterLink>
                     </li>
                   ))}
                 </ul>
@@ -241,21 +242,21 @@ export function Footer() {
         <div className="container-dif flex flex-col items-center justify-between gap-3 px-4 py-5 text-center text-xs text-white/55 sm:flex-row sm:px-6 sm:text-start sm:text-sm">
           <p>{text(footer.rights)}</p>
           <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1">
-            <Link
+            <SiteLink
               href="/privacy"
               className="text-white/70 transition-colors hover:text-white"
             >
               {text(sectionTitles.privacyPageTitle)}
-            </Link>
+            </SiteLink>
             <span className="hidden text-white/25 sm:inline" aria-hidden>
               |
             </span>
-            <Link
+            <SiteLink
               href="/transparency"
               className="text-white/70 transition-colors hover:text-white"
             >
               {text(sectionTitles.navTransparency)}
-            </Link>
+            </SiteLink>
           </div>
         </div>
       </div>

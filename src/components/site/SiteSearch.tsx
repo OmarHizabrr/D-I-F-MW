@@ -6,6 +6,7 @@ import { Search, X } from "lucide-react";
 import { useSiteContent } from "@/context/SiteContentContext";
 import { useMergedPublicProjects } from "@/hooks/useMergedPublicProjects";
 import { useLocale } from "@/context/LocaleContext";
+import { normalizeSiteHref } from "@/lib/site-href";
 import { Dialog } from "@/components/ui/Dialog";
 import { pickLocalized, type LocaleCode } from "@/types/cms";
 import ar from "@/i18n/locales/ar";
@@ -175,7 +176,7 @@ export function SiteSearchButton({ className }: { className?: string }) {
             {results.map((item) => (
               <li key={item.id}>
                 <Link
-                  href={item.href}
+                  href={normalizeSiteHref(item.href)}
                   onClick={() => setOpen(false)}
                   className="block rounded-xl px-3 py-2.5 text-sm transition-colors hover:bg-brand-green/10"
                 >
