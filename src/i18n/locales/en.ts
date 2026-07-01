@@ -260,6 +260,7 @@ const en = {
     hours: "Sat - Thu: 8:00 AM - 4:00 PM",
     rights: "All rights reserved © Development and Investment Foundation",
     followUs: "Follow Us",
+    viewAll: "View all",
     orgNameAr: "مؤسسة التطوير والتنمية",
     orgNameEn: "D.I.F",
     orgTagline: "Development & Investment Foundation",

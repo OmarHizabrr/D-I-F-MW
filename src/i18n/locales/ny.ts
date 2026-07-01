@@ -260,6 +260,7 @@ const ny = {
     hours: "Lamulungu - Lachinayi: 8:00 AM - 4:00 PM",
     rights: "Ufulu wonse ndi wotetezedwa © Development and Investment Foundation",
     followUs: "Titsatireni",
+    viewAll: "Onani zonse",
     orgNameAr: "مؤسسة التطوير والتنمية",
     orgNameEn: "D.I.F",
     orgTagline: "Development & Investment Foundation",

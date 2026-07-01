@@ -173,3 +173,18 @@ const LEGACY_FLAT_NAV_IDS = new Set([
 export function footerUsesGroupedLinks(quickLinkIds: string[]): boolean {
   return quickLinkIds.some((id) => !LEGACY_FLAT_NAV_IDS.has(id));
 }
+
+const FOOTER_MAX_LINKS_PER_GROUP = 5;
+
+/** يحدّ الروابط الطويلة (مثل برامج أثرنا) مع رابط «عرض الكل» */
+export function capFooterGroupLinks(
+  links: NavChild[],
+  parentHref: string,
+  viewAllLabel: LocalizedString
+): NavChild[] {
+  if (links.length <= FOOTER_MAX_LINKS_PER_GROUP) return links;
+  return [
+    ...links.slice(0, FOOTER_MAX_LINKS_PER_GROUP - 1),
+    { id: `${parentHref}-view-all`, label: viewAllLabel, href: parentHref },
+  ];
+}

@@ -263,6 +263,7 @@ const ar = {
     hours: "السبت - الخميس: 8:00 ص - 4:00 م",
     rights: "جميع الحقوق محفوظة © مؤسسة التطوير والتنمية",
     followUs: "تابعنا",
+    viewAll: "عرض الكل",
     orgNameAr: "مؤسسة التطوير والتنمية",
     orgNameEn: "D.I.F",
     orgTagline: "Development & Investment Foundation",

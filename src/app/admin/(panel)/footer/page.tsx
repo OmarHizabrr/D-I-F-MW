@@ -261,12 +261,6 @@ export default function AdminFooterPage() {
             address={pickAdminLabel(data.address)}
             workingHours={pickAdminLabel(data.workingHours)}
             rights={pickAdminLabel(data.rights)}
-            showHome={data.showHomeLink !== false}
-            homeLabel={
-              navItems.find((n) => n.id === "home")?.label
-                ? pickAdminLabel(navItems.find((n) => n.id === "home")!.label)
-                : undefined
-            }
             quickLinkGroups={groupedPreview.map((g) => ({
               title: pickAdminLabel(g.title),
               links: g.links.map((l) => ({
